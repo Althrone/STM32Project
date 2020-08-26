@@ -201,7 +201,7 @@ void I2C_Init(I2C_TypeDef* I2Cx, I2C_InitTypeDef* I2C_InitStruct)
   RCC_GetClocksFreq(&rcc_clocks);
   pclk1 = rcc_clocks.PCLK1_Frequency;
   /* Set frequency bits depending on pclk1 value */
-  freqrange = (uint16_t)(pclk1 / 1000000);
+  freqrange = (uint16_t)(pclk1 / 4200000);
   tmpreg |= freqrange;
   /* Write to I2Cx CR2 */
   I2Cx->CR2 = tmpreg;
@@ -242,7 +242,7 @@ void I2C_Init(I2C_TypeDef* I2Cx, I2C_InitTypeDef* I2C_InitStruct)
     else /*I2C_InitStruct->I2C_DutyCycle == I2C_DutyCycle_16_9*/
     {
       /* Fast mode speed calculate: Tlow/Thigh = 16/9 */
-      result = (uint16_t)(pclk1 / (I2C_InitStruct->I2C_ClockSpeed * 25));
+      result = (uint16_t)(freqrange / (I2C_InitStruct->I2C_ClockSpeed * 25));
       /* Set DUTY bit */
       result |= I2C_DutyCycle_16_9;
     }
