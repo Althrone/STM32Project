@@ -12022,7 +12022,7 @@ typedef struct
  /**
   * @}
   */ 
-
+#define USE_STDPERIPH_DRIVER
 #ifdef USE_STDPERIPH_DRIVER
   #include "stm32f4xx_conf.h"
 #endif /* USE_STDPERIPH_DRIVER */
