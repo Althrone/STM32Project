@@ -4,10 +4,12 @@
  * 修改记录：
  * 位置：source\FWLIB\src\stm32f4xx_i2c.c 204行
  * 原内容：freqrange = (uint16_t)(pclk1 / 1000000);
+ * 新内容：freqrange = (uint16_t)(pclk1 / 4200000);
  * 原因：快速模式需要修改I2CX_CR2的FREQ，这里我相当于设置成为10MHz。
  * 
  * 位置：source\FWLIB\src\stm32f4xx_i2c.c 245行
  * 原内容：result = (uint16_t)(pclk1 / (I2C_InitStruct->I2C_ClockSpeed * 25));
+ * 新内容：result = (uint16_t)(freqrange / (I2C_InitStruct->I2C_ClockSpeed * 25));
  * 原因：我觉得是硬件IIC少人用，参考手册误导了，这里程序也误导了，
  * 正确计算方法应该是用I2C_CR2的FREQ计算，就是说FREQ=10的话，计算
  * 频率就应该是10MHz而不是APB1的PCLK1=42MHz，因为这个是我之前验证
@@ -50,4 +52,48 @@ void I2C1_Init(void)
     I2C_InitStructure.I2C_AcknowledgedAddress=I2C_AcknowledgedAddress_7bit;
     I2C_Init(I2C1,&I2C_InitStructure);
 
+    //开I2C中断
+    I2C_ITConfig(I2C1,I2C_IT_BUF,ENABLE);
+    I2C_ITConfig(I2C1,I2C_IT_EVT,ENABLE);
+    I2C_ITConfig(I2C1,I2C_IT_ERR,ENABLE);
+    I2C_Cmd(I2C1,ENABLE);
+}
+
+
+
+void I2C1_EV_IRQHandler(void)
+{
+
+}
+
+void I2C1_ER_IRQHandler(void)
+{
+    if(I2C_GetFlagStatus(I2C1,I2C_FLAG_SMBALERT)!=RESET)
+    {
+        I2C_ClearFlag(I2C1,I2C_FLAG_SMBALERT);
+    }
+    if(I2C_GetFlagStatus(I2C1,I2C_FLAG_TIMEOUT)!=RESET)
+    {
+        I2C_ClearFlag(I2C1,I2C_FLAG_TIMEOUT);
+    }
+    if(I2C_GetFlagStatus(I2C1,I2C_FLAG_PECERR)!=RESET)
+    {
+        I2C_ClearFlag(I2C1,I2C_FLAG_PECERR);
+    }
+    if(I2C_GetFlagStatus(I2C1,I2C_FLAG_OVR)!=RESET)
+    {
+        I2C_ClearFlag(I2C1,I2C_FLAG_OVR);
+    }
+    if(I2C_GetFlagStatus(I2C1,I2C_FLAG_AF)!=RESET)
+    {
+        I2C_ClearFlag(I2C1,I2C_FLAG_AF);
+    }
+    if(I2C_GetFlagStatus(I2C1,I2C_FLAG_ARLO)!=RESET)
+    {
+        I2C_ClearFlag(I2C1,I2C_FLAG_ARLO);
+    }
+    if(I2C_GetFlagStatus(I2C1,I2C_FLAG_BERR)!=RESET)
+    {
+        I2C_ClearFlag(I2C1,I2C_FLAG_BERR);
+    }
 }
