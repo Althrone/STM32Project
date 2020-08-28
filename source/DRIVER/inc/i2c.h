@@ -9,6 +9,15 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx.h"
 
+/* Exported types ------------------------------------------------------------*/
+
+
+/* Exported functions --------------------------------------------------------*/ 
+
+/** 
+  * @brief  I2C Init structure definition  
+  */
+
 void I2C1_Init(void);
 
 #ifdef __cplusplus
