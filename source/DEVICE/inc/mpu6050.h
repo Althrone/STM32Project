@@ -11,23 +11,26 @@
 
 /* Exported types ------------------------------------------------------------*/
 
-
-/* Exported functions --------------------------------------------------------*/ 
-
 /** 
   * @brief  MPU6050 Data structure definition  
   */
 
 typedef struct
 {
-    uint16_t MPU6050_RawAccleX;
-    uint16_t MPU6050_RawAccleY;
-    uint16_t MPU6050_RawAccleZ;
-    uint16_t MPU6050_RawTemp;
-    uint16_t MPU6050_RawGyroX;
-    uint16_t MPU6050_RawGyroY;
-    uint16_t MPU6050_RawGyroZ;
+    int16_t MPU6050_RawAccelX;
+    int16_t MPU6050_RawAccelY;
+    int16_t MPU6050_RawAccelZ;
+    int16_t MPU6050_RawTemp;
+    int16_t MPU6050_RawGyroX;
+    int16_t MPU6050_RawGyroY;
+    int16_t MPU6050_RawGyroZ;
 }MPU6050_DataTypeDef;
+
+/* Exported functions --------------------------------------------------------*/ 
+
+void MPU6050_Init(void);
+void MPU6050_RawAccelRead(int16_t* );
+
 
 #ifdef __cplusplus
 }
