@@ -17,6 +17,8 @@
 
 /* Exported functions --------------------------------------------------------*/ 
 
+void USART1_Init(void);
+
 #ifdef __cplusplus
 }
 #endif

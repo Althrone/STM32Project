@@ -9,6 +9,7 @@
  * 新增内容：#define USART_Mode_Rx_Tx                     ((uint16_t)0x000C)
  * 原因：参考USART_HardwareFlowControl的
  * USART_HardwareFlowControl_RTS_CTS进行修改
+ * 这个寄存器准备用于与上位机通信，只负责发送
  **/
 void USART1_Init(void)
 {
@@ -35,11 +36,14 @@ void USART1_Init(void)
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1,ENABLE);
     //USART初始化结构体定义
     USART_InitTypeDef USART_InitStructure;
-    USART_InitStructure.USART_BaudRate=;
+    USART_InitStructure.USART_BaudRate=115200;
     USART_InitStructure.USART_WordLength=USART_WordLength_8b;
     USART_InitStructure.USART_StopBits=USART_StopBits_1;
     USART_InitStructure.USART_Parity=USART_Parity_No;
     USART_InitStructure.USART_Mode=USART_Mode_Rx_Tx;
     USART_InitStructure.USART_HardwareFlowControl=USART_HardwareFlowControl_None;
     USART_Init(USART1,&USART_InitStructure);
+
+    //开USART1中断
+    USART_ITConfig(USART1,USART_IT_TXE,ENABLE);
 }

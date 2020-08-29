@@ -35,7 +35,7 @@ void I2C_SendMultByte(I2C_TypeDef* I2Cx,uint8_t length,uint8_t* data)
 {
     if(I2C_GetFlagStatus(I2Cx,I2C_FLAG_BUSY)!=RESET)
     {
-        I2C_HangSlove();
+        // I2C_HangSlove();
     }
 }
 
@@ -83,7 +83,7 @@ void I2C1_Init(void)
     GPIO_InitStructure.GPIO_OType=GPIO_OType_OD;
     GPIO_Init(GPIOB,&GPIO_InitStructure);
 
-    //开I2C时钟
+    //开I2C1时钟
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1,ENABLE);
     //I2C初始化结构体定义
     I2C_InitTypeDef I2C_InitStructure;
@@ -93,7 +93,7 @@ void I2C1_Init(void)
     I2C_InitStructure.I2C_AcknowledgedAddress=I2C_AcknowledgedAddress_7bit;
     I2C_Init(I2C1,&I2C_InitStructure);
 
-    //开I2C中断
+    //开I2C1中断
     I2C_ITConfig(I2C1,I2C_IT_BUF,ENABLE);
     I2C_ITConfig(I2C1,I2C_IT_EVT,ENABLE);
     I2C_ITConfig(I2C1,I2C_IT_ERR,ENABLE);
