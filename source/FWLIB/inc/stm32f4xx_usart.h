@@ -172,6 +172,7 @@ typedef struct
   
 #define USART_Mode_Rx                        ((uint16_t)0x0004)
 #define USART_Mode_Tx                        ((uint16_t)0x0008)
+#define USART_Mode_Rx_Tx                     ((uint16_t)0x000C)
 #define IS_USART_MODE(MODE) ((((MODE) & (uint16_t)0xFFF3) == 0x00) && ((MODE) != (uint16_t)0x00))
 /**
   * @}

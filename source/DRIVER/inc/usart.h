@@ -1,6 +1,6 @@
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __RGBLED_H
-#define __RGBLED_H
+#ifndef __USART_H
+#define __USART_H
 
 #ifdef __cplusplus
     extern "C" {
@@ -11,12 +11,14 @@
 
 /* Exported types ------------------------------------------------------------*/
 
-/* Exported functions --------------------------------------------------------*/ 
+/** 
+  * @brief  I2C Init structure definition  
+  */
 
-void RGBLED_Init(void);
+/* Exported functions --------------------------------------------------------*/ 
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /*__RGBLED_H */
+#endif /*__USART_H */

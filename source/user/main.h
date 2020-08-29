@@ -12,6 +12,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx.h"
 #include "i2c.h"
+#include "rgbled.h"
 
 #ifdef __cplusplus
 }

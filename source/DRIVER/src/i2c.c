@@ -6,11 +6,17 @@
  * @brief  硬件I2C挂死解锁函数
  * @param  I2Cx: 指定I2Cx外设，x=1,2,3
  * @param  指定GPIO引脚
+ * 希望可以通过GPIOx和I2Cx判断出引脚位置
  **/
 void I2C_HangSlove(GPIO_TypeDef* GPIOx,I2C_TypeDef* I2Cx)
 {
     //关闭I2C使能
+    I2C_Cmd(I2Cx,DISABLE);
+    GPIO_InitTypeDef GPIO_InitStructure;
 	//SCL切回GPIO通用输出，因为复用输出的时候输出模式已经是开漏，所以刚好可以用
+    GPIO_InitStructure.GPIO_Pin=GPIO_Pin_6;
+    GPIO_InitStructure.GPIO_Mode=GPIO_Mode_OUT;
+    GPIO_Init(GPIOx,&GPIO_InitStructure);
 	//SDA切回GPIO通用输入，用于检查SDA是否释放，这时候输出模式寄存器的开漏不用管，不会影响输入检测
 	//检查SDA是否变回高了，不行就再来一次
 	//SDA变通用输出
@@ -27,7 +33,10 @@ void I2C_HangSlove(GPIO_TypeDef* GPIOx,I2C_TypeDef* I2Cx)
  **/
 void I2C_SendMultByte(I2C_TypeDef* I2Cx,uint8_t length,uint8_t* data)
 {
-
+    if(I2C_GetFlagStatus(I2Cx,I2C_FLAG_BUSY)!=RESET)
+    {
+        I2C_HangSlove();
+    }
 }
 
 /* I2C1 private functions ----------------------------------------------------*/ 
