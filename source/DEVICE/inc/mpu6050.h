@@ -24,7 +24,7 @@ typedef struct
     int16_t MPU6050_RawGyroX;
     int16_t MPU6050_RawGyroY;
     int16_t MPU6050_RawGyroZ;
-}MPU6050_DataTypeDef;
+}MPU6050_RawDataTypeDef;
 
 /* Exported functions --------------------------------------------------------*/ 
 

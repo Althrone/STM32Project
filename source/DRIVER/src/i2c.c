@@ -1,5 +1,37 @@
 #include "i2c.h"
 
+/* I2C public functions ------------------------------------------------------*/ 
+
+/**
+ * @brief  硬件I2C挂死解锁函数
+ * @param  I2Cx: 指定I2Cx外设，x=1,2,3
+ * @param  指定GPIO引脚
+ **/
+void I2C_HangSlove(GPIO_TypeDef* GPIOx,I2C_TypeDef* I2Cx)
+{
+    //关闭I2C使能
+	//SCL切回GPIO通用输出，因为复用输出的时候输出模式已经是开漏，所以刚好可以用
+	//SDA切回GPIO通用输入，用于检查SDA是否释放，这时候输出模式寄存器的开漏不用管，不会影响输入检测
+	//检查SDA是否变回高了，不行就再来一次
+	//SDA变通用输出
+    //SCL切回复用功能，也就是回到SCL模式
+    //SDA切回复用功能，也就是回到SDA模式
+}
+
+/**
+ * @brief  发送单个或多个数据到I2C从机
+ * @param  I2Cx: 指定I2Cx外设，x=1,2,3
+ * @param  length: 指定数据长度
+ * @param  data: 上层指定的存储空间首地址
+ * 
+ **/
+void I2C_SendMultByte(I2C_TypeDef* I2Cx,uint8_t length,uint8_t* data)
+{
+
+}
+
+/* I2C1 private functions ----------------------------------------------------*/ 
+
 /**
  * 修改记录：
  * 位置：source\FWLIB\src\stm32f4xx_i2c.c 204行
@@ -58,8 +90,6 @@ void I2C1_Init(void)
     I2C_ITConfig(I2C1,I2C_IT_ERR,ENABLE);
     I2C_Cmd(I2C1,ENABLE);
 }
-
-
 
 void I2C1_EV_IRQHandler(void)
 {
