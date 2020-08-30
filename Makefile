@@ -77,9 +77,9 @@ C_INCLUDES = \
 
 
 # compile gcc flags
-ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
+ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -fdata-sections -ffunction-sections
  
-CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
+CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -fdata-sections -ffunction-sections
 
 #######################################
 # LDFLAGS
@@ -111,12 +111,25 @@ OCD_CHIP_FILE = stm32f4x.cfg	#芯片配置文件
 	# @rm -rf $(BUILD_DIR)/*.hex
 	# @rm -rf $(BUILD_DIR)/*.elf
 
+ASM_OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
 STDPERIPH_OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(STDPERIPH_C_SOURCES:.c=.o)))
+DEVICE_OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(DEVICE_C_SOURCES:.c=.o)))
+DRIVER_OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(DRIVER_C_SOURCES:.c=.o)))
+USER_OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(USER_C_SOURCES:.c=.o)))
 
-.PHONY: all startup core burn clean macro pwd
+OBJECTS = $(ASM_OBJECTS) $(STDPERIPH_OBJECTS) $(DEVICE_OBJECTS) $(DRIVER_OBJECTS) $(USER_OBJECTS) 
 
-all: \
-$(BUILD_DIR)/$(NAME)_$(DATE).elf
+.PHONY: \
+all \
+startup stdperiph device driver \
+burn clean cleano \
+macro pwd
+
+all: startup stdperiph device driver user
+
+elf: a.elf
+
+# $(BUILD_DIR)/$(NAME)_$(DATE).elf
 
 # $(BUILD_DIR)/$(NAME)_$(DATE).bin: $(BUILD_DIR)/$(NAME)_$(DATE).elf
 # 	$(CP) -O binary $^ $@
@@ -124,24 +137,44 @@ $(BUILD_DIR)/$(NAME)_$(DATE).elf
 # $(BUILD_DIR)/$(NAME)_$(DATE).hex: $(BUILD_DIR)/$(NAME)_$(DATE).elf
 # 	$(CP) -O ihex $^ $@
 
-$(BUILD_DIR)/$(NAME)_$(DATE).elf: $(OBJECTS)
-	$(CC) $(OBJECTS) -o $@
-	$(SZ) $@
+-specs=nosys.specs -static -Wl,-cref,-u,Reset_Handler -Wl,-Map=test.map -Wl,--gc-sections -Wl,--defsym=malloc_getpagesize_P=0x80 -Wl,--start-group -lc -lm -Wl,--end-group
+-specs=nosys.specs -static -Wl,-cref,-u,Reset_Handler -Wl,-Map=test.map -Wl,--gc-sections -Wl,--defsym=malloc_getpagesize_P=0x80 -Wl,--start-group -lc -lm -Wl,--end-group
 
-startup: $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
+a.elf: build/main.o buildstartup_stm32f40_41xxx.o
+	$(CC) $(CFLAGS) -T $(LDSCRIPT) -specs=nosys.specs -static -Wl,-cref,-u,Reset_Handler -Wl,-Map=test.map -Wl,--gc-sections -Wl,--defsym=malloc_getpagesize_P=0x80 -Wl,--start-group -lc -lm -Wl,--end-group $^ -o $@
+#$(SZ) $@
+# $(CC) $(CFLAGS) $(LDFLAGS) $(OBJECTS) -o $@
+
 vpath %.s $(sort $(dir $(ASM_SOURCES)))
+
+startup: $(ASM_OBJECTS)
+	@echo \<\<\<\<\<Startup File Compile Completely\>\>\>\>\>
+
 $(BUILD_DIR)/%.o: %.s
-	$(CC) -c $(CFLAGS) -g $< -o $@
+	$(CC) -c $(CFLAGS) -g -Wa,--warn $< -o $@
 
-core:
-	@echo Attention:build the core
+vpath %.c $(sort $(dir $(STDPERIPH_C_SOURCES)))
 
-stdperiph:  $(STDPERIPH_OBJECTS)
-	@echo aaaaaaaaaaaaaaaaaaaaa
+stdperiph: $(STDPERIPH_OBJECTS)
+	@echo \<\<\<\<\<Standard Peripheral Library Compile Completely\>\>\>\>\>
 
-$(STDPERIPH_OBJECTS): $(STDPERIPH_C_SOURCES)
-	@echo Attention:build standard peripheral library
-	$(CC) -c $(CFLAGS) $< -o $@
+$(BUILD_DIR)/%.o: %.c
+	$(CC) -c $(CFLAGS) -g -Wall $< -o $@
+
+vpath %.c $(sort $(dir $(DEVICE_C_SOURCES)))
+
+device: $(DEVICE_OBJECTS)
+	@echo \<\<\<\<\<Device Compile Completely\>\>\>\>\>
+
+vpath %.c $(sort $(dir $(DRIVER_C_SOURCES)))
+
+driver: $(DRIVER_OBJECTS)
+	@echo \<\<\<\<\<Driver Compile Completely\>\>\>\>\>
+
+vpath %.c $(sort $(dir $(USER_C_SOURCES)))
+
+user: $(USER_OBJECTS)
+	@echo \<\<\<\<\<User File Compile Completely\>\>\>\>\>
 
 burn:
 	openocd \
@@ -154,6 +187,9 @@ burn:
 clean:
 	rm -rf $(BUILD_DIR)/*
 
+cleano:
+	rm -rf $(BUILD_DIR)/*o
+
 macro:
 	touch gnuc_macro.c
 	-rm gnuc_macro.h
@@ -163,7 +199,7 @@ macro:
 
 
 pwd:
-	@echo $(STDPERIPH_OBJECTS)
+	@echo $(OBJECTS)
 #@echo $(words $(wildcard $(BUILD_DIR)/*.bin))
 #@echo $(NAME)_$(DATE).bin
 #@echo $(BUILD_DIR)/$(NAME)_$(DATE).hex: $(BUILD_DIR)/$(NAME)_$(DATE).elf
