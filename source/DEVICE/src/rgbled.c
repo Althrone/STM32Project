@@ -23,5 +23,5 @@ void RGBLED_Init(void)
     GPIO_InitStructure.GPIO_Mode=GPIO_Mode_OUT;
     GPIO_InitStructure.GPIO_Speed=GPIO_Speed_100MHz;
     GPIO_InitStructure.GPIO_OType=GPIO_OType_PP;
-    GPIO_Init(GPIOE,&GPIO_InitStructure);   
+    GPIO_Init(GPIOE,&GPIO_InitStructure);
 }

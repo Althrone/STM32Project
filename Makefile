@@ -2,7 +2,7 @@
 #路径都是相对于/d/STM32Project的
 
 NAME = IDCC
-DATE = `date +%Y_%m_%d`
+COMPILE_TIME = $(shell date +%Y_%m_%d)
 
 # c编译生成文件夹
 BUILD_DIR = build
@@ -24,7 +24,7 @@ source/CORE/startup_stm32f40_41xxx.s \
 # building variables
 ######################################
 # optimization
-OPT = -Og
+# OPT = -Og
 
 #######################################
 # binaries
@@ -56,7 +56,7 @@ MCU = -mthumb $(CPU) $(FPU) $(FLOAT-ABI)
 
 # macros for gcc
 # AS defines
-AS_DEFS = \
+AS_DEFS =\
 
 # C defines
 # USE_STDPERIPH_DRIVER用于使用标准外设库，包含stm32f4xx_conf.h文件
@@ -65,7 +65,7 @@ C_DEFS = \
 -DUSE_STDPERIPH_DRIVER \
  
 # AS includes
-AS_INCLUDES = \
+AS_INCLUDES =\
  
 # C includes
 C_INCLUDES = \
@@ -73,13 +73,14 @@ C_INCLUDES = \
 -Isource/CORE \
 -Isource/FWLIB/inc \
 -Isource/DRIVER/inc \
--Isource/DEVICE/inc \
+-Isource/DEVICE/inc
 
 
 # compile gcc flags
-ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -fdata-sections -ffunction-sections
- 
-CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -fdata-sections -ffunction-sections
+ASFLAGS = $(MCU) $(OPT)
+# ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -fdata-sections -ffunction-sections
+CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT)
+# CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -fdata-sections -ffunction-sections
 
 #######################################
 # LDFLAGS
@@ -121,45 +122,46 @@ OBJECTS = $(ASM_OBJECTS) $(STDPERIPH_OBJECTS) $(DEVICE_OBJECTS) $(DRIVER_OBJECTS
 
 .PHONY: \
 all \
-startup stdperiph device driver \
-burn clean cleano \
+startup stdperiph device driver user\
+burn link \
+clean cleano \
 macro pwd
 
-all: startup stdperiph device driver user
+all: startup stdperiph device driver user $(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).elf $(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).bin
 
-elf: a.elf
-
-# $(BUILD_DIR)/$(NAME)_$(DATE).elf
-
-# $(BUILD_DIR)/$(NAME)_$(DATE).bin: $(BUILD_DIR)/$(NAME)_$(DATE).elf
-# 	$(CP) -O binary $^ $@
-
+$(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).bin: $(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).elf
+	$(CP) $^ $@
+# -O binary 
 # $(BUILD_DIR)/$(NAME)_$(DATE).hex: $(BUILD_DIR)/$(NAME)_$(DATE).elf
 # 	$(CP) -O ihex $^ $@
 
--specs=nosys.specs -static -Wl,-cref,-u,Reset_Handler -Wl,-Map=test.map -Wl,--gc-sections -Wl,--defsym=malloc_getpagesize_P=0x80 -Wl,--start-group -lc -lm -Wl,--end-group
--specs=nosys.specs -static -Wl,-cref,-u,Reset_Handler -Wl,-Map=test.map -Wl,--gc-sections -Wl,--defsym=malloc_getpagesize_P=0x80 -Wl,--start-group -lc -lm -Wl,--end-group
-
-a.elf: build/main.o buildstartup_stm32f40_41xxx.o
-	$(CC) $(CFLAGS) -T $(LDSCRIPT) -specs=nosys.specs -static -Wl,-cref,-u,Reset_Handler -Wl,-Map=test.map -Wl,--gc-sections -Wl,--defsym=malloc_getpagesize_P=0x80 -Wl,--start-group -lc -lm -Wl,--end-group $^ -o $@
+$(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).elf: $(OBJECTS)
+	$(CC) -mthumb -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard \
+-T $(LDSCRIPT) -specs=nosys.specs -static \
+-Wl,-cref,-u,Reset_Handler -Wl,-Map=$(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).map \
+-Wl,--gc-sections \
+-Wl,--defsym=malloc_getpagesize_P=0x80 \
+-Wl,--start-group -lc -lm -Wl,--end-group \
+$^ \
+-o $@
 #$(SZ) $@
 # $(CC) $(CFLAGS) $(LDFLAGS) $(OBJECTS) -o $@
+
+$(BUILD_DIR)/%.o: %.s
+	$(CC) -c $(ASFLAGS) -g -Wa,--warn $< -o $@
+
+$(BUILD_DIR)/%.o: %.c
+	$(CC) -c $(CFLAGS) -g -Wall $< -o $@
 
 vpath %.s $(sort $(dir $(ASM_SOURCES)))
 
 startup: $(ASM_OBJECTS)
 	@echo \<\<\<\<\<Startup File Compile Completely\>\>\>\>\>
 
-$(BUILD_DIR)/%.o: %.s
-	$(CC) -c $(CFLAGS) -g -Wa,--warn $< -o $@
-
 vpath %.c $(sort $(dir $(STDPERIPH_C_SOURCES)))
 
 stdperiph: $(STDPERIPH_OBJECTS)
 	@echo \<\<\<\<\<Standard Peripheral Library Compile Completely\>\>\>\>\>
-
-$(BUILD_DIR)/%.o: %.c
-	$(CC) -c $(CFLAGS) -g -Wall $< -o $@
 
 vpath %.c $(sort $(dir $(DEVICE_C_SOURCES)))
 
@@ -182,7 +184,14 @@ burn:
 	-f target/$(OCD_CHIP_FILE) \
 	-c init \
 	-c "reset halt" \
-	-c "flash write_image erase $(wildcard $(BUILD_DIR)/*.bin)"
+	-c "flash write_image erase $(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).bin" \
+	-c "reset run" \
+	-c exit
+
+link:
+	openocd \
+	-f interface/$(OCD_LINK_FILE) \
+	-f target/$(OCD_CHIP_FILE)
 
 clean:
 	rm -rf $(BUILD_DIR)/*
@@ -195,11 +204,8 @@ macro:
 	-rm gnuc_macro.h
 	$(CC) -E -dM $(FLOAT-ABI) -c gnuc_macro.c >> gnuc_macro.h
 
-
-
-
 pwd:
-	@echo $(OBJECTS)
+	@echo $(BUILD_DIR)/$(NAME)_$(DATE)
 #@echo $(words $(wildcard $(BUILD_DIR)/*.bin))
 #@echo $(NAME)_$(DATE).bin
 #@echo $(BUILD_DIR)/$(NAME)_$(DATE).hex: $(BUILD_DIR)/$(NAME)_$(DATE).elf

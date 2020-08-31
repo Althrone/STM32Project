@@ -8,12 +8,10 @@
             "defines": [
                 "_DEBUG",
                 "UNICODE",
-                "_UNICODE"
+                "_UNICODE",
+                "USE_STDPERIPH_DRIVER"
             ],
-            "compilerPath": "C:\\Program Files (x86)\\mingw64\\bin\\gcc.exe",
-            "cStandard": "gnu18",
-            "cppStandard": "gnu++14",
-            "intelliSenseMode": "gcc-x64"
+            "intelliSenseMode": "msvc-x64"
         }
     ],
     "version": 4

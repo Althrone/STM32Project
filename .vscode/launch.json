@@ -5,33 +5,23 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "arm-none-eabi-gdb",
+            "name": "IDCC",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/xxxxxxxx.elf",
+            "program": "${workspaceFolder}/build/IDCC_2020_08_31.elf",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
-            "miDebuggerPath": "arm-none-eabi-gdb",
+            "miDebuggerPath": "arm-none-eabi-gdb.exe",
             "setupCommands": [
-                {
-                    "text": "target remote localhost:3333",
-                },
-                {
-                    "text": "file D:/rcap-0.1/build/rcap.elf",
-                },
-                {
-                    "text": "monitor reset",
-                },
-                {
-                    "text": "monitor halt",
-                },
-                {
-                    "text": "load",
-                },
+                {"text": "target remote localhost:3333"},
+                {"text": "file ${workspaceFolder}/build/IDCC_2020_08_31.elf"},
+                {"text": "monitor reset"},
+                {"text": "monitor halt"},
+                {"text": "load"},
             ],
             "preLaunchTask": "build"
         }
