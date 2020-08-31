@@ -47,3 +47,8 @@ void USART1_Init(void)
     //开USART1中断
     USART_ITConfig(USART1,USART_IT_TXE,ENABLE);
 }
+
+void USART1_IRQHandler(void)
+{
+
+}

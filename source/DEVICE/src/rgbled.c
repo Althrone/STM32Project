@@ -25,3 +25,22 @@ void RGBLED_Init(void)
     GPIO_InitStructure.GPIO_OType=GPIO_OType_PP;
     GPIO_Init(GPIOE,&GPIO_InitStructure);
 }
+
+void RGBLED_ColourSet(uint8_t colour)
+{
+
+}
+
+void RGBLED_OFF(void)
+{
+    GPIO_SetBits(GPIOE,GPIO_Pin_0);
+    GPIO_SetBits(GPIOE,GPIO_Pin_1);
+    GPIO_SetBits(GPIOE,GPIO_Pin_2);
+}
+
+void RGBLED_White(void)
+{
+    GPIO_ResetBits(GPIOE,GPIO_Pin_0);
+    GPIO_ResetBits(GPIOE,GPIO_Pin_1);
+    GPIO_ResetBits(GPIOE,GPIO_Pin_2);
+}

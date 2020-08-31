@@ -14,6 +14,10 @@
 /* Exported functions --------------------------------------------------------*/ 
 
 void RGBLED_Init(void);
+void RGBLED_ColourSet(uint8_t colour);
+void RGBLED_OFF(void);
+void RGBLED_White(void);
+
 
 #ifdef __cplusplus
 }
