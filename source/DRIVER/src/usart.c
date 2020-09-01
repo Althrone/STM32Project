@@ -45,10 +45,10 @@ void USART1_Init(void)
     USART_Init(USART1,&USART_InitStructure);
 
     //开USART1中断
-    USART_ITConfig(USART1,USART_IT_TXE,ENABLE);
+    // USART_ITConfig(USART1,USART_IT_TXE,ENABLE);
 }
 
-void USART1_IRQHandler(void)
-{
+// void USART1_IRQHandler(void)
+// {
 
-}
+// }

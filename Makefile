@@ -130,12 +130,15 @@ macro pwd
 all: startup stdperiph device driver user $(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).elf $(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).bin
 
 $(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).bin: $(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).elf
+	rm -rf $(BUILD_DIR)/*.bin
 	$(CP) $^ $@
 # -O binary 
 # $(BUILD_DIR)/$(NAME)_$(DATE).hex: $(BUILD_DIR)/$(NAME)_$(DATE).elf
 # 	$(CP) -O ihex $^ $@
 
 $(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).elf: $(OBJECTS)
+	rm -rf $(BUILD_DIR)/*.elf
+	rm -rf $(BUILD_DIR)/*.map
 	$(CC) -mthumb -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard \
 -T $(LDSCRIPT) -specs=nosys.specs -static \
 -Wl,-cref,-u,Reset_Handler -Wl,-Map=$(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).map \
@@ -197,7 +200,7 @@ clean:
 	rm -rf $(BUILD_DIR)/*
 
 cleano:
-	rm -rf $(BUILD_DIR)/*o
+	rm -rf $(BUILD_DIR)/*.o
 
 macro:
 	touch gnuc_macro.c
