@@ -93,7 +93,7 @@ void I2C1_Init(void)
     I2C_InitStructure.I2C_AcknowledgedAddress=I2C_AcknowledgedAddress_7bit;
     I2C_Init(I2C1,&I2C_InitStructure);
 
-    //开I2C1中断
+    // 开I2C1中断
     I2C_ITConfig(I2C1,I2C_IT_BUF,ENABLE);
     I2C_ITConfig(I2C1,I2C_IT_EVT,ENABLE);
     I2C_ITConfig(I2C1,I2C_IT_ERR,ENABLE);
