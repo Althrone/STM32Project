@@ -10,6 +10,10 @@ int main(void)
     RGBLED_Init();
     // USART1_Init();
     TIM6_Init();
+    
+    Motor_Init();
+
+    Motor_SetSpeed();
 
     while (1)
     {

@@ -43,7 +43,10 @@ void TIM3_Init(void)
     TIM_OC3Init(TIM3,&TIM_OCInitStruct);
     //PWMOUT_4
     TIM_OC4Init(TIM3,&TIM_OCInitStruct);
-
+    //寄存器预装载
+    TIM_ARRPreloadConfig(TIM3, ENABLE);
+    //TIM3使能
+    TIM_Cmd(TIM3,ENABLE);
 }
 
 /**

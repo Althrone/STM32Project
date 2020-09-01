@@ -20,6 +20,7 @@
 /* Exported functions --------------------------------------------------------*/ 
 void TIM6_Init(void);
 
+void TIM3_Init(void);
 
 #ifdef __cplusplus
 }

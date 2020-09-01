@@ -41,4 +41,14 @@ void Motor_Init(void)
     GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_OType=GPIO_OType_PP;
     GPIO_Init(GPIOA,&GPIO_InitStructure);
+
+    TIM3_Init();
+}
+
+void Motor_SetSpeed(void)
+{
+    TIM_SetCompare1(TIM3,3000);
+    TIM_SetCompare2(TIM3,3000);
+    TIM_SetCompare3(TIM3,3000);
+    TIM_SetCompare4(TIM3,3000);
 }

@@ -9,10 +9,14 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx.h"
 
+#include "tim.h"
+
 /* Exported types ------------------------------------------------------------*/
 
 /* Exported functions --------------------------------------------------------*/ 
 
+void Motor_Init(void);
+void Motor_SetSpeed(void);
 
 
 

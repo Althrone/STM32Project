@@ -11,10 +11,13 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx.h"
-#include "i2c.h"
-#include "rgbled.h"
+
 #include "usart.h"
 #include "tim.h"
+#include "i2c.h"
+
+#include "rgbled.h"
+#include "motor.h"
 
 #ifdef __cplusplus
 }
