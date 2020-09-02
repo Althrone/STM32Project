@@ -49,6 +49,20 @@ void TIM3_Init(void)
     TIM_Cmd(TIM3,ENABLE);
 }
 
+void TIM5_Init(void)
+{
+    //开TIM5时钟
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5,ENABLE);
+    //TIM初始化时基单元结构体定义
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;
+    TIM_TimeBaseInitStructure.TIM_Prescaler=42-1;//4分频就是4-1
+    TIM_TimeBaseInitStructure.TIM_CounterMode=TIM_CounterMode_Up;
+    TIM_TimeBaseInitStructure.TIM_Period=40000-1;
+    TIM_TimeBaseInitStructure.TIM_ClockDivision=TIM_CKD_DIV1;//暂时不知道有什么用
+    // TIM_TimeBaseInitStructure.TIM_RepetitionCounter=;//只有TIM1和TIM8才有
+    TIM_TimeBaseInit(TIM3,&TIM_TimeBaseInitStructure);
+}
+
 /**
  * 试试定时1s
  * 
@@ -80,6 +94,22 @@ void TIM6_Init(void)
     TIM_Cmd(TIM6,ENABLE);
 }
 
+/**
+ * 采样频率10us
+ **/
+void TIM7_Init(void)
+{
+    //开TIM7时钟
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM7,ENABLE);
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;
+    TIM_TimeBaseInitStructure.TIM_Prescaler=8400;
+    TIM_TimeBaseInitStructure.TIM_Period=10000;
+    TIM_TimeBaseInit(TIM7,&TIM_TimeBaseInitStructure);
+}
+
+/**
+ * 用于驱动LED1s闪烁
+ **/
 uint8_t flag=0;
 
 void TIM6_DAC_IRQHandler(void)

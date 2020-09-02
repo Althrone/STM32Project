@@ -14,13 +14,15 @@
 /* Exported types ------------------------------------------------------------*/
 
 /** 
-  * @brief  I2C Init structure definition  
+  * @brief  TIM Init structure definition  
   */
 
-/* Exported functions --------------------------------------------------------*/ 
-void TIM6_Init(void);
+/* Exported functions --------------------------------------------------------*/
 
 void TIM3_Init(void);
+void TIM5_Init(void);
+void TIM6_Init(void);
+void TIM7_Init(void);
 
 #ifdef __cplusplus
 }
