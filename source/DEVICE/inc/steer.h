@@ -1,6 +1,6 @@
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __MOTOR_H
-#define __MOTOR_H
+#ifndef __STEER_H
+#define __STEER_H
 
 #ifdef __cplusplus
     extern "C" {
@@ -14,16 +14,15 @@
 /* Exported types ------------------------------------------------------------*/
 
 /** 
-  * @brief  Motor Init structure definition  
+  * @brief  Steer Init structure definition  
   */
 
 /* Exported functions --------------------------------------------------------*/ 
 
-void Motor_Init(void);
-void Motor_SetSpeed(void);
+void Steer_Init(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /*__MOTOR_H */
+#endif /*__STEER_H */

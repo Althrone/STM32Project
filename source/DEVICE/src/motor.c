@@ -47,7 +47,7 @@ void Motor_Init(void)
 
 void Motor_SetSpeed(void)
 {
-    TIM_SetCompare1(TIM3,3000);
+    TIM_SetCompare1(TIM3,4000);
     TIM_SetCompare2(TIM3,3000);
     TIM_SetCompare3(TIM3,3000);
     TIM_SetCompare4(TIM3,3000);
