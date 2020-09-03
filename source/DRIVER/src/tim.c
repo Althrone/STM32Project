@@ -60,7 +60,7 @@ void TIM5_Init(void)
     TIM_TimeBaseInitStructure.TIM_Period=40000-1;
     TIM_TimeBaseInitStructure.TIM_ClockDivision=TIM_CKD_DIV1;//暂时不知道有什么用
     // TIM_TimeBaseInitStructure.TIM_RepetitionCounter=;//只有TIM1和TIM8才有
-    TIM_TimeBaseInit(TIM3,&TIM_TimeBaseInitStructure);
+    TIM_TimeBaseInit(TIM5,&TIM_TimeBaseInitStructure);
 }
 
 /**
@@ -95,17 +95,33 @@ void TIM6_Init(void)
 }
 
 /**
- * 采样频率10us
+ * 定时1ms，然后通过获取当前值来细化时间
+ * 用于精确定时，可细化到1us
  **/
 void TIM7_Init(void)
 {
     //开TIM7时钟
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM7,ENABLE);
     TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;
-    TIM_TimeBaseInitStructure.TIM_Prescaler=8400;
-    TIM_TimeBaseInitStructure.TIM_Period=10000;
+    TIM_TimeBaseInitStructure.TIM_Prescaler=84;
+    TIM_TimeBaseInitStructure.TIM_Period=1000;
     TIM_TimeBaseInit(TIM7,&TIM_TimeBaseInitStructure);
+
+    //定义NVIC初始化结构体
+    NVIC_InitTypeDef NVIC_InitStructure;
+    NVIC_InitStructure.NVIC_IRQChannel=TIM7_IRQn; //定时器5中断
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=1; //抢占优先级1
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority=1; //子优先级1
+	NVIC_InitStructure.NVIC_IRQChannelCmd=ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+
+    //开TIM6中断
+    TIM_ITConfig(TIM7,TIM_IT_Update,ENABLE);
+    //TIM6使能
+    TIM_Cmd(TIM7,ENABLE);
 }
+
+
 
 /**
  * 用于驱动LED1s闪烁
