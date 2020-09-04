@@ -44,11 +44,21 @@ void USART1_Init(void)
     USART_InitStructure.USART_HardwareFlowControl=USART_HardwareFlowControl_None;
     USART_Init(USART1,&USART_InitStructure);
 
+    // //NVI初始化结构体定义
+    // NVIC_InitTypeDef NVIC_InitStructure;
+    // NVIC_InitStructure.NVIC_IRQChannel=USART6_IRQn ; //USART6中断
+    // NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=0x01; //抢占优先级1
+    // NVIC_InitStructure.NVIC_IRQChannelSubPriority=0x03; //子优先级3
+    // NVIC_InitStructure.NVIC_IRQChannelCmd=ENABLE;
+    // NVIC_Init(&NVIC_InitStructure);
+
     //开USART1中断
-    // USART_ITConfig(USART1,USART_IT_TXE,ENABLE);
+    USART_ITConfig(USART1,USART_IT_TXE,ENABLE);
+    //USART1使能
+    USART_Cmd(USART1,ENABLE);
 }
 
-// void USART1_IRQHandler(void)
-// {
+void USART1_IRQHandler(void)
+{
 
-// }
+}
