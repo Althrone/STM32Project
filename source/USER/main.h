@@ -16,6 +16,8 @@
 #include "tim.h"
 #include "i2c.h"
 
+#include "ANO_DT.h"
+
 #include "rgbled.h"
 #include "motor.h"
 

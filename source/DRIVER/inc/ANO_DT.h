@@ -12,13 +12,16 @@
 
 #include "usart.h"
 
+#include <stddef.h>
+#include <stdlib.h>
+
 /* Exported types ------------------------------------------------------------*/
 
 //数据拆分宏定义，在发送大于1字节的数据类型时，比如int16、float等，需要把数据拆分成单独字节进行发送
-#define BYTE0(dwTemp)       ( *( (char *)(&dwTemp)    ) )
-#define BYTE1(dwTemp)       ( *( (char *)(&dwTemp) + 1) )
-#define BYTE2(dwTemp)       ( *( (char *)(&dwTemp) + 2) )
-#define BYTE3(dwTemp)       ( *( (char *)(&dwTemp) + 3) )
+#define BYTE0(dwTemp)       ( *( (uint8_t *)(&dwTemp)    ) )
+#define BYTE1(dwTemp)       ( *( (uint8_t *)(&dwTemp) + 1) )
+#define BYTE2(dwTemp)       ( *( (uint8_t *)(&dwTemp) + 2) )
+#define BYTE3(dwTemp)       ( *( (uint8_t *)(&dwTemp) + 3) )
 
 typedef enum
 {
@@ -31,7 +34,7 @@ typedef enum
     ANO_Moto        =0x06,
     ANO_Senser2     =0x07,
     ANO_SenserLink  =0x08
-}ANOFuncByte_TypeDef;//功能字节,不完整，待补充
+}ANO_FuncByteTypeDef;//功能字节,不完整，待补充
 
 typedef enum
 {
@@ -47,9 +50,30 @@ typedef enum
     ANO_OpticalFlow =0x22,//匿名光流
     ANO_OpenMV      =0x29,//匿名OpenMV
     ANO_UWB         =0x30 //匿名无线定位
-}ANODev_TypeDef;//发送设备和目标设备
+}ANO_DevByteTypeDef;//发送设备和目标设备
+
+typedef struct
+{
+    uint8_t ANO_DT_HardwareType;
+    uint16_t ANO_DT_HardwareVer;
+    uint16_t ANO_DT_SoftwareVer;
+    uint16_t ANO_DT_BootloaderVer;
+}ANO_DT_SendVerTypeDef;
+
+typedef struct
+{
+    int16_t ANO_DT_Roll;
+    int16_t ANO_DT_Pitch;
+    int16_t ANO_DT_Yaw;
+    int32_t ANO_DT_Altitude;
+    uint8_t ANO_DT_FlyModel;
+    uint8_t ANO_DT_Armed;
+}ANO_DT_SendStatusTypeDef;
+
+
 /* Exported functions --------------------------------------------------------*/ 
 
+void ANO_DT_SendVer(USART_TypeDef* USARTx,ANO_DT_SendVerTypeDef* ANO_DT_SendVerStruct);
 
 
 

@@ -122,8 +122,8 @@ OBJECTS = $(ASM_OBJECTS) $(STDPERIPH_OBJECTS) $(DEVICE_OBJECTS) $(DRIVER_OBJECTS
 
 .PHONY: \
 all \
-startup stdperiph device driver user\
-burn link \
+startup stdperiph device driver user \
+burn link reset \
 clean cleano \
 macro pwd
 
@@ -196,6 +196,14 @@ link:
 	-f interface/$(OCD_LINK_FILE) \
 	-f target/$(OCD_CHIP_FILE)
 
+reset:
+	openocd \
+	-f interface/$(OCD_LINK_FILE) \
+	-f target/$(OCD_CHIP_FILE) \
+	-c init \
+	-c halt \
+	-c reset \
+	-c exit
 clean:
 	rm -rf $(BUILD_DIR)/*
 
