@@ -6,7 +6,7 @@
  * @brief   使用匿名飞控V6协议
  **/
 
-#define S_ADDR  ANO_ToKon
+#define S_ADDR  ANO_OtherHDW
 #define D_ADDR  ANO_Computer
 
 #include "ANO_DT.h"
@@ -19,10 +19,11 @@
  **/
 uint8_t* ANO_DT_SplitMember(uint8_t memberlenth,uint8_t* memberhead,uint8_t* databuf)
 {
+    memberhead+=memberlenth-1;
     for (uint8_t i = 0; i < memberlenth; i++)
     {
         *(++databuf)=*memberhead;
-        memberhead++;
+        memberhead--;
     }
     return databuf;
 }
@@ -42,7 +43,6 @@ void ANO_DT_SendVer(USART_TypeDef* USARTx,ANO_DT_SendVerTypeDef* ANO_DT_SendVerS
                   sizeof(ANO_DT_SendVerStruct->ANO_DT_BootloaderVer);
     //分派内存空间
     uint8_t* databuf=(uint8_t*)malloc(lenth+6);
-    uint8_t a;
     //填写其他帧
     *(databuf)=0xAA;      //帧头固定
     *(++databuf)=S_ADDR;    //在定义里面改
@@ -53,28 +53,29 @@ void ANO_DT_SendVer(USART_TypeDef* USARTx,ANO_DT_SendVerTypeDef* ANO_DT_SendVerS
     databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendVerStruct->ANO_DT_HardwareType),
                        (uint8_t *)&ANO_DT_SendVerStruct->ANO_DT_HardwareType,
                        databuf);
-    a=*(databuf);
     databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendVerStruct->ANO_DT_HardwareVer),
                        (uint8_t *)&ANO_DT_SendVerStruct->ANO_DT_HardwareVer,
                        databuf);
-    a=*(databuf);
     databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendVerStruct->ANO_DT_SoftwareVer),
                        (uint8_t *)&ANO_DT_SendVerStruct->ANO_DT_SoftwareVer,
                        databuf);
-    a=*(databuf);
     databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendVerStruct->ANO_DT_BootloaderVer),
                        (uint8_t *)&ANO_DT_SendVerStruct->ANO_DT_BootloaderVer,
                        databuf);
-    a=*(databuf);
     //指针回滚
     databuf=databuf-(lenth+6-2);
     //和校验
-    for (uint8_t i = 0; i < lenth+5; i++)
+    for (uint8_t i = 0; i < lenth+6-1; i++)
     {
         sum=sum+*(databuf+i);
     }
     *(databuf+lenth+6-1)=sum;
     //发送数据
+    for (uint8_t i = 0; i < lenth+6; i++)
+    {
+        USART_SendData(USARTx,*(databuf+i));
+        while(USART_GetFlagStatus(USART1,USART_FLAG_TXE) == RESET);
+    }
     //释放内存
     free(databuf);
 }
