@@ -73,6 +73,8 @@ typedef struct
 
 /* Exported functions --------------------------------------------------------*/ 
 
+uint8_t* ANO_DT_SplitData(uint8_t lenth,uint8_t* dataaddr,uint8_t* databuf);
+
 void ANO_DT_SendVer(USART_TypeDef* USARTx,ANO_DT_SendVerTypeDef* ANO_DT_SendVerStruct);
 
 
