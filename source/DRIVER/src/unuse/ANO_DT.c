@@ -132,21 +132,21 @@
 // }
 
 
-// /**
-//  * @brief  通用的串口数据发送函数
-//  * @param  HardwareType: 硬件种类
-//  *          This parameter can be one of the following values:
-//  *            @arg NULL:  
-//  * @param  HardwareVer: 硬件版本
-//  *          This parameter can be one of the following values:
-//  *            @arg NULL:  
-//  * @param  SoftwareVer: 软件版本
-//  *          This parameter can be one of the following values:
-//  *            @arg NULL:  
-//  * @param  BootloaderVer: 引导加载版本
-//  *          This parameter can be one of the following values:
-//  *            @arg NULL:  
-//  **/
+/**
+ * @brief  通用的串口数据发送函数
+ * @param  HardwareType: 硬件种类
+ *          This parameter can be one of the following values:
+ *            @arg NULL:  
+ * @param  HardwareVer: 硬件版本
+ *          This parameter can be one of the following values:
+ *            @arg NULL:  
+ * @param  SoftwareVer: 软件版本
+ *          This parameter can be one of the following values:
+ *            @arg NULL:  
+ * @param  BootloaderVer: 引导加载版本
+ *          This parameter can be one of the following values:
+ *            @arg NULL:  
+ **/
 // void ANO_DT_SendData()
 // {
     

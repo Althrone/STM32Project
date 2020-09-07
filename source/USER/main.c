@@ -6,6 +6,7 @@ int main(void)
 {
     ANO_DT_SendVerTypeDef ANO_DT_SendVerStruct;
     ANO_DT_SendVerStruct.ANO_DT_BootloaderVer=1;
+    ANO_DT_SendVerStruct.ANO_DT_HardwareType=0xCC;
     //
     // I2C1_Init();
     //
@@ -17,7 +18,7 @@ int main(void)
 
     Motor_SetSpeed();
 
-    ANO_DT_SendVer(USART1,&ANO_DT_SendVerStruct);
+    // ANO_DT_SendVer(USART1,&ANO_DT_SendVerStruct);
 
     USART_SendData(USART1,0xAA);
 

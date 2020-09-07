@@ -12,8 +12,9 @@
 
 #include "usart.h"
 
-#include <stddef.h>
+// #include <stddef.h>
 #include <stdlib.h>
+#include <string.h>
 
 /* Exported types ------------------------------------------------------------*/
 
@@ -73,8 +74,7 @@ typedef struct
 
 /* Exported functions --------------------------------------------------------*/ 
 
-uint8_t* ANO_DT_SplitData(uint8_t lenth,uint8_t* dataaddr,uint8_t* databuf);
-
+uint8_t* ANO_DT_SplitMember(uint8_t memberlenth,uint8_t* memberhead,uint8_t* databuf);
 void ANO_DT_SendVer(USART_TypeDef* USARTx,ANO_DT_SendVerTypeDef* ANO_DT_SendVerStruct);
 
 
