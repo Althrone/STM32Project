@@ -18,7 +18,7 @@ int main(void)
 
     Motor_SetSpeed();
 
-    // ANO_DT_SendVer(USART1,&ANO_DT_SendVerStruct);
+    ANO_DT_SendVer(USART1,&ANO_DT_SendVerStruct);
 
     USART_SendData(USART1,0xAA);
 
