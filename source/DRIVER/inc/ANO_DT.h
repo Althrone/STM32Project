@@ -66,16 +66,26 @@ typedef struct
     int16_t ANO_DT_Roll;
     int16_t ANO_DT_Pitch;
     int16_t ANO_DT_Yaw;
+    int32_t ANO_DT_Altitude;    //海拔高度
+    uint8_t ANO_DT_FlyModel;    //飞行模式
+    uint8_t ANO_DT_Armed;       //安全锁状态
+}ANO_DT_SendStatusTypeDef;
+
+typedef struct
+{
+    int16_t ANO_DT_Roll;
+    int16_t ANO_DT_Pitch;
+    int16_t ANO_DT_Yaw;
     int32_t ANO_DT_Altitude;
     uint8_t ANO_DT_FlyModel;
     uint8_t ANO_DT_Armed;
 }ANO_DT_SendStatusTypeDef;
 
-
 /* Exported functions --------------------------------------------------------*/ 
 
 uint8_t* ANO_DT_SplitMember(uint8_t memberlenth,uint8_t* memberhead,uint8_t* databuf);
 void ANO_DT_SendVer(USART_TypeDef* USARTx,ANO_DT_SendVerTypeDef* ANO_DT_SendVerStruct);
+void ANO_DT_SendStatus(USART_TypeDef* USARTx,ANO_DT_SendStatusTypeDef* ANO_DT_SendStatusStruct);
 
 
 

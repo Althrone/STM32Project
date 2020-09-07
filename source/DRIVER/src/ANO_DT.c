@@ -30,8 +30,8 @@ uint8_t* ANO_DT_SplitMember(uint8_t memberlenth,uint8_t* memberhead,uint8_t* dat
 
 /**
  * @brief  发送版本信息
- * @param  USARTx: 硬件种类
- * @param  ANO_DT_SendVerStruct: 硬件版本
+ * @param  USARTx: 串口号
+ * @param  ANO_DT_SendVerStruct: 版本信息结构体
  **/
 void ANO_DT_SendVer(USART_TypeDef* USARTx,ANO_DT_SendVerTypeDef* ANO_DT_SendVerStruct)
 {
@@ -62,6 +62,66 @@ void ANO_DT_SendVer(USART_TypeDef* USARTx,ANO_DT_SendVerTypeDef* ANO_DT_SendVerS
     databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendVerStruct->ANO_DT_BootloaderVer),
                        (uint8_t *)&ANO_DT_SendVerStruct->ANO_DT_BootloaderVer,
                        databuf);
+    //指针回滚
+    databuf=databuf-(lenth+6-2);
+    //和校验
+    for (uint8_t i = 0; i < lenth+6-1; i++)
+    {
+        sum=sum+*(databuf+i);
+    }
+    *(databuf+lenth+6-1)=sum;
+    //发送数据
+    for (uint8_t i = 0; i < lenth+6; i++)
+    {
+        USART_SendData(USARTx,*(databuf+i));
+        while(USART_GetFlagStatus(USART1,USART_FLAG_TXE) == RESET);
+    }
+    //释放内存
+    free(databuf);
+}
+
+/**
+ * @brief  发送姿态等基本信息
+ * @param  USARTx: 串口号
+ * @param  ANO_DT_SendVerStruct: 姿态等信息的结构体
+ **/
+void ANO_DT_SendStatus(USART_TypeDef* USARTx,ANO_DT_SendStatusTypeDef* ANO_DT_SendStatusStruct)
+{
+    uint8_t sum=0;
+    //计算数据长度
+    uint8_t lenth=sizeof(ANO_DT_SendStatusStruct->ANO_DT_Roll)+
+                  sizeof(ANO_DT_SendStatusStruct->ANO_DT_Pitch)+
+                  sizeof(ANO_DT_SendStatusStruct->ANO_DT_Yaw)+
+                  sizeof(ANO_DT_SendStatusStruct->ANO_DT_Altitude)+
+                  sizeof(ANO_DT_SendStatusStruct->ANO_DT_FlyModel)+
+                  sizeof(ANO_DT_SendStatusStruct->ANO_DT_Armed);
+    //分派内存空间
+    uint8_t* databuf=(uint8_t*)malloc(lenth+6);
+    //填写其他帧
+    *(databuf)=0xAA;      //帧头固定
+    *(++databuf)=S_ADDR;    //在定义里面改
+    *(++databuf)=D_ADDR;    //在定义里面改
+    *(++databuf)=0x00;      //功能字
+    *(++databuf)=lenth;     //有效数据长度
+    //数据填充
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendStatusTypeDef->ANO_DT_Roll),
+                          (uint8_t *)&ANO_DT_SendStatusTypeDef->ANO_DT_Roll,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendStatusTypeDef->ANO_DT_Pitch),
+                          (uint8_t *)&ANO_DT_SendStatusTypeDef->ANO_DT_Pitch,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendStatusTypeDef->ANO_DT_Yaw),
+                          (uint8_t *)&ANO_DT_SendStatusTypeDef->ANO_DT_Yaw,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendStatusTypeDef->ANO_DT_Altitude),
+                          (uint8_t *)&ANO_DT_SendStatusTypeDef->ANO_DT_Altitude,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendStatusTypeDef->ANO_DT_FlyModel),
+                          (uint8_t *)&ANO_DT_SendStatusTypeDef->ANO_DT_FlyModel,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendStatusTypeDef->ANO_DT_Armed),
+                          (uint8_t *)&ANO_DT_SendStatusTypeDef->ANO_DT_Armed,
+                          databuf);
     //指针回滚
     databuf=databuf-(lenth+6-2);
     //和校验
