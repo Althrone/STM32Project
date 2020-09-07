@@ -6,8 +6,8 @@
  * @brief   使用匿名飞控V6协议
  **/
 
-#define S_ADDR  ANO_OtherHDW
-#define D_ADDR  ANO_Computer
+#define S_ADDR  ANO_DT_OtherHDW
+#define D_ADDR  ANO_DT_Computer
 
 #include "ANO_DT.h"
 
@@ -44,7 +44,7 @@ void ANO_DT_SendVer(USART_TypeDef* USARTx,ANO_DT_SendVerTypeDef* ANO_DT_SendVerS
     //分派内存空间
     uint8_t* databuf=(uint8_t*)malloc(lenth+6);
     //填写其他帧
-    *(databuf)=0xAA;      //帧头固定
+    *(databuf)=0xAA;        //帧头固定
     *(++databuf)=S_ADDR;    //在定义里面改
     *(++databuf)=D_ADDR;    //在定义里面改
     *(++databuf)=0x00;      //功能字
@@ -83,7 +83,7 @@ void ANO_DT_SendVer(USART_TypeDef* USARTx,ANO_DT_SendVerTypeDef* ANO_DT_SendVerS
 /**
  * @brief  发送姿态等基本信息
  * @param  USARTx: 串口号
- * @param  ANO_DT_SendVerStruct: 姿态等信息的结构体
+ * @param  ANO_DT_SendStatusStruct: 姿态等信息的结构体
  **/
 void ANO_DT_SendStatus(USART_TypeDef* USARTx,ANO_DT_SendStatusTypeDef* ANO_DT_SendStatusStruct)
 {
@@ -98,29 +98,93 @@ void ANO_DT_SendStatus(USART_TypeDef* USARTx,ANO_DT_SendStatusTypeDef* ANO_DT_Se
     //分派内存空间
     uint8_t* databuf=(uint8_t*)malloc(lenth+6);
     //填写其他帧
-    *(databuf)=0xAA;      //帧头固定
+    *(databuf)=0xAA;        //帧头固定
     *(++databuf)=S_ADDR;    //在定义里面改
     *(++databuf)=D_ADDR;    //在定义里面改
-    *(++databuf)=0x00;      //功能字
+    *(++databuf)=0x01;      //功能字
     *(++databuf)=lenth;     //有效数据长度
     //数据填充
-    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendStatusTypeDef->ANO_DT_Roll),
-                          (uint8_t *)&ANO_DT_SendStatusTypeDef->ANO_DT_Roll,
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendStatusStruct->ANO_DT_Roll),
+                          (uint8_t *)&ANO_DT_SendStatusStruct->ANO_DT_Roll,
                           databuf);
-    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendStatusTypeDef->ANO_DT_Pitch),
-                          (uint8_t *)&ANO_DT_SendStatusTypeDef->ANO_DT_Pitch,
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendStatusStruct->ANO_DT_Pitch),
+                          (uint8_t *)&ANO_DT_SendStatusStruct->ANO_DT_Pitch,
                           databuf);
-    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendStatusTypeDef->ANO_DT_Yaw),
-                          (uint8_t *)&ANO_DT_SendStatusTypeDef->ANO_DT_Yaw,
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendStatusStruct->ANO_DT_Yaw),
+                          (uint8_t *)&ANO_DT_SendStatusStruct->ANO_DT_Yaw,
                           databuf);
-    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendStatusTypeDef->ANO_DT_Altitude),
-                          (uint8_t *)&ANO_DT_SendStatusTypeDef->ANO_DT_Altitude,
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendStatusStruct->ANO_DT_Altitude),
+                          (uint8_t *)&ANO_DT_SendStatusStruct->ANO_DT_Altitude,
                           databuf);
-    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendStatusTypeDef->ANO_DT_FlyModel),
-                          (uint8_t *)&ANO_DT_SendStatusTypeDef->ANO_DT_FlyModel,
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendStatusStruct->ANO_DT_FlyModel),
+                          (uint8_t *)&ANO_DT_SendStatusStruct->ANO_DT_FlyModel,
                           databuf);
-    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendStatusTypeDef->ANO_DT_Armed),
-                          (uint8_t *)&ANO_DT_SendStatusTypeDef->ANO_DT_Armed,
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendStatusStruct->ANO_DT_Armed),
+                          (uint8_t *)&ANO_DT_SendStatusStruct->ANO_DT_Armed,
+                          databuf);
+    //指针回滚
+    databuf=databuf-(lenth+6-2);
+    //和校验
+    for (uint8_t i = 0; i < lenth+6-1; i++)
+    {
+        sum=sum+*(databuf+i);
+    }
+    *(databuf+lenth+6-1)=sum;
+    //发送数据
+    for (uint8_t i = 0; i < lenth+6; i++)
+    {
+        USART_SendData(USARTx,*(databuf+i));
+        while(USART_GetFlagStatus(USART1,USART_FLAG_TXE) == RESET);
+    }
+    //释放内存
+    free(databuf);
+}
+
+/**
+ * @brief  发送传感器数据
+ * @param  USARTx: 串口号
+ * @param  ANO_DT_SendSenserStruct: 传感器数据结构体
+ **/
+void ANO_DT_SendSenser(USART_TypeDef* USARTx,ANO_DT_SendSenserTypeDef* ANO_DT_SendSenserStruct)
+{
+    uint8_t sum=0;
+    //计算数据长度
+    uint8_t lenth=sizeof(ANO_DT_SendSenserTypeDef);
+    //分派内存空间
+    uint8_t* databuf=(uint8_t*)malloc(lenth+6);
+    //填写其他帧
+    *(databuf)=0xAA;        //帧头固定
+    *(++databuf)=S_ADDR;    //在定义里面改
+    *(++databuf)=D_ADDR;    //在定义里面改
+    *(++databuf)=0x02;      //功能字
+    *(++databuf)=lenth;     //有效数据长度
+    //数据填充
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendSenserStruct->ANO_DT_AccX),
+                          (uint8_t *)&ANO_DT_SendSenserStruct->ANO_DT_AccX,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendSenserStruct->ANO_DT_AccY),
+                          (uint8_t *)&ANO_DT_SendSenserStruct->ANO_DT_AccY,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendSenserStruct->ANO_DT_AccZ),
+                          (uint8_t *)&ANO_DT_SendSenserStruct->ANO_DT_AccZ,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendSenserStruct->ANO_DT_GyroX),
+                          (uint8_t *)&ANO_DT_SendSenserStruct->ANO_DT_GyroX,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendSenserStruct->ANO_DT_GyroY),
+                          (uint8_t *)&ANO_DT_SendSenserStruct->ANO_DT_GyroY,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendSenserStruct->ANO_DT_GyroZ),
+                          (uint8_t *)&ANO_DT_SendSenserStruct->ANO_DT_GyroZ,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendSenserStruct->ANO_DT_MagX),
+                          (uint8_t *)&ANO_DT_SendSenserStruct->ANO_DT_MagX,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendSenserStruct->ANO_DT_MagY),
+                          (uint8_t *)&ANO_DT_SendSenserStruct->ANO_DT_MagY,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendSenserStruct->ANO_DT_MagZ),
+                          (uint8_t *)&ANO_DT_SendSenserStruct->ANO_DT_MagZ,
                           databuf);
     //指针回滚
     databuf=databuf-(lenth+6-2);
