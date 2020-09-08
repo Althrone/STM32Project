@@ -26,16 +26,16 @@
 
 typedef enum
 {
-    ANO_Ver         =0x00,//版本信息
-    ANO_Status      =0x01,
-    ANO_Senser      =0x02,
-    ANO_RCData      =0x03,
-    ANO_GPSData     =0x04,
-    ANO_Power       =0x05,
-    ANO_Moto        =0x06,
-    ANO_Senser2     =0x07,
-    ANO_SenserLink  =0x08
-}ANO_FuncByteTypeDef;//功能字节,不完整，待补充
+    ANO_DT_Ver         =0x00,//版本信息
+    ANO_DT_Status      =0x01,
+    ANO_DT_Senser      =0x02,
+    ANO_DT_RCData      =0x03,
+    ANO_DT_GPSData     =0x04,
+    ANO_DT_Power       =0x05,
+    ANO_DT_Moto        =0x06,
+    ANO_DT_Senser2     =0x07,
+    ANO_DT_SenserLink  =0x08
+}ANO_DT_FuncByteTypeDef;//功能字节,不完整，待补充
 
 typedef enum
 {
@@ -51,7 +51,7 @@ typedef enum
     ANO_DT_OpticalFlow =0x22,   //匿名光流
     ANO_DT_OpenMV      =0x29,   //匿名OpenMV
     ANO_DT_UWB         =0x30    //匿名无线定位
-}ANO_DevByteTypeDef;//发送设备和目标设备
+}ANO_DT_DevByteTypeDef;//发送设备和目标设备
 
 typedef struct
 {
@@ -83,6 +83,48 @@ typedef struct
     int16_t ANO_DT_MagY;
     int16_t ANO_DT_MagZ;
 }ANO_DT_SendSenserTypeDef;
+
+typedef struct
+{
+    int16_t ANO_DT_RCThrottle;
+    int16_t ANO_DT_RCYaw;
+    int16_t ANO_DT_RCRoll;
+    int16_t ANO_DT_RCPitch;
+    int16_t ANO_DT_RCAUX1;
+    int16_t ANO_DT_RCAUX2;
+    int16_t ANO_DT_RCAUX3;
+    int16_t ANO_DT_RCAUX4;
+    int16_t ANO_DT_RCAUX5;
+    int16_t ANO_DT_RCAUX6;
+}ANO_DT_SendRCDataTypeDef;
+
+typedef struct
+{
+    uint8_t ANO_DT_PointStatus;
+    uint8_t ANO_DT_Satellite;
+    int32_t ANO_DT_Longitude;
+    int32_t ANO_DT_Latitude;
+    int16_t ANO_DT_ReturnAngle;
+    uint16_t ANO_DT_ReturnDistance;
+}ANO_DT_SendGPSDataTypeDef;
+
+typedef struct
+{
+    uint16_t ANO_DT_Voltage;
+    uint16_t ANO_DT_Current;
+}ANO_DT_SendPowerTypeDef;
+
+typedef struct
+{
+    uint16_t ANO_DT_Moto1;
+    uint16_t ANO_DT_Moto2;
+    uint16_t ANO_DT_Moto3;
+    uint16_t ANO_DT_Moto4;
+    uint16_t ANO_DT_Moto5;
+    uint16_t ANO_DT_Moto6;
+    uint16_t ANO_DT_Moto7;
+    uint16_t ANO_DT_Moto8;
+}ANO_DT_SendMotoTypeDef;
 
 /* Exported functions --------------------------------------------------------*/ 
 

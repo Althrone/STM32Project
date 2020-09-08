@@ -44,11 +44,11 @@ void ANO_DT_SendVer(USART_TypeDef* USARTx,ANO_DT_SendVerTypeDef* ANO_DT_SendVerS
     //分派内存空间
     uint8_t* databuf=(uint8_t*)malloc(lenth+6);
     //填写其他帧
-    *(databuf)=0xAA;        //帧头固定
-    *(++databuf)=S_ADDR;    //在定义里面改
-    *(++databuf)=D_ADDR;    //在定义里面改
-    *(++databuf)=0x00;      //功能字
-    *(++databuf)=lenth;     //有效数据长度
+    *(databuf)=0xAA;            //帧头固定
+    *(++databuf)=S_ADDR;        //在定义里面改
+    *(++databuf)=D_ADDR;        //在定义里面改
+    *(++databuf)=ANO_DT_Ver;    //功能字
+    *(++databuf)=lenth;         //有效数据长度
     //数据填充
     databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendVerStruct->ANO_DT_HardwareType),
                        (uint8_t *)&ANO_DT_SendVerStruct->ANO_DT_HardwareType,
@@ -74,7 +74,7 @@ void ANO_DT_SendVer(USART_TypeDef* USARTx,ANO_DT_SendVerTypeDef* ANO_DT_SendVerS
     for (uint8_t i = 0; i < lenth+6; i++)
     {
         USART_SendData(USARTx,*(databuf+i));
-        while(USART_GetFlagStatus(USART1,USART_FLAG_TXE) == RESET);
+        while(USART_GetFlagStatus(USARTx,USART_FLAG_TXE) == RESET);
     }
     //释放内存
     free(databuf);
@@ -98,11 +98,11 @@ void ANO_DT_SendStatus(USART_TypeDef* USARTx,ANO_DT_SendStatusTypeDef* ANO_DT_Se
     //分派内存空间
     uint8_t* databuf=(uint8_t*)malloc(lenth+6);
     //填写其他帧
-    *(databuf)=0xAA;        //帧头固定
-    *(++databuf)=S_ADDR;    //在定义里面改
-    *(++databuf)=D_ADDR;    //在定义里面改
-    *(++databuf)=0x01;      //功能字
-    *(++databuf)=lenth;     //有效数据长度
+    *(databuf)=0xAA;            //帧头固定
+    *(++databuf)=S_ADDR;        //在定义里面改
+    *(++databuf)=D_ADDR;        //在定义里面改
+    *(++databuf)=ANO_DT_Status; //功能字
+    *(++databuf)=lenth;         //有效数据长度
     //数据填充
     databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendStatusStruct->ANO_DT_Roll),
                           (uint8_t *)&ANO_DT_SendStatusStruct->ANO_DT_Roll,
@@ -134,7 +134,7 @@ void ANO_DT_SendStatus(USART_TypeDef* USARTx,ANO_DT_SendStatusTypeDef* ANO_DT_Se
     for (uint8_t i = 0; i < lenth+6; i++)
     {
         USART_SendData(USARTx,*(databuf+i));
-        while(USART_GetFlagStatus(USART1,USART_FLAG_TXE) == RESET);
+        while(USART_GetFlagStatus(USARTx,USART_FLAG_TXE) == RESET);
     }
     //释放内存
     free(databuf);
@@ -153,11 +153,11 @@ void ANO_DT_SendSenser(USART_TypeDef* USARTx,ANO_DT_SendSenserTypeDef* ANO_DT_Se
     //分派内存空间
     uint8_t* databuf=(uint8_t*)malloc(lenth+6);
     //填写其他帧
-    *(databuf)=0xAA;        //帧头固定
-    *(++databuf)=S_ADDR;    //在定义里面改
-    *(++databuf)=D_ADDR;    //在定义里面改
-    *(++databuf)=0x02;      //功能字
-    *(++databuf)=lenth;     //有效数据长度
+    *(databuf)=0xAA;            //帧头固定
+    *(++databuf)=S_ADDR;        //在定义里面改
+    *(++databuf)=D_ADDR;        //在定义里面改
+    *(++databuf)=ANO_DT_Senser; //功能字
+    *(++databuf)=lenth;         //有效数据长度
     //数据填充
     databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendSenserStruct->ANO_DT_AccX),
                           (uint8_t *)&ANO_DT_SendSenserStruct->ANO_DT_AccX,
@@ -198,7 +198,238 @@ void ANO_DT_SendSenser(USART_TypeDef* USARTx,ANO_DT_SendSenserTypeDef* ANO_DT_Se
     for (uint8_t i = 0; i < lenth+6; i++)
     {
         USART_SendData(USARTx,*(databuf+i));
-        while(USART_GetFlagStatus(USART1,USART_FLAG_TXE) == RESET);
+        while(USART_GetFlagStatus(USARTx,USART_FLAG_TXE) == RESET);
+    }
+    //释放内存
+    free(databuf);
+}
+
+/**
+ * @brief  发送遥控数据
+ * @param  USARTx: 串口号
+ * @param  ANO_DT_SendRCDataStruct: 遥控数据结构体
+ **/
+void ANO_DT_SendRCData(USART_TypeDef* USARTx,ANO_DT_SendRCDataTypeDef* ANO_DT_SendRCDataStruct)
+{
+    uint8_t sum=0;
+    //计算数据长度
+    uint8_t lenth=sizeof(ANO_DT_SendRCDataTypeDef);
+    //分派内存空间
+    uint8_t* databuf=(uint8_t*)malloc(lenth+6);
+    //填写其他帧
+    *(databuf)=0xAA;            //帧头固定
+    *(++databuf)=S_ADDR;        //在定义里面改
+    *(++databuf)=D_ADDR;        //在定义里面改
+    *(++databuf)=ANO_DT_RCData; //功能字
+    *(++databuf)=lenth;         //有效数据长度
+    //数据填充
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendRCDataStruct->ANO_DT_RCThrottle),
+                          (uint8_t *)&ANO_DT_SendRCDataStruct->ANO_DT_RCThrottle,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendRCDataStruct->ANO_DT_RCYaw),
+                          (uint8_t *)&ANO_DT_SendRCDataStruct->ANO_DT_RCYaw,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendRCDataStruct->ANO_DT_RCRoll),
+                          (uint8_t *)&ANO_DT_SendRCDataStruct->ANO_DT_RCRoll,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendRCDataStruct->ANO_DT_RCPitch),
+                          (uint8_t *)&ANO_DT_SendRCDataStruct->ANO_DT_RCPitch,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendRCDataStruct->ANO_DT_RCAUX1),
+                          (uint8_t *)&ANO_DT_SendRCDataStruct->ANO_DT_RCAUX1,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendRCDataStruct->ANO_DT_RCAUX2),
+                          (uint8_t *)&ANO_DT_SendRCDataStruct->ANO_DT_RCAUX2,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendRCDataStruct->ANO_DT_RCAUX3),
+                          (uint8_t *)&ANO_DT_SendRCDataStruct->ANO_DT_RCAUX3,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendRCDataStruct->ANO_DT_RCAUX4),
+                          (uint8_t *)&ANO_DT_SendRCDataStruct->ANO_DT_RCAUX4,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendRCDataStruct->ANO_DT_RCAUX5),
+                          (uint8_t *)&ANO_DT_SendRCDataStruct->ANO_DT_RCAUX5,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendRCDataStruct->ANO_DT_RCAUX6),
+                          (uint8_t *)&ANO_DT_SendRCDataStruct->ANO_DT_RCAUX6,
+                          databuf);
+    //指针回滚
+    databuf=databuf-(lenth+6-2);
+    //和校验
+    for (uint8_t i = 0; i < lenth+6-1; i++)
+    {
+        sum=sum+*(databuf+i);
+    }
+    *(databuf+lenth+6-1)=sum;
+    //发送数据
+    for (uint8_t i = 0; i < lenth+6; i++)
+    {
+        USART_SendData(USARTx,*(databuf+i));
+        while(USART_GetFlagStatus(USARTx,USART_FLAG_TXE) == RESET);
+    }
+    //释放内存
+    free(databuf);
+}
+
+/**
+ * @brief  发送GPS数据
+ * @param  USARTx: 串口号
+ * @param  ANO_DT_SendGPSDataStruct: GPS数据结构体
+ **/
+void ANO_DT_SendRCData(USART_TypeDef* USARTx,ANO_DT_SendGPSDataTypeDef* ANO_DT_SendGPSDataStruct)
+{
+    uint8_t sum=0;
+    //计算数据长度
+    uint8_t lenth=sizeof(ANO_DT_SendGPSDataStruct->ANO_DT_PointStatus)+
+                  sizeof(ANO_DT_SendGPSDataStruct->ANO_DT_Satellite)+
+                  sizeof(ANO_DT_SendGPSDataStruct->ANO_DT_Longitude)+
+                  sizeof(ANO_DT_SendGPSDataStruct->ANO_DT_Latitude)+
+                  sizeof(ANO_DT_SendGPSDataStruct->ANO_DT_ReturnAngle)+
+                  sizeof(ANO_DT_SendGPSDataStruct->ANO_DT_ReturnDistance);
+    //分派内存空间
+    uint8_t* databuf=(uint8_t*)malloc(lenth+6);
+    //填写其他帧
+    *(databuf)=0xAA;                //帧头固定
+    *(++databuf)=S_ADDR;            //在定义里面改
+    *(++databuf)=D_ADDR;            //在定义里面改
+    *(++databuf)=ANO_DT_GPSData;    //功能字
+    *(++databuf)=lenth;             //有效数据长度
+    //数据填充
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendGPSDataStruct->ANO_DT_PointStatus),
+                          (uint8_t *)&ANO_DT_SendGPSDataStruct->ANO_DT_PointStatus,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendGPSDataStruct->ANO_DT_Satellite),
+                          (uint8_t *)&ANO_DT_SendGPSDataStruct->ANO_DT_Satellite,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendGPSDataStruct->ANO_DT_Longitude),
+                          (uint8_t *)&ANO_DT_SendGPSDataStruct->ANO_DT_Longitude,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendGPSDataStruct->ANO_DT_Latitude),
+                          (uint8_t *)&ANO_DT_SendGPSDataStruct->ANO_DT_Latitude,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendGPSDataStruct->ANO_DT_ReturnAngle),
+                          (uint8_t *)&ANO_DT_SendGPSDataStruct->ANO_DT_ReturnAngle,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendGPSDataStruct->ANO_DT_ReturnDistance),
+                          (uint8_t *)&ANO_DT_SendGPSDataStruct->ANO_DT_ReturnDistance,
+                          databuf);
+    //指针回滚
+    databuf=databuf-(lenth+6-2);
+    //和校验
+    for (uint8_t i = 0; i < lenth+6-1; i++)
+    {
+        sum=sum+*(databuf+i);
+    }
+    *(databuf+lenth+6-1)=sum;
+    //发送数据
+    for (uint8_t i = 0; i < lenth+6; i++)
+    {
+        USART_SendData(USARTx,*(databuf+i));
+        while(USART_GetFlagStatus(USARTx,USART_FLAG_TXE) == RESET);
+    }
+    //释放内存
+    free(databuf);
+}
+
+/**
+ * @brief  发送电池数据
+ * @param  USARTx: 串口号
+ * @param  ANO_DT_SendPowerStruct: 电池数据结构体
+ **/
+void ANO_DT_SendPower(USART_TypeDef* USARTx,ANO_DT_SendPowerTypeDef* ANO_DT_SendPowerStruct)
+{
+    uint8_t sum=0;
+    //计算数据长度
+    uint8_t lenth=sizeof(ANO_DT_SendPowerTypeDef);
+    //分派内存空间
+    uint8_t* databuf=(uint8_t*)malloc(lenth+6);
+    //填写其他帧
+    *(databuf)=0xAA;                //帧头固定
+    *(++databuf)=S_ADDR;            //在定义里面改
+    *(++databuf)=D_ADDR;            //在定义里面改
+    *(++databuf)=ANO_DT_Power;    //功能字
+    *(++databuf)=lenth;             //有效数据长度
+    //数据填充
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendPowerStruct->ANO_DT_Voltage),
+                          (uint8_t *)&ANO_DT_SendPowerStruct->ANO_DT_Voltage,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendPowerStruct->ANO_DT_Current),
+                          (uint8_t *)&ANO_DT_SendPowerStruct->ANO_DT_Current,
+                          databuf);
+    //指针回滚
+    databuf=databuf-(lenth+6-2);
+    //和校验
+    for (uint8_t i = 0; i < lenth+6-1; i++)
+    {
+        sum=sum+*(databuf+i);
+    }
+    *(databuf+lenth+6-1)=sum;
+    //发送数据
+    for (uint8_t i = 0; i < lenth+6; i++)
+    {
+        USART_SendData(USARTx,*(databuf+i));
+        while(USART_GetFlagStatus(USARTx,USART_FLAG_TXE) == RESET);
+    }
+    //释放内存
+    free(databuf);
+}
+
+/**
+ * @brief  发送电机PWM数据
+ * @param  USARTx: 串口号
+ * @param  ANO_DT_SendMotoStruct: 电机PWM数据结构体
+ **/
+void ANO_DT_SendMoto(USART_TypeDef* USARTx,ANO_DT_SendMotoTypeDef* ANO_DT_SendMotoStruct)
+{
+    uint8_t sum=0;
+    //计算数据长度
+    uint8_t lenth=sizeof(ANO_DT_SendMotoTypeDef);
+    //分派内存空间
+    uint8_t* databuf=(uint8_t*)malloc(lenth+6);
+    //填写其他帧
+    *(databuf)=0xAA;                //帧头固定
+    *(++databuf)=S_ADDR;            //在定义里面改
+    *(++databuf)=D_ADDR;            //在定义里面改
+    *(++databuf)=ANO_DT_Moto;       //功能字
+    *(++databuf)=lenth;             //有效数据长度
+    //数据填充
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendMotoStruct->ANO_DT_Moto1),
+                          (uint8_t *)&ANO_DT_SendMotoStruct->ANO_DT_Moto1,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendMotoStruct->ANO_DT_Moto2),
+                          (uint8_t *)&ANO_DT_SendMotoStruct->ANO_DT_Moto2,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendMotoStruct->ANO_DT_Moto3),
+                          (uint8_t *)&ANO_DT_SendMotoStruct->ANO_DT_Moto3,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendMotoStruct->ANO_DT_Moto4),
+                          (uint8_t *)&ANO_DT_SendMotoStruct->ANO_DT_Moto4,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendMotoStruct->ANO_DT_Moto5),
+                          (uint8_t *)&ANO_DT_SendMotoStruct->ANO_DT_Moto5,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendMotoStruct->ANO_DT_Moto6),
+                          (uint8_t *)&ANO_DT_SendMotoStruct->ANO_DT_Moto6,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendMotoStruct->ANO_DT_Moto7),
+                          (uint8_t *)&ANO_DT_SendMotoStruct->ANO_DT_Moto7,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendMotoStruct->ANO_DT_Moto8),
+                          (uint8_t *)&ANO_DT_SendMotoStruct->ANO_DT_Moto8,
+                          databuf);
+    //指针回滚
+    databuf=databuf-(lenth+6-2);
+    //和校验
+    for (uint8_t i = 0; i < lenth+6-1; i++)
+    {
+        sum=sum+*(databuf+i);
+    }
+    *(databuf+lenth+6-1)=sum;
+    //发送数据
+    for (uint8_t i = 0; i < lenth+6; i++)
+    {
+        USART_SendData(USARTx,*(databuf+i));
+        while(USART_GetFlagStatus(USARTx,USART_FLAG_TXE) == RESET);
     }
     //释放内存
     free(databuf);
