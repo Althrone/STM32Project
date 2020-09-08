@@ -276,7 +276,7 @@ void ANO_DT_SendRCData(USART_TypeDef* USARTx,ANO_DT_SendRCDataTypeDef* ANO_DT_Se
  * @param  USARTx: 串口号
  * @param  ANO_DT_SendGPSDataStruct: GPS数据结构体
  **/
-void ANO_DT_SendRCData(USART_TypeDef* USARTx,ANO_DT_SendGPSDataTypeDef* ANO_DT_SendGPSDataStruct)
+void ANO_DT_SendGPSData(USART_TypeDef* USARTx,ANO_DT_SendGPSDataTypeDef* ANO_DT_SendGPSDataStruct)
 {
     uint8_t sum=0;
     //计算数据长度
