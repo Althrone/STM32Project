@@ -18,7 +18,7 @@
 
 /* Exported functions --------------------------------------------------------*/
 
-
+void SysTick_DelayUs(uint32_t microsecond);
 
 #ifdef __cplusplus
 }

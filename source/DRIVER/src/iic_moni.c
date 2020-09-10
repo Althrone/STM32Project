@@ -45,9 +45,9 @@
 *返回值：无
 *备  注: 移植时只需要将delay_us()换成自己的延时即可
 *******************************************************************************/	
-void IIC_Delay(void)
+void IIC_Delay(uint32_t microsecond)
 {
-	delay_us(4);
+	SysTick_DelayUs(microsecond);
 }
 
 /******************************************************************************
@@ -59,26 +59,26 @@ void IIC_Delay(void)
 *******************************************************************************/	
 void IIC_Init(void)
 {			
-  GPIO_InitTypeDef  GPIO_InitStructure;
-	
-  RCC_AHB1PeriphClockCmd(RCC_IIC_SDA, ENABLE);
-	RCC_AHB1PeriphClockCmd(RCC_IIC_SCL, ENABLE);
+    GPIO_InitTypeDef  GPIO_InitStructure;
+        
+    RCC_AHB1PeriphClockCmd(RCC_IIC_SDA, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_IIC_SCL, ENABLE);
 
-  GPIO_InitStructure.GPIO_Pin = IIC_SCL;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT; //选择模式
-  GPIO_InitStructure.GPIO_OType = GPIO_OType_OD; //开漏输出类型  
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
-  GPIO_Init(IIC_SCL_PORT, &GPIO_InitStructure);
-	
-	GPIO_InitStructure.GPIO_Pin = IIC_SDA;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT; //选择模式
-  GPIO_InitStructure.GPIO_OType = GPIO_OType_OD; //开漏输出类型  
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP; //仅仅对配置成输入时有效
-  GPIO_Init(IIC_SDA_PORT, &GPIO_InitStructure);
-	
-	IIC_SCL_H;
-	IIC_SDA_H;
+    GPIO_InitStructure.GPIO_Pin = IIC_SCL;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT; //选择模式
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_OD; //开漏输出类型  
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
+    GPIO_Init(IIC_SCL_PORT, &GPIO_InitStructure);
+        
+    GPIO_InitStructure.GPIO_Pin = IIC_SDA;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT; //选择模式
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_OD; //开漏输出类型  
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP; //仅仅对配置成输入时有效
+    GPIO_Init(IIC_SDA_PORT, &GPIO_InitStructure);
+        
+    IIC_SCL_H;
+    IIC_SDA_H;
 }
 /******************************************************************************
 *函  数：void IIC_Start(void)
@@ -92,9 +92,9 @@ void IIC_Start(void)
 	SDA_OUT(); //sda线输出 
 	IIC_SDA_H;	
 	IIC_SCL_H;
-	delay_us(4);
+	IIC_Delay(4);
  	IIC_SDA_L; //START:when CLK is high,DATA change form high to low 
-	delay_us(4);
+	IIC_Delay(4);
 	IIC_SCL_L; //钳住I2C总线，准备发送或接收数据 
 }
 
@@ -110,10 +110,10 @@ void IIC_Stop(void)
 	SDA_OUT(); //sda线输出
 	IIC_SCL_L;
 	IIC_SDA_L; //STOP:when CLK is high DATA change form low to high
-  delay_us(4);
+    IIC_Delay(4);
 	IIC_SCL_H; 
 	IIC_SDA_H; //发送I2C总线结束信号
-  delay_us(4);							   	
+    IIC_Delay(4);							   	
 }
 
 /******************************************************************************
@@ -129,8 +129,8 @@ uint8_t IIC_WaitAck(void)
 {
 	uint8_t ucErrTime=0;
 	SDA_IN(); //SDA设置为输入  （从机给一个低电平做为应答） 
-	IIC_SDA_H;delay_us(1);	   
-	IIC_SCL_H;delay_us(1);	 
+	IIC_SDA_H;IIC_Delay(1);	   
+	IIC_SCL_H;IIC_Delay(1);	 
 	while(READ_SDA)
 	{
 		ucErrTime++;
@@ -158,9 +158,9 @@ void IIC_Ack(void)
 	IIC_SCL_L;
 	SDA_OUT();
 	IIC_SDA_L;
-	delay_us(1);
+	IIC_Delay(1);
 	IIC_SCL_H;
-	delay_us(2);
+	IIC_Delay(2);
 	IIC_SCL_L;
 }
 
@@ -177,9 +177,9 @@ void IIC_NAck(void)
 	IIC_SCL_L;
 	SDA_OUT();
 	IIC_SDA_H;
-	delay_us(1);
+	IIC_Delay(1);
 	IIC_SCL_H;
-	delay_us(1);
+	IIC_Delay(1);
 	IIC_SCL_L;
 }					 				     
 
@@ -191,24 +191,24 @@ void IIC_NAck(void)
 *备  注：主机往从机发
 *******************************************************************************/		  
 void IIC_SendByte(uint8_t data)
-{                        
+{
     uint8_t t;   
-	  SDA_OUT(); 	    
+    SDA_OUT();
     IIC_SCL_L; //拉低时钟开始数据传输
     for(t=0;t<8;t++)
-    {              
-      if((data&0x80)>>7)
-				IIC_SDA_H;
-			else
-				IIC_SDA_L;
-      data<<=1;
-			delay_us(1);			
-		  IIC_SCL_H;
-		  delay_us(1);
-			IIC_SCL_L;	
-		  delay_us(1);
-    }	 
-} 	 
+    {
+        if((data&0x80)>>7)
+            IIC_SDA_H;
+        else
+            IIC_SDA_L;
+        data<<=1;
+        IIC_Delay(1);
+        IIC_SCL_H;
+        IIC_Delay(1);
+        IIC_SCL_L;
+        IIC_Delay(1);
+    }
+}
    
 /******************************************************************************
 *函  数：uint8_t IIC_ReadByte(uint8_t ack)
@@ -219,21 +219,21 @@ void IIC_SendByte(uint8_t data)
 *******************************************************************************/	
 uint8_t IIC_ReadByte(uint8_t ack)
 {
-	uint8_t i,receive=0;
-	SDA_IN(); //SDA设置为输入模式 等待接收从机返回数据
-  for(i=0;i<8;i++ )
-	{
-     IIC_SCL_L; 
-     delay_us(1);
-		 IIC_SCL_H;
-     receive<<=1;
-     if(READ_SDA)receive++; //从机发送的电平
-	   delay_us(1); 
-   }					 
+    uint8_t i,receive=0;
+    SDA_IN(); //SDA设置为输入模式 等待接收从机返回数据
+    for(i=0;i<8;i++ )
+    {
+        IIC_SCL_L; 
+        IIC_Delay(1);
+        IIC_SCL_H;
+        receive<<=1;
+        if(READ_SDA)receive++; //从机发送的电平
+        IIC_Delay(1); 
+    }
     if(ack)
-        IIC_Ack(); //发送ACK 
+        IIC_Ack(); //发送ACK
     else
-        IIC_NAck(); //发送nACK  
+        IIC_NAck(); //发送nACK
     return receive;
 }
 
@@ -270,32 +270,32 @@ uint8_t IIC_ReadByteFromSlave(uint8_t I2C_Addr,uint8_t reg,uint8_t *buf)
 *函  数：uint8_t IIC_WriteByteFromSlave(uint8_t I2C_Addr,uint8_t addr，uint8_t buf))
 *功　能：写入指定设备 指定寄存器的一个值
 *参  数：I2C_Addr  目标设备地址
-		     reg	     寄存器地址
+		 reg	     寄存器地址
          buf       要写入的数据
 *返回值：1 失败 0成功
 *备  注：无
 *******************************************************************************/ 
 uint8_t IIC_WriteByteToSlave(uint8_t I2C_Addr,uint8_t reg,uint8_t data)
 {
-	IIC_Start();
-	IIC_SendByte(I2C_Addr<<1|0); //发送从机地址
-	if(IIC_WaitAck())
-	{
-		IIC_Stop();
-		return 1; //从机地址写入失败
-	}
-	IIC_SendByte(reg); //发送寄存器地址
-  IIC_WaitAck();	  
-	IIC_SendByte(data); 
-	if(IIC_WaitAck())
-	{
-		IIC_Stop(); 
-		return 1; //数据写入失败
-	}
-	IIC_Stop(); //产生一个停止条件
+    IIC_Start();
+    IIC_SendByte(I2C_Addr<<1|0); //发送从机地址
+    if(IIC_WaitAck())
+    {
+        IIC_Stop();
+        return 1; //从机地址写入失败
+    }
+    IIC_SendByte(reg); //发送寄存器地址
+    IIC_WaitAck();	  
+    IIC_SendByte(data); 
+    if(IIC_WaitAck())
+    {
+        IIC_Stop(); 
+        return 1; //数据写入失败
+    }
+    IIC_Stop(); //产生一个停止条件
 
-  //return 1; //status == 0;
-	return 0;
+    //return 1; //status == 0;
+    return 0;
 }
 
 /******************************************************************************

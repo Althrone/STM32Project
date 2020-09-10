@@ -1,9 +1,8 @@
 #ifndef __IIC_MONI_H
 #define __IIC_MONI_H
 #include "stm32f4xx.h"
-// #include "nvicconfig.h"
 
-// #include "delay.h"
+#include "systick.h"
 #include "usart.h"
 
 #include <stdio.h>
@@ -16,6 +15,8 @@
 *******************************************************************************/
 
 //IIC所有操作函数
+void IIC_Delay(uint32_t microsecond);
+
 void IIC_Init(void);                //初始化IIC的IO口				 
 void IIC_Start(void);			    //发送IIC开始信号
 void IIC_Stop(void);	  	        //发送IIC停止信号
