@@ -7,7 +7,11 @@
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "i2c.h"
+#include "iic_moni.h"
+
+/* Device Address ------------------------------------------------------------*/
+#define MPU6050_AD0_LOW             0x68
+#define MPU6050_AD0_HIGH            0x69
 
 /* Memory Map ----------------------------------------------------------------*/
 #define MPU6050_SELF_TEST_X         0x0D
@@ -105,6 +109,49 @@
 #define MPU6050_WHO_AM_I            0x75
 
 /* Register Bit --------------------------------------------------------------*/
+#define MPU6050_SMPLRT_DIV_(n)                          (n)//Gyroscope Output Rate / (1 + SMPLRT_DIV)
+
+#define MPU6050_CONFIG_DLPF_CFG_SHIFT                   (0)
+#define MPU6050_CONFIG_DLPF_CFG_MASK                    (7<<MPU6050_CONFIG_DLPF_CFG_SHIFT)
+    #define MPU6050_CONFIG_DLPF_CFG_BW_256              (0<<MPU6050_CONFIG_DLPF_CFG_SHIFT)
+    #define MPU6050_CONFIG_DLPF_CFG_BW_188              (1<<MPU6050_CONFIG_DLPF_CFG_SHIFT)
+    #define MPU6050_CONFIG_DLPF_CFG_BW_98               (2<<MPU6050_CONFIG_DLPF_CFG_SHIFT)
+    #define MPU6050_CONFIG_DLPF_CFG_BW_42               (3<<MPU6050_CONFIG_DLPF_CFG_SHIFT)
+    #define MPU6050_CONFIG_DLPF_CFG_BW_20               (4<<MPU6050_CONFIG_DLPF_CFG_SHIFT)
+    #define MPU6050_CONFIG_DLPF_CFG_BW_10               (5<<MPU6050_CONFIG_DLPF_CFG_SHIFT)
+    #define MPU6050_CONFIG_DLPF_CFG_BW_5                (6<<MPU6050_CONFIG_DLPF_CFG_SHIFT)
+    #define MPU6050_CONFIG_DLPF_CFG_DISABLE             (7<<MPU6050_CONFIG_DLPF_CFG_SHIFT)
+#define MPU6050_CONFIG_EXT_SYNC_SET_SHIFT               (3)
+#define MPU6050_CONFIG_EXT_SYNC_SET_MASK                (7<<MPU6050_CONFIG_EXT_SYNC_SET_SHIFT)
+    #define MPU6050_CONFIG_EXT_SYNC_SET_UNINPUT         (0<<MPU6050_CONFIG_EXT_SYNC_SET_SHIFT)
+    #define MPU6050_CONFIG_EXT_SYNC_SET_TEMP_OUT_L      (1<<MPU6050_CONFIG_EXT_SYNC_SET_SHIFT)
+    #define MPU6050_CONFIG_EXT_SYNC_SET_GYRO_XOUT_L     (2<<MPU6050_CONFIG_EXT_SYNC_SET_SHIFT)
+    #define MPU6050_CONFIG_EXT_SYNC_SET_GYRO_YOUT_L     (3<<MPU6050_CONFIG_EXT_SYNC_SET_SHIFT)
+    #define MPU6050_CONFIG_EXT_SYNC_SET_GYRO_ZOUT_L     (4<<MPU6050_CONFIG_EXT_SYNC_SET_SHIFT)
+    #define MPU6050_CONFIG_EXT_SYNC_SET_ACCEL_XOUT_L    (5<<MPU6050_CONFIG_EXT_SYNC_SET_SHIFT)
+    #define MPU6050_CONFIG_EXT_SYNC_SET_ACCEL_YOUT_L    (6<<MPU6050_CONFIG_EXT_SYNC_SET_SHIFT)
+    #define MPU6050_CONFIG_EXT_SYNC_SET_ACCEL_ZOUT_L    (7<<MPU6050_CONFIG_EXT_SYNC_SET_SHIFT)
+
+#define MPU6050_GYRO_CONFIG_FS_SEL_SHIFT                (3)
+#define MPU6050_GYRO_CONFIG_FS_SEL_MASK                 (3<<MPU6050_GYRO_CONFIG_FS_SEL_SHIFT)
+    #define MPU6050_GYRO_CONFIG_FS_SEL_250              (0<<MPU6050_GYRO_CONFIG_FS_SEL_SHIFT)
+    #define MPU6050_GYRO_CONFIG_FS_SEL_500              (1<<MPU6050_GYRO_CONFIG_FS_SEL_SHIFT)
+    #define MPU6050_GYRO_CONFIG_FS_SEL_1000             (2<<MPU6050_GYRO_CONFIG_FS_SEL_SHIFT)
+    #define MPU6050_GYRO_CONFIG_FS_SEL_2000             (3<<MPU6050_GYRO_CONFIG_FS_SEL_SHIFT)
+#define MPU6050_GYRO_CONFIG_ZG_ST                       (1<<5)
+#define MPU6050_GYRO_CONFIG_YG_ST                       (1<<6)
+#define MPU6050_GYRO_CONFIG_XG_ST                       (1<<7)
+
+#define MPU6050_ACCEL_CONFIG_AFS_SEL_SHIFT              (3)
+#define MPU6050_ACCEL_CONFIG_AFS_SEL_MASK               (3<<MPU6050_ACCEL_CONFIG_AFS_SEL_SHIFT)
+    #define MPU6050_ACCEL_CONFIG_AFS_SEL_2G             (0<<MPU6050_ACCEL_CONFIG_AFS_SEL_SHIFT)
+    #define MPU6050_ACCEL_CONFIG_AFS_SEL_4G             (0<<MPU6050_ACCEL_CONFIG_AFS_SEL_SHIFT)
+    #define MPU6050_ACCEL_CONFIG_AFS_SEL_8G             (0<<MPU6050_ACCEL_CONFIG_AFS_SEL_SHIFT)
+    #define MPU6050_ACCEL_CONFIG_AFS_SEL_16G            (0<<MPU6050_ACCEL_CONFIG_AFS_SEL_SHIFT)
+#define MPU6050_ACCEL_CONFIG_ZA_ST                      (1<<5)
+#define MPU6050_ACCEL_CONFIG_YA_ST                      (1<<6)
+#define MPU6050_ACCEL_CONFIG_XA_ST                      (1<<7)
+
 #define MPU6050_PWR_MGMT_1_CLKSEL_SHIFT                 (0)
 #define MPU6050_PWR_MGMT_1_CLKSEL_MASK                  (7<<MPU6050_PWR_MGMT_1_CLKSEL_SHIFT)
     #define MPU6050_PWR_MGMT_1_CLKSEL_INTCLK            (0<<MPU6050_PWR_MGMT_1_CLKSEL_SHIFT)
@@ -137,10 +184,26 @@ typedef struct
     int16_t MPU6050_RawGyroZ;
 }MPU6050_RawDataTypeDef;
 
+typedef struct
+{
+    float_t MPU6050_FloatAccelX;
+    float_t MPU6050_FloatAccelY;
+    float_t MPU6050_FloatAccelZ;
+    float_t MPU6050_FloatTemp;
+    float_t MPU6050_FloatGyroX;
+    float_t MPU6050_FloatGyroY;
+    float_t MPU6050_FloatGyroZ;
+}MPU6050_FloatDataTypeDef;
+
+
 /* Exported functions --------------------------------------------------------*/ 
 
 void MPU6050_Init(void);
-void MPU6050_RawAccelRead(int16_t* );
+void MPU6050_RawAccelRead(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct);
+void MPU6050_AllRawDataRead(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct);
+
+void MPU6050_RawData2FloatData(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct,
+                               MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct);
 
 
 #ifdef __cplusplus

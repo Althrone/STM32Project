@@ -18,6 +18,8 @@ int main(void)
     
     Motor_Init();
 
+    MPU6050_Init();
+
     Motor_SetSpeed();
 
     ANO_DT_SendVer(USART1,&ANO_DT_SendVerStruct);
@@ -26,6 +28,7 @@ int main(void)
 
     while (1)
     {
+        
         // if(USART_GetFlagStatus(USART1,USART_FLAG_TXE)!=RESET)
         // {
         //     USART_SendData(USART1,0xAA);

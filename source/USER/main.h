@@ -20,6 +20,7 @@
 
 #include "rgbled.h"
 #include "motor.h"
+#include "mpu6050.h"
 
 #ifdef __cplusplus
 }

@@ -302,29 +302,29 @@ uint8_t IIC_WriteByteToSlave(uint8_t I2C_Addr,uint8_t reg,uint8_t data)
 *函  数：uint8_t IICreadBytes(uint8_t dev, uint8_t reg, uint8_t length, uint8_t *data)
 *功　能：读取指定设备 指定寄存器的 length个值
 *参  数：dev     目标设备地址
-		     reg	   寄存器地址
+		 reg	   寄存器地址
          length  要读的字节数
-		     *data   读出的数据将要存放的指针
+		 *data   读出的数据将要存放的指针
 *返回值：1成功 0失败
 *备  注：无
 *******************************************************************************/ 
 uint8_t IIC_ReadMultByteFromSlave(uint8_t I2C_Addr, uint8_t reg, uint8_t length, uint8_t *data)
 {
-  uint8_t count = 0;
-	uint8_t temp;
-	IIC_Start();
-	IIC_SendByte(I2C_Addr<<1|0); //发送从机地址
-	if(IIC_WaitAck())
-	{
-		IIC_Stop(); 
-		return 1; //从机地址写入失败
-	}
-	IIC_SendByte(reg); //发送寄存器地址
-  IIC_WaitAck();	  
-	IIC_Start();
-	IIC_SendByte(I2C_Addr<<1|1); //进入接收模式	
-	IIC_WaitAck();
-  for(count=0;count<length;count++)
+    uint8_t count = 0;
+    uint8_t temp;
+    IIC_Start();
+    IIC_SendByte(I2C_Addr<<1|0); //发送从机地址
+    if(IIC_WaitAck())
+    {
+        IIC_Stop(); 
+        return 1; //从机地址写入失败
+    }
+    IIC_SendByte(reg); //发送寄存器地址
+    IIC_WaitAck();	  
+    IIC_Start();
+    IIC_SendByte(I2C_Addr<<1|1); //进入接收模式	
+    IIC_WaitAck();
+    for(count=0;count<length;count++)
 	{
 		if(count!=(length-1))
 		temp = IIC_ReadByte(1); //带ACK的读数据
@@ -335,7 +335,7 @@ uint8_t IIC_ReadMultByteFromSlave(uint8_t I2C_Addr, uint8_t reg, uint8_t length,
 	}
     IIC_Stop(); //产生一个停止条件
     //return count;
-	 return 0;
+	return 0;
 }
 
 /******************************************************************************
