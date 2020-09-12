@@ -6,7 +6,7 @@
  * @brief   使用匿名飞控V6协议
  **/
 
-#define S_ADDR  ANO_DT_OtherHDW
+#define S_ADDR  ANO_DT_ToKon
 #define D_ADDR  ANO_DT_Computer
 
 #include "ANO_DT.h"

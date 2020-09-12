@@ -37,7 +37,7 @@ void MPU6050_AllRawDataRead(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct)
     //抽取数据
     IIC_ReadMultByteFromSlave(MPU6050_AD0_LOW,MPU6050_ACCEL_XOUT_H,14,temp);
     //转化成有符号整型
-    MPU6050_RawDataStruct->MPU6050_RawAccelX=(int16_t)((temp[0]<<8)+temp[1]);
+    MPU6050_RawDataStruct->MPU6050_RawAccelX=((int16_t)temp[0]<<8)+temp[1];
     MPU6050_RawDataStruct->MPU6050_RawAccelY=(int16_t)((temp[2]<<8)+temp[3]);
     MPU6050_RawDataStruct->MPU6050_RawAccelZ=(int16_t)((temp[4]<<8)+temp[5]);
     MPU6050_RawDataStruct->MPU6050_RawTemp=(int16_t)((temp[6]<<8)+temp[7]);
@@ -51,7 +51,6 @@ void MPU6050_AllRawDataRead(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct)
  * @param  MPU6050_RawDataStruct: 原始数据结构体
  * @param  MPU6050_FloatDataStruct: 真值结构体
  **/
-
 void MPU6050_RawData2FloatData(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct,
                                MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct)
 {
