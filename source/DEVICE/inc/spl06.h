@@ -79,6 +79,7 @@
     #define SPL06_TMP_CFG_TMP_RATE_32   (5<<SPL06_TMP_CFG_TMP_RATE_SHIFT)
     #define SPL06_TMP_CFG_TMP_RATE_64   (6<<SPL06_TMP_CFG_TMP_RATE_SHIFT)
     #define SPL06_TMP_CFG_TMP_RATE_128  (7<<SPL06_TMP_CFG_TMP_RATE_SHIFT)
+#define SPL06_TMP_CFG_TMP_EX            (1<<7)
 
 #define SPL06_MEAS_CFG_MEAS_CTRL_SHIFT          (0)
 #define SPL06_MEAS_CFG_MEAS_CTRL_MASK           (7<<SPL06_MEAS_CFG_MEAS_CTRL_SHIFT)
@@ -108,7 +109,7 @@
 #define SPL06_FIFO_STS_FIFO_EMPTY               (1<<0)
 #define SPL06_FIFO_STS_FIFO_FULL                (1<<1)
 
-#define SPL06_RESET_SOFT_RST                    (0x1001<<0)
+#define SPL06_RESET_SOFT_RST                    (0b1001<<0)
 #define SPL06_RESET_FIFO_FLUSH                  (1<<7)
 
 #define SPL06_ID_REV_ID                         ()
@@ -119,6 +120,18 @@
 /** 
   * @brief  I2C Init structure definition  
   */
+
+typedef enum
+{
+    SPL06_Single    =524288,
+    SPL06_2Times    =1572864,
+    SPL06_4Times    =3670016,
+    SPL06_8Times    =7864320,
+    SPL06_16Times   =253952,
+    SPL06_32Times   =516096,
+    SPL06_64Times   =1040384,
+    SPL06_128Times  =2088960,
+}SPL06_CompScaleFactorsTypeDef;
 
 typedef struct
 {
@@ -148,6 +161,11 @@ typedef struct
 
 
 /* Exported functions --------------------------------------------------------*/ 
+void SPL06_Init(void);
+void SPL06_AllRawDataRead(SPL06_RawDataTypeDef* SPL06_RawDataStruct);
+void SPL06_RawData2FloatData(SPL06_RawDataTypeDef* SPL06_RawDataStruct,
+                             SPL06_FloatDataTypeDef* SPL06_FloatDataStruct);
+
 
 
 #ifdef __cplusplus

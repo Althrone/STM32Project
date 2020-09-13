@@ -21,6 +21,7 @@
 #include "rgbled.h"
 #include "motor.h"
 #include "mpu6050.h"
+#include "spl06.h"
 
 #ifdef __cplusplus
 }

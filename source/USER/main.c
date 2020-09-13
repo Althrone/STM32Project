@@ -20,6 +20,7 @@ int main(void)
     Motor_Init();
 
     MPU6050_Init();
+    SPL06_Init();
 
     Motor_SetSpeed();
 
@@ -28,9 +29,13 @@ int main(void)
     // USART_SendData(USART1,0xAA);
     ANO_DT_SendSenserTypeDef ANO_DT_SendSenserStruct;
     MPU6050_RawDataTypeDef MPU6050_RawDataStruct;
+    SPL06_RawDataTypeDef SPL06_RawDataStruct;
+    SPL06_FloatDataTypeDef SPL06_FloatDataStruct;
 
     while (1)
     {
+        SPL06_AllRawDataRead(&SPL06_RawDataStruct);
+        SPL06_RawData2FloatData(&SPL06_RawDataStruct,&SPL06_FloatDataStruct);
         MPU6050_AllRawDataRead(&MPU6050_RawDataStruct);
         ANO_DT_SendSenserStruct.ANO_DT_AccX=MPU6050_RawDataStruct.MPU6050_RawAccelX;
         ANO_DT_SendSenserStruct.ANO_DT_AccY=MPU6050_RawDataStruct.MPU6050_RawAccelY;

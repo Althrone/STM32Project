@@ -10,6 +10,7 @@ void SPL06_Init(void)
     uint8_t temp[18];
     //重置所有寄存器
     IIC_WriteByteToSlave(SPL06_AD0_HIGH,SPL06_RESET,SPL06_RESET_SOFT_RST);
+    
     IIC_ReadMultByteFromSlave(SPL06_AD0_HIGH,SPL06_COEF,18,temp);//获取系数
     //系数预处理
     SPL06_PRMStruct.c0=((int16_t)temp[0]<<4)+(temp[1]>>4);
@@ -29,10 +30,15 @@ void SPL06_Init(void)
     SPL06_PRMStruct.c20=((int16_t)temp[12]<<8)+temp[13];
     SPL06_PRMStruct.c21=((int16_t)temp[14]<<8)+temp[15];
     SPL06_PRMStruct.c30=((int16_t)temp[16]<<8)+temp[17];
-    //计算补偿压力值
-
-    //计算补偿温度值
     //设置为运动模式
+    IIC_WriteByteToSlave(SPL06_AD0_HIGH,SPL06_PRS_CFG,SPL06_PRS_CFG_PM_RATE_4|
+                                                      SPL06_PRS_CFG_PM_PRC_64);//0x26
+    IIC_WriteByteToSlave(SPL06_AD0_HIGH,SPL06_TMP_CFG,SPL06_TMP_CFG_TMP_EX|
+                                                      SPL06_TMP_CFG_TMP_RATE_4|
+                                                      SPL06_TMP_CFG_TMP_PRC_1);//0xA0
+    IIC_WriteByteToSlave(SPL06_AD0_HIGH,SPL06_CFG_REG,SPL06_CFG_REG_P_SHIFT);
+    //对气压和温度进行连续测量
+    IIC_WriteByteToSlave(SPL06_AD0_HIGH,SPL06_MEAS_CFG,SPL06_MEAS_CFG_MEAS_CTRL_BGPRSTMP);
 }
 
 /**
@@ -61,5 +67,18 @@ void SPL06_AllRawDataRead(SPL06_RawDataTypeDef* SPL06_RawDataStruct)
 void SPL06_RawData2FloatData(SPL06_RawDataTypeDef* SPL06_RawDataStruct,
                              SPL06_FloatDataTypeDef* SPL06_FloatDataStruct)
 {
+    float_t Praw_sc,Traw_sc;
+    uint32_t kP,kT;
+    kP=SPL06_64Times;
+    kT=SPL06_Single;
+    Praw_sc=SPL06_RawDataStruct->SPL06_RawPres/kP;
+    Traw_sc=SPL06_RawDataStruct->SPL06_RawTemp/kT;
+    //
+    SPL06_FloatDataStruct->SPL06_FloatPres=
+                       SPL06_PRMStruct.c00+
+                       Praw_sc*(SPL06_PRMStruct.c10+Praw_sc*(SPL06_PRMStruct.c20+Praw_sc*SPL06_PRMStruct.c30))+
+                       Traw_sc*SPL06_PRMStruct.c10+
+                       Traw_sc*Praw_sc*(SPL06_PRMStruct.c11+Praw_sc*SPL06_PRMStruct.c21);
+    SPL06_FloatDataStruct->SPL06_FloatTemp=SPL06_PRMStruct.c0*0.5+SPL06_PRMStruct.c1*Traw_sc;
     //
 }

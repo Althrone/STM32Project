@@ -100,7 +100,7 @@ LDFLAGS = $(MCU) -T$(LDSCRIPT) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--
 #######################################
 #OpenOCD
 #######################################
-OCD_LINK_FILE = stlink-v2.cfg	#烧录器配置文件，用于普通买到的烧录器
+OCD_LINK_FILE = stlink-v2.cfg#烧录器配置文件，用于普通买到的烧录器
 # OCD_LINK_FILE = stlink-v2-1.cfg	#烧录器配置文件，用于stm32f4discovery
 OCD_CHIP_FILE = stm32f4x.cfg	#芯片配置文件
 

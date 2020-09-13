@@ -348,6 +348,14 @@ uint8_t IIC_ReadMultByteFromSlave(uint8_t I2C_Addr, uint8_t reg, uint8_t length,
 *返回值：1成功 0失败
 *备  注：无
 *******************************************************************************/ 
+/**
+ * @brief  将多个字节写入指定设备 指定寄存器
+ * @param  I2C_Addr: 目标设备地址
+ * @param  reg: 寄存器地址
+ * @param  length: 要写的字节数
+ * @param  data: 要写入的数据将要存放的指针
+ * @retval 1成功 0失败
+ **/
 uint8_t IIC_WriteMultByteToSlave(uint8_t I2C_Addr, uint8_t reg, uint8_t length, uint8_t* data)
 {
   
