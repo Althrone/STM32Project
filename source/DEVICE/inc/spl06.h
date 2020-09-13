@@ -165,6 +165,7 @@ void SPL06_Init(void);
 void SPL06_AllRawDataRead(SPL06_RawDataTypeDef* SPL06_RawDataStruct);
 void SPL06_RawData2FloatData(SPL06_RawDataTypeDef* SPL06_RawDataStruct,
                              SPL06_FloatDataTypeDef* SPL06_FloatDataStruct);
+void SPL06_IDRead(uint8_t* data);
 
 
 

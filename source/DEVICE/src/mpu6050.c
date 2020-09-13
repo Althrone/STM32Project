@@ -18,7 +18,8 @@ void MPU6050_Init(void)
     IIC_WriteByteToSlave(MPU6050_AD0_LOW,MPU6050_CONFIG,MPU6050_CONFIG_DLPF_CFG_BW_20);//Gyroscope Output Rate=1kHz
     //设置采样率
     IIC_WriteByteToSlave(MPU6050_AD0_LOW,MPU6050_SMPLRT_DIV,MPU6050_SMPLRT_DIV_(0));//采样频率1kHz
-    //使能6050
+    //唤醒6050
+    IIC_WriteByteToSlave(MPU6050_AD0_LOW,MPU6050_PWR_MGMT_1,0x00);
 }
 
 void MPU6050_RawAccelRead(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct)
@@ -38,12 +39,12 @@ void MPU6050_AllRawDataRead(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct)
     IIC_ReadMultByteFromSlave(MPU6050_AD0_LOW,MPU6050_ACCEL_XOUT_H,14,temp);
     //转化成有符号整型
     MPU6050_RawDataStruct->MPU6050_RawAccelX=((int16_t)temp[0]<<8)+temp[1];
-    MPU6050_RawDataStruct->MPU6050_RawAccelY=(int16_t)((temp[2]<<8)+temp[3]);
-    MPU6050_RawDataStruct->MPU6050_RawAccelZ=(int16_t)((temp[4]<<8)+temp[5]);
-    MPU6050_RawDataStruct->MPU6050_RawTemp=(int16_t)((temp[6]<<8)+temp[7]);
-    MPU6050_RawDataStruct->MPU6050_RawGyroX=(int16_t)((temp[8]<<8)+temp[9]);
-    MPU6050_RawDataStruct->MPU6050_RawGyroY=(int16_t)((temp[10]<<8)+temp[11]);
-    MPU6050_RawDataStruct->MPU6050_RawGyroZ=(int16_t)((temp[12]<<8)+temp[13]);
+    MPU6050_RawDataStruct->MPU6050_RawAccelY=((int16_t)temp[2]<<8)+temp[3];
+    MPU6050_RawDataStruct->MPU6050_RawAccelZ=((int16_t)temp[4]<<8)+temp[5];
+    MPU6050_RawDataStruct->MPU6050_RawTemp=((int16_t)temp[6]<<8)+temp[7];
+    MPU6050_RawDataStruct->MPU6050_RawGyroX=((int16_t)temp[8]<<8)+temp[9];
+    MPU6050_RawDataStruct->MPU6050_RawGyroY=((int16_t)temp[10]<<8)+temp[11];
+    MPU6050_RawDataStruct->MPU6050_RawGyroZ=((int16_t)temp[12]<<8)+temp[13];
 }
 
 /**
@@ -63,4 +64,9 @@ void MPU6050_RawData2FloatData(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct,
     MPU6050_FloatDataStruct->MPU6050_FloatGyroX=Gyro_Full_Scale*MPU6050_RawDataStruct->MPU6050_RawGyroX/32767.0f;
     MPU6050_FloatDataStruct->MPU6050_FloatGyroY=Gyro_Full_Scale*MPU6050_RawDataStruct->MPU6050_RawGyroY/32767.0f;
     MPU6050_FloatDataStruct->MPU6050_FloatGyroZ=Gyro_Full_Scale*MPU6050_RawDataStruct->MPU6050_RawGyroZ/32767.0f;
+}
+
+void MPU6050_IDRead(uint8_t* data)
+{
+    IIC_ReadByteFromSlave(MPU6050_AD0_LOW,MPU6050_WHO_AM_I,data);
 }

@@ -205,6 +205,7 @@ void MPU6050_AllRawDataRead(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct);
 void MPU6050_RawData2FloatData(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct,
                                MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct);
 
+void MPU6050_IDRead(uint8_t* data);
 
 #ifdef __cplusplus
 }

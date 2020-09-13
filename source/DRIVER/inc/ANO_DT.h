@@ -126,6 +126,14 @@ typedef struct
     uint16_t ANO_DT_Moto8;
 }ANO_DT_SendMotoTypeDef;
 
+typedef struct
+{
+    int32_t ANO_DT_ALT_BAR;
+    int32_t ANO_DT_ALT_ADD;
+    int16_t ANO_DT_SEN_TMP;
+}ANO_DT_SendSenser2TypeDef;
+
+
 /* Exported functions --------------------------------------------------------*/ 
 
 uint8_t* ANO_DT_SplitMember(uint8_t memberlenth,uint8_t* memberhead,uint8_t* databuf);
@@ -137,6 +145,8 @@ void ANO_DT_SendRCData(USART_TypeDef* USARTx,ANO_DT_SendRCDataTypeDef* ANO_DT_Se
 void ANO_DT_SendGPSData(USART_TypeDef* USARTx,ANO_DT_SendGPSDataTypeDef* ANO_DT_SendGPSDataStruct);
 void ANO_DT_SendPower(USART_TypeDef* USARTx,ANO_DT_SendPowerTypeDef* ANO_DT_SendPowerStruct);
 void ANO_DT_SendMoto(USART_TypeDef* USARTx,ANO_DT_SendMotoTypeDef* ANO_DT_SendMotoStruct);
+void ANO_DT_SendSenser2(USART_TypeDef* USARTx,ANO_DT_SendSenser2TypeDef* ANO_DT_SendSenser2Struct);
+
 
 
 

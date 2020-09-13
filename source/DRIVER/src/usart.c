@@ -53,7 +53,7 @@ void USART1_Init(void)
     // NVIC_Init(&NVIC_InitStructure);
 
     //开USART1中断
-    USART_ITConfig(USART1,USART_IT_TXE,ENABLE);
+    // USART_ITConfig(USART1,USART_IT_TXE,ENABLE);
     //USART1使能
     USART_Cmd(USART1,ENABLE);
 }

@@ -10,7 +10,7 @@ void SPL06_Init(void)
     uint8_t temp[18];
     //重置所有寄存器
     IIC_WriteByteToSlave(SPL06_AD0_HIGH,SPL06_RESET,SPL06_RESET_SOFT_RST);
-    
+    SysTick_DelayMs(40);
     IIC_ReadMultByteFromSlave(SPL06_AD0_HIGH,SPL06_COEF,18,temp);//获取系数
     //系数预处理
     SPL06_PRMStruct.c0=((int16_t)temp[0]<<4)+(temp[1]>>4);
@@ -81,4 +81,9 @@ void SPL06_RawData2FloatData(SPL06_RawDataTypeDef* SPL06_RawDataStruct,
                        Traw_sc*Praw_sc*(SPL06_PRMStruct.c11+Praw_sc*SPL06_PRMStruct.c21);
     SPL06_FloatDataStruct->SPL06_FloatTemp=SPL06_PRMStruct.c0*0.5+SPL06_PRMStruct.c1*Traw_sc;
     //
+}
+
+void SPL06_IDRead(uint8_t* data)
+{
+    IIC_ReadByteFromSlave(SPL06_AD0_HIGH,SPL06_ID,data);
 }

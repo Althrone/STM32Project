@@ -434,3 +434,51 @@ void ANO_DT_SendMoto(USART_TypeDef* USARTx,ANO_DT_SendMotoTypeDef* ANO_DT_SendMo
     //释放内存
     free(databuf);
 }
+
+/**
+ * @brief  发送2号传感器数据
+ * @param  USARTx: 串口号
+ * @param  ANO_DT_SendSenser2Struct: 2号传感器数据结构体
+ **/
+void ANO_DT_SendSenser2(USART_TypeDef* USARTx,ANO_DT_SendSenser2TypeDef* ANO_DT_SendSenser2Struct)
+{
+    uint8_t sum=0;
+    //计算数据长度
+    uint8_t lenth=sizeof(ANO_DT_SendSenser2Struct->ANO_DT_ALT_BAR)+
+                  sizeof(ANO_DT_SendSenser2Struct->ANO_DT_ALT_ADD)+
+                  sizeof(ANO_DT_SendSenser2Struct->ANO_DT_SEN_TMP);
+    //分派内存空间
+    uint8_t* databuf=(uint8_t*)malloc(lenth+6);
+    //填写其他帧
+    *(databuf)=0xAA;                //帧头固定
+    *(++databuf)=S_ADDR;            //在定义里面改
+    *(++databuf)=D_ADDR;            //在定义里面改
+    *(++databuf)=ANO_DT_Moto;       //功能字
+    *(++databuf)=lenth;             //有效数据长度
+    //数据填充
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendSenser2Struct->ANO_DT_ALT_BAR),
+                          (uint8_t *)&ANO_DT_SendSenser2Struct->ANO_DT_ALT_BAR,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendSenser2Struct->ANO_DT_ALT_ADD),
+                          (uint8_t *)&ANO_DT_SendSenser2Struct->ANO_DT_ALT_ADD,
+                          databuf);
+    databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendSenser2Struct->ANO_DT_SEN_TMP),
+                          (uint8_t *)&ANO_DT_SendSenser2Struct->ANO_DT_SEN_TMP,
+                          databuf);
+    //指针回滚
+    databuf=databuf-(lenth+6-2);
+    //和校验
+    for (uint8_t i = 0; i < lenth+6-1; i++)
+    {
+        sum=sum+*(databuf+i);
+    }
+    *(databuf+lenth+6-1)=sum;
+    //发送数据
+    for (uint8_t i = 0; i < lenth+6; i++)
+    {
+        USART_SendData(USARTx,*(databuf+i));
+        while(USART_GetFlagStatus(USARTx,USART_FLAG_TXE) == RESET);
+    }
+    //释放内存
+    free(databuf);
+}
