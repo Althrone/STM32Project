@@ -97,6 +97,7 @@ void TIM6_Init(void)
 /**
  * 定时1ms，然后通过获取当前值来细化时间
  * 用于精确定时，可细化到1us
+ * 目前用于遥控
  **/
 void TIM7_Init(void)
 {
@@ -115,9 +116,9 @@ void TIM7_Init(void)
 	NVIC_InitStructure.NVIC_IRQChannelCmd=ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 
-    //开TIM6中断
+    //开TIM7中断
     TIM_ITConfig(TIM7,TIM_IT_Update,ENABLE);
-    //TIM6使能
+    //TIM7使能
     TIM_Cmd(TIM7,ENABLE);
 }
 

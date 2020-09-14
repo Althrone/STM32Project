@@ -58,6 +58,14 @@
 
 typedef struct
 {
+    int8_t ASAX;
+    int8_t ASAY;
+    int8_t ASAZ;
+}AK8975_PRMTypeDef;
+
+
+typedef struct
+{
     int16_t AK8975_RawMagX;
     int16_t AK8975_RawMagY;
     int16_t AK8975_RawMagZ;
@@ -74,6 +82,9 @@ typedef struct
 
 void AK8975_Init(void);
 void AK8975_AllRawDataRead(AK8975_RawDataTypeDef* AK8975_RawDataStruct);
+void AK8975_RawData2FloatData(AK8975_RawDataTypeDef* AK8975_RawDataStruct,
+                              AK8975_FloatDataTypeDef* AK8975_FloatDataStruct);
+
 void AK8975_IDRead(uint8_t* data);
 
 #ifdef __cplusplus

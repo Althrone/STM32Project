@@ -1,7 +1,6 @@
 #include "main.h"
 
 
-
 int main(void)
 {
     // I2C1_Init();//硬件iic
@@ -11,6 +10,7 @@ int main(void)
     IIC_Init();
     USART1_Init();
     // Motor_Init();
+    PPM_Init();
 
     MPU6050_Init();
     SPL06_Init();
@@ -27,6 +27,7 @@ int main(void)
     SPL06_FloatDataTypeDef SPL06_FloatDataStruct;
 
     AK8975_RawDataTypeDef AK8975_RawDataStruct;
+    AK8975_FloatDataTypeDef AK8975_FloatDataStruct;
 
     while (1)
     {
@@ -47,5 +48,6 @@ int main(void)
 
         MPU6050_RawData2FloatData(&MPU6050_RawDataStruct,&MPU6050_FloatDataStruct);
         SPL06_RawData2FloatData(&SPL06_RawDataStruct,&SPL06_FloatDataStruct);
+        AK8975_RawData2FloatData(&AK8975_RawDataStruct,&AK8975_FloatDataStruct);
     }
 }

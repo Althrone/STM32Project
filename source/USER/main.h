@@ -15,6 +15,7 @@
 #include "usart.h"
 #include "tim.h"
 #include "iic_moni.h"
+#include "ppm.h"
 
 #include "ANO_DT.h"
 
