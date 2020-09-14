@@ -6,7 +6,7 @@ PPM_DemodFlagTypeDef PPM_DemodFlagStruct={0,0};
 PPM_RawDataTypeDef PPM_RawDataStruct;
 
 /**
- * PPM-TIM1_CH3N-PE12
+ * PPM-PE12
  * 接收机发出的PPM信号精度为20us，根据香农定理，采样频率应该是它的两倍，
  * 也就是10us
  **/
@@ -27,22 +27,30 @@ void PPM_Init(void)
 
     //初始化中断线12
     EXTI_InitTypeDef EXTI_InitStruct;
-    EXTI_InitStruct.EXTI_Line = EXTI_Line12;
-    EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
-    EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising;//上升沿触发中断
-    EXTI_InitStruct.EXTI_LineCmd	= ENABLE;
+    EXTI_InitStruct.EXTI_Line=EXTI_Line12;
+    EXTI_InitStruct.EXTI_Mode=EXTI_Mode_Interrupt;
+    EXTI_InitStruct.EXTI_Trigger=EXTI_Trigger_Rising;//上升沿触发中断
+    EXTI_InitStruct.EXTI_LineCmd=ENABLE;
     EXTI_Init(&EXTI_InitStruct);
 
     //PPM接收机外部中断
     //定义NVIC初始化结构体
     NVIC_InitTypeDef NVIC_InitStruct;
-    NVIC_InitStruct.NVIC_IRQChannel = EXTI15_10_IRQn;
-    NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority =2;
-    NVIC_InitStruct.NVIC_IRQChannelSubPriority =1;
-    NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_InitStruct.NVIC_IRQChannel=EXTI15_10_IRQn;
+    NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority=2;
+    NVIC_InitStruct.NVIC_IRQChannelSubPriority=1;
+    NVIC_InitStruct.NVIC_IRQChannelCmd=ENABLE;
     NVIC_Init(&NVIC_InitStruct);
 
     TIM7_Init();
+}
+
+void PPM_GetRCData(ANO_DT_SendRCDataTypeDef* ANO_DT_SendRCDataStruct)
+{
+    ANO_DT_SendRCDataStruct->ANO_DT_RCRoll=PPM_RawDataStruct.PPM_RawCh1;
+    ANO_DT_SendRCDataStruct->ANO_DT_RCPitch=PPM_RawDataStruct.PPM_RawCh2;
+    ANO_DT_SendRCDataStruct->ANO_DT_RCThrottle=PPM_RawDataStruct.PPM_RawCh3;
+    ANO_DT_SendRCDataStruct->ANO_DT_RCYaw=PPM_RawDataStruct.PPM_RawCh4;
 }
 
 /**

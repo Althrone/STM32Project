@@ -13,6 +13,7 @@
 #include "stm32f4xx.h"
 
 #include "tim.h"
+#include "ANO_DT.h"
 
 /* Exported types ------------------------------------------------------------*/
 
@@ -60,6 +61,7 @@ typedef struct
 /* Exported functions --------------------------------------------------------*/
 
 void PPM_Init(void);
+void PPM_GetRCData(ANO_DT_SendRCDataTypeDef* ANO_DT_SendRCDataStruct);
 
 #ifdef __cplusplus
 }
