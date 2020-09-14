@@ -22,11 +22,6 @@ void MPU6050_Init(void)
     IIC_WriteByteToSlave(MPU6050_AD0_LOW,MPU6050_PWR_MGMT_1,0x00);
 }
 
-void MPU6050_RawAccelRead(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct)
-{
-
-}
-
 /**
  * @brief  读取6050的加速度，温度，角速度数据
  * @param  MPU6050_RawDataStruct: 读取到的数据提取到这个结构体

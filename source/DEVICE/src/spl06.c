@@ -71,8 +71,8 @@ void SPL06_RawData2FloatData(SPL06_RawDataTypeDef* SPL06_RawDataStruct,
     uint32_t kP,kT;
     kP=SPL06_64Times;
     kT=SPL06_Single;
-    Praw_sc=SPL06_RawDataStruct->SPL06_RawPres/kP;
-    Traw_sc=SPL06_RawDataStruct->SPL06_RawTemp/kT;
+    Praw_sc=(float_t)SPL06_RawDataStruct->SPL06_RawPres/kP;
+    Traw_sc=(float_t)SPL06_RawDataStruct->SPL06_RawTemp/kT;
     //
     SPL06_FloatDataStruct->SPL06_FloatPres=
                        SPL06_PRMStruct.c00+

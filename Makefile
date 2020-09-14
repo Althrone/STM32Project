@@ -156,6 +156,9 @@ $(BUILD_DIR)/%.o: %.s
 $(BUILD_DIR)/%.o: %.c
 	$(CC) -c $(CFLAGS) -g -Wall $< -o $@
 
+# build/spl06.s: source/DEVICE/src/spl06.c
+# $(CC) -S $(CFLAGS) -g -Wall $< -o $@
+
 vpath %.s $(sort $(dir $(ASM_SOURCES)))
 
 startup: $(ASM_OBJECTS)

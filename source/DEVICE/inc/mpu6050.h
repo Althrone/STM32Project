@@ -166,7 +166,6 @@
 #define MPU6050_PWR_MGMT_1_SLEEP                        (1<<6)
 #define MPU6050_PWR_MGMT_1_DEVICE_RESET                 (1<<7)
 
-
 /* Exported types ------------------------------------------------------------*/
 
 /** 
@@ -194,7 +193,6 @@ typedef struct
     float_t MPU6050_FloatGyroY;
     float_t MPU6050_FloatGyroZ;
 }MPU6050_FloatDataTypeDef;
-
 
 /* Exported functions --------------------------------------------------------*/ 
 

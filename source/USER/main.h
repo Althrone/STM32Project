@@ -11,7 +11,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx.h"
-
+//基础通信协议
 #include "usart.h"
 #include "tim.h"
 #include "iic_moni.h"
@@ -20,8 +20,10 @@
 
 #include "rgbled.h"
 #include "motor.h"
+//传感器
 #include "mpu6050.h"
 #include "spl06.h"
+#include "ak8975.h"
 
 #ifdef __cplusplus
 }
