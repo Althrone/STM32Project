@@ -20,6 +20,7 @@ int main(void)
 
     ANO_DT_SendSenserTypeDef ANO_DT_SendSenserStruct;//发送到上位机的传感器数据结构体
     ANO_DT_SendRCDataTypeDef ANO_DT_SendRCDataStruct;//发送到上位机的遥控数据
+    ANO_DT_SendStatusTypeDef ANO_DT_SendStatusStruct;//无人机当前姿态，这里我只是随便塞两个数进去看看
 
     MPU6050_RawDataTypeDef MPU6050_RawDataStruct;
     MPU6050_FloatDataTypeDef MPU6050_FloatDataStruct;
@@ -44,6 +45,8 @@ int main(void)
 
         PPM_GetRCData(&ANO_DT_SendRCDataStruct);
 
+        ATT_RawData(&MPU6050_FloatDataStruct,&ANO_DT_SendStatusStruct);
+
         ANO_DT_SendSenserStruct.ANO_DT_AccX=MPU6050_RawDataStruct.MPU6050_RawAccelX;
         ANO_DT_SendSenserStruct.ANO_DT_AccY=MPU6050_RawDataStruct.MPU6050_RawAccelY;
         ANO_DT_SendSenserStruct.ANO_DT_AccZ=MPU6050_RawDataStruct.MPU6050_RawAccelZ;
@@ -56,6 +59,7 @@ int main(void)
         ANO_DT_SendSenser(USART1,&ANO_DT_SendSenserStruct);
 
         ANO_DT_SendRCData(USART1,&ANO_DT_SendRCDataStruct);
+        ANO_DT_SendStatus(USART1,&ANO_DT_SendStatusStruct);
 
         MPU6050_RawData2FloatData(&MPU6050_RawDataStruct,&MPU6050_FloatDataStruct);
         AK8975_RawData2FloatData(&AK8975_RawDataStruct,&AK8975_FloatDataStruct);

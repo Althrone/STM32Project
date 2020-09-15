@@ -13,7 +13,11 @@ DEVICE_C_SOURCES = $(wildcard source/DEVICE/src/*.c)
 DRIVER_C_SOURCES = $(wildcard source/DRIVER/src/*.c)
 USER_C_SOURCES = $(wildcard source/USER/*.c)
 
-C_SOURCES = $(STDPERIPH_C_SOURCES) $(DEVICE_C_SOURCES) $(DRIVER_C_SOURCES) $(USER_C_SOURCES)
+MATH_C_SOURCES = $(wildcard source/MATH/src/*.c)
+CONTROL_C_SOURCES = $(wildcard source/CONTROL/src/*.c)
+
+C_SOURCES = $(STDPERIPH_C_SOURCES) $(DEVICE_C_SOURCES) $(DRIVER_C_SOURCES) $(USER_C_SOURCES) \
+$(MATH_C_SOURCES) $(CONTROL_C_SOURCES)
 
 
 # ASM sources
@@ -73,7 +77,9 @@ C_INCLUDES = \
 -Isource/CORE \
 -Isource/FWLIB/inc \
 -Isource/DRIVER/inc \
--Isource/DEVICE/inc
+-Isource/DEVICE/inc \
+-Isource/CONTROL/inc \
+-Isource/MATH/inc
 
 
 # compile gcc flags
@@ -85,12 +91,17 @@ CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT)
 #######################################
 # LDFLAGS
 #######################################
+
+# LIBS = -lc -lm
+# LIBDIR = \
+# -Lxxxxxx
+
 # link script  链接配置文件
 LDSCRIPT = source/CORE/STM32F417IG_FLASH.ld
 
 LDGROUP = -Wl,--start-group -lc -lm -Wl,--end-group
 
-LDFLAGS = $(MCU) -T$(LDSCRIPT) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
+LDFLAGS = $(MCU) -T$(LDSCRIPT) $(LIBDIR) $(LIBS)
 
 #######################################
 # SZFLAGS
@@ -118,7 +129,11 @@ DEVICE_OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(DEVICE_C_SOURCES:.c=.o)))
 DRIVER_OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(DRIVER_C_SOURCES:.c=.o)))
 USER_OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(USER_C_SOURCES:.c=.o)))
 
-OBJECTS = $(ASM_OBJECTS) $(STDPERIPH_OBJECTS) $(DEVICE_OBJECTS) $(DRIVER_OBJECTS) $(USER_OBJECTS) 
+MATH_OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(MATH_C_SOURCES:.c=.o)))
+CONTROL_OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(CONTROL_C_SOURCES:.c=.o)))
+
+OBJECTS = $(ASM_OBJECTS) $(STDPERIPH_OBJECTS) $(DEVICE_OBJECTS) $(DRIVER_OBJECTS) $(USER_OBJECTS) \
+$(MATH_OBJECTS) $(CONTROL_OBJECTS)
 
 .PHONY: \
 all \
@@ -127,7 +142,8 @@ burn link reset \
 clean cleano \
 macro pwd
 
-all: startup stdperiph device driver user $(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).elf $(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).bin
+all: startup stdperiph device driver user math control \
+$(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).elf $(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).bin
 
 $(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).bin: $(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).elf
 	rm -rf $(BUILD_DIR)/*.bin
@@ -139,16 +155,19 @@ $(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).bin: $(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).e
 $(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).elf: $(OBJECTS)
 	rm -rf $(BUILD_DIR)/*.elf
 	rm -rf $(BUILD_DIR)/*.map
-	$(CC) -mthumb -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard \
--T $(LDSCRIPT) -specs=nosys.specs -static \
--Wl,-cref,-u,Reset_Handler -Wl,-Map=$(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).map \
+	$(CC) $(LDFLAGS) \
+-specs=nosys.specs -static \
+-Wl,-cref,-u,Reset_Handler \
+-Wl,-Map=$(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).map \
 -Wl,--gc-sections \
 -Wl,--defsym=malloc_getpagesize_P=0x80 \
--Wl,--start-group -lc -lm -Wl,--end-group \
 $^ \
+-Wl,--start-group -lm -lc -Wl,--end-group \
 -o $@
-#$(SZ) $@
-# $(CC) $(CFLAGS) $(LDFLAGS) $(OBJECTS) -o $@
+
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# -lm -lc要在放在.o后面，不然.o里面调用到的库函数找不到地方，我服了
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 $(BUILD_DIR)/%.o: %.s
 	$(CC) -c $(ASFLAGS) -g -Wa,--warn $< -o $@
@@ -184,6 +203,16 @@ vpath %.c $(sort $(dir $(USER_C_SOURCES)))
 user: $(USER_OBJECTS)
 	@echo \<\<\<\<\<User File Compile Completely\>\>\>\>\>
 
+vpath %.c $(sort $(dir $(MATH_C_SOURCES)))
+
+math: $(MATH_OBJECTS)
+	@echo \<\<\<\<\<Math File Compile Completely\>\>\>\>\>
+
+vpath %.c $(sort $(dir $(CONTROL_C_SOURCES)))
+
+control: $(CONTROL_OBJECTS)
+	@echo \<\<\<\<\<Control File Compile Completely\>\>\>\>\>
+
 burn:
 	openocd \
 	-f interface/$(OCD_LINK_FILE) \
@@ -216,7 +245,7 @@ cleano:
 macro:
 	touch gnuc_macro.c
 	-rm gnuc_macro.h
-	$(CC) -E -dM $(FLOAT-ABI) -c gnuc_macro.c >> gnuc_macro.h
+	$(CC) -E -dM $(FPU) $(FLOAT-ABI) -c gnuc_macro.c >> gnuc_macro.h
 
 pwd:
 	@echo $(BUILD_DIR)/$(NAME)_$(DATE)

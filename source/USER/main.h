@@ -19,6 +19,8 @@
 
 #include "ANO_DT.h"
 
+#include "attitude.h"
+
 #include "rgbled.h"
 #include "motor.h"
 //传感器
