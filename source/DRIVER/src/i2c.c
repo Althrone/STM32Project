@@ -136,3 +136,5 @@ void I2C1_ER_IRQHandler(void)
         I2C_ClearFlag(I2C1,I2C_FLAG_BERR);
     }
 }
+
+// void I2C_ReadByte

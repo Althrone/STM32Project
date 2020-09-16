@@ -1,0 +1,16 @@
+typedef struct
+{
+    float_t Kalman_MPU6050VarAccelX;
+    float_t Kalman_MPU6050VarAccelY;
+    float_t Kalman_MPU6050VarAccelZ;
+    float_t Kalman_MPU6050VarGyroX;
+    float_t Kalman_MPU6050VarGyroY;
+    float_t Kalman_MPU6050VarGyroZ;
+}Kalman_MPU6050VarDataTypeDef;
+
+typedef struct
+{
+    float_t Kalman_AK8975VarMagX;
+    float_t Kalman_AK8975VarMagY;
+    float_t Kalman_AK8975VarMagZ;
+}Kalman_AK8975VarDataTypeDef;

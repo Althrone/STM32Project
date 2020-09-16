@@ -15,6 +15,13 @@
   * @brief  I2C Init structure definition  
   */
 
+typedef enum
+{
+    I2C_StateStart=0,
+    I2C_StateStop=1
+}I2C_StateTypeDef;
+
+
 /* Exported functions --------------------------------------------------------*/ 
 
 

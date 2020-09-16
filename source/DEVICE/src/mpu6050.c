@@ -1,9 +1,9 @@
 #include "mpu6050.h"
 
-
-
 /**
  * @brief  初始化6050
+ * @note  这个传感器也是sb，初始化之后MPU6050_PWR_MGMT_1
+ * 的SLEEP位是1，然后这个状态下你修改其他寄存器是没鸟用的
  **/
 void MPU6050_Init(void)
 {
@@ -11,6 +11,7 @@ void MPU6050_Init(void)
     IIC_WriteByteToSlave(MPU6050_AD0_LOW,MPU6050_PWR_MGMT_1,MPU6050_PWR_MGMT_1_DEVICE_RESET);
     SysTick_DelayMs(10);
     //配置时钟
+    IIC_WriteByteToSlave(MPU6050_AD0_LOW,MPU6050_PWR_MGMT_1,MPU6050_PWR_MGMT_1_CLKSEL_GYRO_X_PLL);//设置量程等寄存器要先唤醒了
     //设置量程
     IIC_WriteByteToSlave(MPU6050_AD0_LOW,MPU6050_GYRO_CONFIG,MPU6050_GYRO_CONFIG_FS_SEL_2000);
     IIC_WriteByteToSlave(MPU6050_AD0_LOW,MPU6050_ACCEL_CONFIG,MPU6050_ACCEL_CONFIG_AFS_SEL_4G);
@@ -18,8 +19,6 @@ void MPU6050_Init(void)
     IIC_WriteByteToSlave(MPU6050_AD0_LOW,MPU6050_CONFIG,MPU6050_CONFIG_DLPF_CFG_BW_20);//Gyroscope Output Rate=1kHz
     //设置采样率
     IIC_WriteByteToSlave(MPU6050_AD0_LOW,MPU6050_SMPLRT_DIV,MPU6050_SMPLRT_DIV_(0));//采样频率1kHz
-    //唤醒6050
-    IIC_WriteByteToSlave(MPU6050_AD0_LOW,MPU6050_PWR_MGMT_1,0x00);
 }
 
 /**

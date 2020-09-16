@@ -26,6 +26,7 @@
 
 /* Exported functions --------------------------------------------------------*/ 
 void ATT_RawData(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
+                 AK8975_FloatDataTypeDef* AK8975_FloatDataStruct,
                  ANO_DT_SendStatusTypeDef* ANO_DT_SendStatusStruct);
 
 #ifdef __cplusplus
