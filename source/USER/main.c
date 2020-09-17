@@ -31,11 +31,10 @@ int main(void)
     AK8975_RawDataTypeDef AK8975_RawDataStruct;
     AK8975_FloatDataTypeDef AK8975_FloatDataStruct;
 
-    ANO_DT_SendRCDataStruct.ANO_DT_RCThrottle=0;
-    ANO_DT_SendRCDataStruct.ANO_DT_RCYaw=1;
-    ANO_DT_SendRCDataStruct.ANO_DT_RCRoll=2;
-    ANO_DT_SendRCDataStruct.ANO_DT_RCPitch=3;
-    ANO_DT_SendRCDataStruct.ANO_DT_RCAUX1=4;
+    // Kalman_MPU6050VarDataTypeDef Kalman_MPU6050VarDataStruct;
+    // Kalman_AK8975VarDataTypeDef Kalman_AK8975VarDataStruct;
+
+    // Kalman_GetVar(&Kalman_MPU6050VarDataStruct,&Kalman_AK8975VarDataStruct);
 
     while (1)
     {
@@ -45,7 +44,7 @@ int main(void)
 
         PPM_GetRCData(&ANO_DT_SendRCDataStruct);
 
-        ATT_RawData(&MPU6050_FloatDataStruct,&ANO_DT_SendStatusStruct);
+        ATT_RawData(&MPU6050_FloatDataStruct,&AK8975_FloatDataStruct,&ANO_DT_SendStatusStruct);
 
         ANO_DT_SendSenserStruct.ANO_DT_AccX=MPU6050_RawDataStruct.MPU6050_RawAccelX;
         ANO_DT_SendSenserStruct.ANO_DT_AccY=MPU6050_RawDataStruct.MPU6050_RawAccelY;

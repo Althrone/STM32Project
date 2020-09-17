@@ -13,6 +13,8 @@
 #include "ak8975.h"
 #include "spl06.h"
 
+#include "base.h"
+
 /* Exported types ------------------------------------------------------------*/
 
 /** 
@@ -54,6 +56,11 @@ typedef struct
 }Kalman_AK8975VarDataTypeDef;
 
 /* Exported functions --------------------------------------------------------*/ 
+void Kalman_GetMean(Kalman_MPU6050MeanDataTypeDef* Kalman_MPU6050MeanDataStruct,
+                    Kalman_AK8975MeanDataTypeDef* Kalman_AK8975MeanDataStruct);
+
+void Kalman_GetVar(Kalman_MPU6050VarDataTypeDef* Kalman_MPU6050VarDataStruct,
+                   Kalman_AK8975VarDataTypeDef* Kalman_AK8975VarDataStruct);
 
 #ifdef __cplusplus
 }
