@@ -19,6 +19,14 @@
 #include "ANO_DT.h"
 
 /* Exported types ------------------------------------------------------------*/
+typedef struct
+{
+    float_t ATT_Q0;
+    float_t ATT_Q1;
+    float_t ATT_Q2;
+    float_t ATT_Q3;
+};
+
 
 /** 
   * @brief  I2C Init structure definition  

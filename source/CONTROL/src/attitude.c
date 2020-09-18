@@ -41,3 +41,11 @@ void ATT_RawData(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
     ANO_DT_SendStatusStruct->ANO_DT_Yaw=(int16_t)psi*100;
     // ANO_DT_SendStatusStruct->ANO_DT_Yaw=0;
 }
+
+/**
+ * @brief   欧拉角转四元数
+ **/
+void ATT_Angle2Quat(float_t* angle,float_t* quat)
+{
+    
+}
