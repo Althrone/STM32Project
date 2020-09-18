@@ -259,7 +259,7 @@ uint8_t IIC_ReadByteFromSlave(uint8_t I2C_Addr,uint8_t reg,uint8_t *buf)
 	IIC_WaitAck();	  
 	
 	IIC_Start();
-	IIC_SendByte(I2C_Addr<<1|1); //进入接收模式			   
+	IIC_SendByte(I2C_Addr<<1|1); //进入接收模式
 	IIC_WaitAck();
 	*buf=IIC_ReadByte(0);	   
   IIC_Stop(); //产生一个停止条件

@@ -197,7 +197,6 @@ typedef struct
 /* Exported functions --------------------------------------------------------*/ 
 
 void MPU6050_Init(void);
-void MPU6050_RawAccelRead(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct);
 void MPU6050_AllRawDataRead(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct);
 
 void MPU6050_RawData2FloatData(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct,

@@ -35,6 +35,11 @@ int main(void)
     // Kalman_AK8975VarDataTypeDef Kalman_AK8975VarDataStruct;
 
     // Kalman_GetVar(&Kalman_MPU6050VarDataStruct,&Kalman_AK8975VarDataStruct);
+    uint8_t data=0;
+    AT24C02_ByteWrite(0x00,0xAA);
+    AT24C02_SequentialRead(0x00,1,&data);
+    data=data+1;
+
 
     while (1)
     {

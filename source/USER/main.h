@@ -28,6 +28,8 @@
 #include "spl06.h"
 #include "ak8975.h"
 
+#include "at24c02.h"
+
 #include "kalman.h"
 
 #ifdef __cplusplus
