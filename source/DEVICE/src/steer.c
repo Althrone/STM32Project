@@ -28,3 +28,16 @@ void Steer_Init(void)
     TIM5_Init();
 }
 
+void Steer_Test(ANO_DT_SendRCDataTypeDef* ANO_DT_SendRCDataStruct)
+{
+    uint16_t Throttle;
+    if(ANO_DT_SendRCDataStruct->ANO_DT_RCThrottle>2000)
+    Throttle=2000;
+    else if(ANO_DT_SendRCDataStruct->ANO_DT_RCThrottle<1000)
+    Throttle=1000;
+    else
+    Throttle=ANO_DT_SendRCDataStruct->ANO_DT_RCThrottle;
+
+    TIM_SetCompare3(TIM5,Throttle*2);
+    TIM_SetCompare4(TIM5,Throttle*2);
+}

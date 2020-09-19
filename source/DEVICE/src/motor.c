@@ -47,8 +47,55 @@ void Motor_Init(void)
 
 void Motor_SetSpeed(void)
 {
-    TIM_SetCompare1(TIM3,4000);
-    TIM_SetCompare2(TIM3,3000);
-    TIM_SetCompare3(TIM3,3000);
-    TIM_SetCompare4(TIM3,3000);
+    TIM_SetCompare1(TIM3,2000);
+    TIM_SetCompare2(TIM3,2000);
+    TIM_SetCompare3(TIM3,2000);
+    TIM_SetCompare4(TIM3,2000);
+}
+
+/**
+ ↻  ↺
+ →   ←
+↑3↓ ↓1↑
+ ←\ /→
+   X
+ ←/ \→
+↓2↑ ↑4↓
+ →   ←
+ ↺  ↻
+**/
+
+void Motor_PWM(Motor_PWMTypeDef* Motor_PWMStruct)
+{
+    TIM_SetCompare1(TIM3,Motor_PWMStruct->PWM1);
+    TIM_SetCompare2(TIM3,Motor_PWMStruct->PWM2);
+    TIM_SetCompare3(TIM3,Motor_PWMStruct->PWM3);
+    TIM_SetCompare4(TIM3,Motor_PWMStruct->PWM4);
+}
+
+/**
+ * @brief   测试行走功能
+ * @param   ANO_DT_SendRCDataStruct: 接收遥控的信号
+ **/
+void Motor_RunTest(ANO_DT_SendRCDataTypeDef* ANO_DT_SendRCDataStruct)
+{
+    // uint16_t Pitch,Roll;
+    // //俯仰控制前进后退
+    // if(ANO_DT_SendRCDataStruct->ANO_DT_RCPitch>2000)
+    // Pitch=2000;
+    // else if(ANO_DT_SendRCDataStruct->ANO_DT_RCPitch<1000)
+    // Pitch=1000;
+    // else
+    // Pitch=ANO_DT_SendRCDataStruct->ANO_DT_RCPitch;
+
+    // if(ANO_DT_SendRCDataStruct->ANO_DT_RCRoll>2000)
+    // Roll=2000;
+    // else if(ANO_DT_SendRCDataStruct->ANO_DT_RCRoll<1000)
+    // Roll=1000;
+    // else
+    // Roll=ANO_DT_SendRCDataStruct->ANO_DT_RCRoll;
+
+
+
+    //横滚控制差速转弯
 }

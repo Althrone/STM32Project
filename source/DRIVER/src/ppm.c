@@ -64,12 +64,12 @@ void EXTI15_10_IRQHandler(void)
         EXTI_ClearITPendingBit(EXTI_Line12);
         //计算时间片
         PPM_DemodTimeStruct.PPM_LastTime=PPM_DemodTimeStruct.PPM_NewTime;
-        PPM_DemodTimeStruct.PPM_NewTime=1000*PPM_DemodTimeStruct.PPM_1msCnt+TIM5->CNT;//单位us
+        PPM_DemodTimeStruct.PPM_NewTime=1000*PPM_DemodTimeStruct.PPM_1msCnt+TIM7->CNT;//单位us
         PPM_DemodTimeStruct.PPM_TimeSlce=PPM_DemodTimeStruct.PPM_NewTime-PPM_DemodTimeStruct.PPM_LastTime;
 
         //前一次PMM序列已经传输完毕，这次触发就是新的PMM序列
-        if((PPM_DemodTimeStruct.PPM_TimeSlce>=1000)&&
-           (PPM_DemodTimeStruct.PPM_TimeSlce<=2000))
+        if((PPM_DemodTimeStruct.PPM_TimeSlce>=800)&&
+           (PPM_DemodTimeStruct.PPM_TimeSlce<=2200))
         {
             if(PPM_DemodFlagStruct.PPM_EndFlag==SET)
             {
@@ -91,7 +91,7 @@ void EXTI15_10_IRQHandler(void)
             {}
         }
         //两脉冲之间时间超过2ms，代表这段PMM序列已经结束了
-        else if(PPM_DemodTimeStruct.PPM_TimeSlce>2000)
+        else if(PPM_DemodTimeStruct.PPM_TimeSlce>2500)
         {
             PPM_DemodTimeStruct.PPM_1msCnt=0;
             PPM_DemodTimeStruct.PPM_LastTime=0;

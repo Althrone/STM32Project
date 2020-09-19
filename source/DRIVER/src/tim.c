@@ -37,18 +37,27 @@ void TIM3_Init(void)
     // TIM_OCInitStruct.TIM_OCIdleState=;
     // TIM_OCInitStruct.TIM_OCNIdleState=;
     TIM_OC1Init(TIM3,&TIM_OCInitStruct);
+    TIM_OC1PreloadConfig(TIM3, TIM_OCPreload_Enable);
     //PWMOUT_2
     TIM_OC2Init(TIM3,&TIM_OCInitStruct);
+    TIM_OC2PreloadConfig(TIM3, TIM_OCPreload_Enable);
     //PWMOUT_3
     TIM_OC3Init(TIM3,&TIM_OCInitStruct);
+    TIM_OC3PreloadConfig(TIM3, TIM_OCPreload_Enable);
     //PWMOUT_4
     TIM_OC4Init(TIM3,&TIM_OCInitStruct);
+    TIM_OC4PreloadConfig(TIM3, TIM_OCPreload_Enable);
     //寄存器预装载
     TIM_ARRPreloadConfig(TIM3, ENABLE);
     //TIM3使能
     TIM_Cmd(TIM3,ENABLE);
 }
 
+/**
+ * @brief   舵机pwm
+ * PWMOUT_5-TIM5_CH4-PA2
+ * PWMOUT_6-TIM5_CH3-PA3
+ **/
 void TIM5_Init(void)
 {
     //开TIM5时钟
@@ -61,11 +70,32 @@ void TIM5_Init(void)
     TIM_TimeBaseInitStructure.TIM_ClockDivision=TIM_CKD_DIV1;//暂时不知道有什么用
     // TIM_TimeBaseInitStructure.TIM_RepetitionCounter=;//只有TIM1和TIM8才有
     TIM_TimeBaseInit(TIM5,&TIM_TimeBaseInitStructure);
+
+    //TIM初始化输出比较结构体定义
+    TIM_OCInitTypeDef TIM_OCInitStruct;
+    TIM_OCInitStruct.TIM_OCMode=TIM_OCMode_PWM1;
+    TIM_OCInitStruct.TIM_OutputState=TIM_OutputState_Enable;
+    // TIM_OCInitStruct.TIM_OutputNState=;
+    TIM_OCInitStruct.TIM_Pulse=0;//比较值
+    TIM_OCInitStruct.TIM_OCPolarity=TIM_OCPolarity_High;
+    // TIM_OCInitStruct.TIM_OCNPolarity=;
+    // TIM_OCInitStruct.TIM_OCIdleState=;
+    // TIM_OCInitStruct.TIM_OCNIdleState=;
+    //PWMOUT_5
+    TIM_OC4Init(TIM5,&TIM_OCInitStruct);
+    TIM_OC4PreloadConfig(TIM5, TIM_OCPreload_Enable);
+    //PWMOUT_6
+    TIM_OC3Init(TIM5,&TIM_OCInitStruct);
+    TIM_OC3PreloadConfig(TIM5, TIM_OCPreload_Enable);
+    //寄存器预装载
+    TIM_ARRPreloadConfig(TIM5, ENABLE);
+    //TIM3使能
+    TIM_Cmd(TIM5,ENABLE);
 }
 
 /**
  * 试试定时1s
- * 
+ * LED
  **/
 void TIM6_Init(void)
 {
@@ -73,9 +103,9 @@ void TIM6_Init(void)
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6,ENABLE);
     //TIM初始化结构体定义
     TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;
-    TIM_TimeBaseInitStructure.TIM_Prescaler=8400;
+    TIM_TimeBaseInitStructure.TIM_Prescaler=8400-1;
     // TIM_TimeBaseInitStructure.TIM_CounterMode=TIM_CounterMode_Up;//TIM6只有向上计数模式
-    TIM_TimeBaseInitStructure.TIM_Period=10000;
+    TIM_TimeBaseInitStructure.TIM_Period=10000-1;
     // TIM_TimeBaseInitStructure.TIM_ClockDivision=;//TIM6没有时钟分频
     // TIM_TimeBaseInitStructure.TIM_RepetitionCounter=;//只有TIM1和TIM8才有
     TIM_TimeBaseInit(TIM6,&TIM_TimeBaseInitStructure);
@@ -104,8 +134,8 @@ void TIM7_Init(void)
     //开TIM7时钟
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM7,ENABLE);
     TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;
-    TIM_TimeBaseInitStructure.TIM_Prescaler=84;
-    TIM_TimeBaseInitStructure.TIM_Period=1000;
+    TIM_TimeBaseInitStructure.TIM_Prescaler=84-1;
+    TIM_TimeBaseInitStructure.TIM_Period=1000-1;
     TIM_TimeBaseInit(TIM7,&TIM_TimeBaseInitStructure);
 
     //定义NVIC初始化结构体

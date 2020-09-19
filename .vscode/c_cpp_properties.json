@@ -9,7 +9,8 @@
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE",
-                "USE_STDPERIPH_DRIVER"
+                "USE_STDPERIPH_DRIVER",
+                "__VFP_FP__"
             ],
             "intelliSenseMode": "msvc-x64"
         }

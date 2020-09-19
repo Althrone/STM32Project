@@ -11,6 +11,8 @@
 
 #include "tim.h"
 
+#include "ANO_DT.h"
+
 /* Exported types ------------------------------------------------------------*/
 
 /** 
@@ -20,6 +22,8 @@
 /* Exported functions --------------------------------------------------------*/ 
 
 void Steer_Init(void);
+void Steer_Test(ANO_DT_SendRCDataTypeDef* ANO_DT_SendRCDataStruct);
+
 
 #ifdef __cplusplus
 }

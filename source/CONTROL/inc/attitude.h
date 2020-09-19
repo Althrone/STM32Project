@@ -21,11 +21,19 @@
 /* Exported types ------------------------------------------------------------*/
 typedef struct
 {
-    float_t ATT_Q0;
-    float_t ATT_Q1;
-    float_t ATT_Q2;
-    float_t ATT_Q3;
-};
+    float_t ATT_Quat0;
+    float_t ATT_Quat1;
+    float_t ATT_Quat2;
+    float_t ATT_Quat3;
+}ATT_QuatDataTypeDef;
+
+typedef struct
+{
+    float_t ATT_AnglePhi;
+    float_t ATT_AngleTheta;
+    float_t ATT_AnglePsi;
+}ATT_AngleDataTypeDef;
+
 
 
 /** 
@@ -35,7 +43,11 @@ typedef struct
 /* Exported functions --------------------------------------------------------*/ 
 void ATT_RawData(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
                  AK8975_FloatDataTypeDef* AK8975_FloatDataStruct,
-                 ANO_DT_SendStatusTypeDef* ANO_DT_SendStatusStruct);
+                 ATT_AngleDataTypeDef* ATT_AngleDataStruct);
+void ATT_Angle2Quat(ATT_AngleDataTypeDef* ATT_AngleDataStruct,
+                    ATT_QuatDataTypeDef* ATT_QuatDataStruct);
+void ATT_Quat2Angle(ATT_QuatDataTypeDef* ATT_QuatDataStruct,
+                    ATT_AngleDataTypeDef* ATT_AngleDataStruct);
 
 #ifdef __cplusplus
 }

@@ -3,20 +3,23 @@
 
 int main(void)
 {
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//设置系统中断优先级分组2
+
     // I2C1_Init();//硬件iic
     RGBLED_Init();
     TIM6_Init();
 
     IIC_Init();
     USART1_Init();
-    // Motor_Init();
+    
     PPM_Init();
 
     MPU6050_Init();
     SPL06_Init();
     AK8975_Init();
 
-    // Motor_SetSpeed();
+    Motor_Init();
+    Steer_Init();
 
     ANO_DT_SendSenserTypeDef ANO_DT_SendSenserStruct;//发送到上位机的传感器数据结构体
     ANO_DT_SendRCDataTypeDef ANO_DT_SendRCDataStruct;//发送到上位机的遥控数据
@@ -31,15 +34,8 @@ int main(void)
     AK8975_RawDataTypeDef AK8975_RawDataStruct;
     AK8975_FloatDataTypeDef AK8975_FloatDataStruct;
 
-    // Kalman_MPU6050VarDataTypeDef Kalman_MPU6050VarDataStruct;
-    // Kalman_AK8975VarDataTypeDef Kalman_AK8975VarDataStruct;
-
-    // Kalman_GetVar(&Kalman_MPU6050VarDataStruct,&Kalman_AK8975VarDataStruct);
-    uint8_t data=0;
-    AT24C02_ByteWrite(0x00,0xAA);
-    AT24C02_SequentialRead(0x00,1,&data);
-    data=data+1;
-
+    ATT_AngleDataTypeDef ATT_AngleDataStruct;
+    ATT_QuatDataTypeDef ATT_QuatDataStruct;
 
     while (1)
     {
@@ -47,9 +43,22 @@ int main(void)
         AK8975_AllRawDataRead(&AK8975_RawDataStruct);
         SPL06_AllRawDataRead(&SPL06_RawDataStruct);
 
+        MPU6050_RawData2FloatData(&MPU6050_RawDataStruct,&MPU6050_FloatDataStruct);
+        AK8975_RawData2FloatData(&AK8975_RawDataStruct,&AK8975_FloatDataStruct);
+        SPL06_RawData2FloatData(&SPL06_RawDataStruct,&SPL06_FloatDataStruct);
+
         PPM_GetRCData(&ANO_DT_SendRCDataStruct);
 
-        ATT_RawData(&MPU6050_FloatDataStruct,&AK8975_FloatDataStruct,&ANO_DT_SendStatusStruct);
+        Steer_Test(&ANO_DT_SendRCDataStruct);
+
+        ATT_RawData(&MPU6050_FloatDataStruct,&AK8975_FloatDataStruct,&ATT_AngleDataStruct);
+        ANO_DT_SendStatusStruct.ANO_DT_Pitch=(int16_t)(ATT_AngleDataStruct.ATT_AngleTheta*100);
+        ANO_DT_SendStatusStruct.ANO_DT_Roll=(int16_t)(ATT_AngleDataStruct.ATT_AnglePhi*100);
+        ANO_DT_SendStatusStruct.ANO_DT_Yaw=(int16_t)(ATT_AngleDataStruct.ATT_AnglePsi*100);
+
+        ATT_Angle2Quat(&ATT_AngleDataStruct,&ATT_QuatDataStruct);
+        ATT_Quat2Angle(&ATT_QuatDataStruct,&ATT_AngleDataStruct);
+
 
         ANO_DT_SendSenserStruct.ANO_DT_AccX=MPU6050_RawDataStruct.MPU6050_RawAccelX;
         ANO_DT_SendSenserStruct.ANO_DT_AccY=MPU6050_RawDataStruct.MPU6050_RawAccelY;
@@ -65,8 +74,6 @@ int main(void)
         ANO_DT_SendRCData(USART1,&ANO_DT_SendRCDataStruct);
         ANO_DT_SendStatus(USART1,&ANO_DT_SendStatusStruct);
 
-        MPU6050_RawData2FloatData(&MPU6050_RawDataStruct,&MPU6050_FloatDataStruct);
-        AK8975_RawData2FloatData(&AK8975_RawDataStruct,&AK8975_FloatDataStruct);
-        SPL06_RawData2FloatData(&SPL06_RawDataStruct,&SPL06_FloatDataStruct);
+        
     }
 }
