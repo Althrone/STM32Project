@@ -21,6 +21,10 @@ int main(void)
     Motor_Init();
     Steer_Init();
 
+    //校准代码区
+    //获取遥控器数值
+    
+
     ANO_DT_SendSenserTypeDef ANO_DT_SendSenserStruct;//发送到上位机的传感器数据结构体
     ANO_DT_SendRCDataTypeDef ANO_DT_SendRCDataStruct;//发送到上位机的遥控数据
     ANO_DT_SendStatusTypeDef ANO_DT_SendStatusStruct;//无人机当前姿态，这里我只是随便塞两个数进去看看
@@ -37,6 +41,8 @@ int main(void)
     ATT_AngleDataTypeDef ATT_AngleDataStruct;
     ATT_QuatDataTypeDef ATT_QuatDataStruct;
 
+    Motor_PWMTypeDef Motor_PWMStruct;
+
     while (1)
     {
         MPU6050_AllRawDataRead(&MPU6050_RawDataStruct);
@@ -51,6 +57,12 @@ int main(void)
 
         Steer_Test(&ANO_DT_SendRCDataStruct);
 
+        Motor_PWMStruct.PWM1=ANO_DT_SendRCDataStruct.ANO_DT_RCThrottle;
+        Motor_PWMStruct.PWM2=ANO_DT_SendRCDataStruct.ANO_DT_RCThrottle;
+        Motor_PWMStruct.PWM3=ANO_DT_SendRCDataStruct.ANO_DT_RCThrottle;
+        Motor_PWMStruct.PWM4=ANO_DT_SendRCDataStruct.ANO_DT_RCThrottle;
+        Motor_PWM(&Motor_PWMStruct);
+
         ATT_RawData(&MPU6050_FloatDataStruct,&AK8975_FloatDataStruct,&ATT_AngleDataStruct);
         ANO_DT_SendStatusStruct.ANO_DT_Pitch=(int16_t)(ATT_AngleDataStruct.ATT_AngleTheta*100);
         ANO_DT_SendStatusStruct.ANO_DT_Roll=(int16_t)(ATT_AngleDataStruct.ATT_AnglePhi*100);
@@ -63,9 +75,9 @@ int main(void)
         ANO_DT_SendSenserStruct.ANO_DT_AccX=MPU6050_RawDataStruct.MPU6050_RawAccelX;
         ANO_DT_SendSenserStruct.ANO_DT_AccY=MPU6050_RawDataStruct.MPU6050_RawAccelY;
         ANO_DT_SendSenserStruct.ANO_DT_AccZ=MPU6050_RawDataStruct.MPU6050_RawAccelZ;
-        ANO_DT_SendSenserStruct.ANO_DT_GyroX=MPU6050_RawDataStruct.MPU6050_RawGyroX;
-        ANO_DT_SendSenserStruct.ANO_DT_GyroY=MPU6050_RawDataStruct.MPU6050_RawGyroY;
-        ANO_DT_SendSenserStruct.ANO_DT_GyroZ=MPU6050_RawDataStruct.MPU6050_RawGyroZ;
+        ANO_DT_SendSenserStruct.ANO_DT_GyroX=MPU6050_RawDataStruct.MPU6050_RawGyroX+25;
+        ANO_DT_SendSenserStruct.ANO_DT_GyroY=MPU6050_RawDataStruct.MPU6050_RawGyroY-25;
+        ANO_DT_SendSenserStruct.ANO_DT_GyroZ=MPU6050_RawDataStruct.MPU6050_RawGyroZ-25;
         ANO_DT_SendSenserStruct.ANO_DT_MagX=AK8975_RawDataStruct.AK8975_RawMagX;
         ANO_DT_SendSenserStruct.ANO_DT_MagY=AK8975_RawDataStruct.AK8975_RawMagY;
         ANO_DT_SendSenserStruct.ANO_DT_MagZ=AK8975_RawDataStruct.AK8975_RawMagZ;

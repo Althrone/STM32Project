@@ -67,10 +67,10 @@ void Motor_SetSpeed(void)
 
 void Motor_PWM(Motor_PWMTypeDef* Motor_PWMStruct)
 {
-    TIM_SetCompare1(TIM3,Motor_PWMStruct->PWM1);
-    TIM_SetCompare2(TIM3,Motor_PWMStruct->PWM2);
-    TIM_SetCompare3(TIM3,Motor_PWMStruct->PWM3);
-    TIM_SetCompare4(TIM3,Motor_PWMStruct->PWM4);
+    TIM_SetCompare1(TIM3,Motor_PWMStruct->PWM1*2);
+    TIM_SetCompare2(TIM3,Motor_PWMStruct->PWM2*2);
+    TIM_SetCompare3(TIM3,Motor_PWMStruct->PWM3*2);
+    TIM_SetCompare4(TIM3,Motor_PWMStruct->PWM4*2);
 }
 
 /**

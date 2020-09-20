@@ -194,6 +194,17 @@ typedef struct
     float_t MPU6050_FloatGyroZ;
 }MPU6050_FloatDataTypeDef;
 
+typedef struct
+{
+    float_t MPU6050_CalAccelX;
+    float_t MPU6050_CalAccelY;
+    float_t MPU6050_CalAccelZ;
+    float_t MPU6050_CalGyroX;
+    float_t MPU6050_CalGyroY;
+    float_t MPU6050_CalGyroZ;
+}MPU6050_CalDataTypeDef;
+
+
 /* Exported functions --------------------------------------------------------*/ 
 
 void MPU6050_Init(void);

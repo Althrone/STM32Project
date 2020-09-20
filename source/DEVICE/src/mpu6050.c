@@ -22,6 +22,52 @@ void MPU6050_Init(void)
 }
 
 /**
+ * @brief   陀螺仪零漂校正
+ **/
+void MPU6050_GyroCal()
+{
+    //静止状态取值1000次，算平均然后塞到存储芯片里面，开机读取里面的数值，如果是0就进入校准状态
+    //暂存数据
+    uint8_t temp[6];
+    MPU6050_CalDataTypeDef MPU6050_CalDataStruct;
+    MPU6050_RawDataTypeDef MPU6050_RawDataStruct;
+    MPU6050_FloatDataTypeDef MPU6050_FloatDataStruct;
+
+    float_t oldGyroX,oldGyroY,oldGyroZ;
+    float_t newGyroX,newGyroY,newGyroZ;
+    for (uint16_t i = 0; i < 1000; i++)
+    {
+        IIC_ReadMultByteFromSlave(MPU6050_AD0_LOW,MPU6050_GYRO_XOUT_H,6,temp);
+        //与前一数据对比，正负10之内都能接受
+        if(((MPU6050_CalDataStruct.MPU6050_CalGyroX-oldGyroX>=-10)||
+           (MPU6050_CalDataStruct.MPU6050_CalGyroX-oldGyroX<=10))&&
+           ((MPU6050_CalDataStruct.MPU6050_CalGyroY-oldGyroY>=-10)||
+           (MPU6050_CalDataStruct.MPU6050_CalGyroY-oldGyroY<=10))&&
+           ((MPU6050_CalDataStruct.MPU6050_CalGyroZ-oldGyroZ>=-10)||
+           (MPU6050_CalDataStruct.MPU6050_CalGyroZ-oldGyroZ<=10)))
+        {
+            MPU6050_CalDataStruct.MPU6050_CalGyroX+=((int16_t)temp[0]<<8)+temp[1];
+            MPU6050_CalDataStruct.MPU6050_CalGyroY+=((int16_t)temp[2]<<8)+temp[3];
+            MPU6050_CalDataStruct.MPU6050_CalGyroZ+=((int16_t)temp[4]<<8)+temp[5];
+        }
+        else
+            i--;
+    }
+    MPU6050_CalDataStruct.MPU6050_CalGyroX/=1000;
+    MPU6050_CalDataStruct.MPU6050_CalGyroY/=1000;
+    MPU6050_CalDataStruct.MPU6050_CalGyroZ/=1000;
+    //浮点数写入存储器，一个占四字节，从0x00开始
+}
+
+/**
+ * @brief   加速度计六面矫正
+ **/
+void MPU6050_AccelCal()
+{
+    //
+}
+
+/**
  * @brief  读取6050的加速度，温度，角速度数据
  * @param  MPU6050_RawDataStruct: 读取到的数据提取到这个结构体
  **/

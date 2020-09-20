@@ -51,6 +51,10 @@ void PPM_GetRCData(ANO_DT_SendRCDataTypeDef* ANO_DT_SendRCDataStruct)
     ANO_DT_SendRCDataStruct->ANO_DT_RCPitch=PPM_RawDataStruct.PPM_RawCh2;
     ANO_DT_SendRCDataStruct->ANO_DT_RCThrottle=PPM_RawDataStruct.PPM_RawCh3;
     ANO_DT_SendRCDataStruct->ANO_DT_RCYaw=PPM_RawDataStruct.PPM_RawCh4;
+    ANO_DT_SendRCDataStruct->ANO_DT_RCAUX1=PPM_RawDataStruct.PPM_RawCh5;//SWA
+    ANO_DT_SendRCDataStruct->ANO_DT_RCAUX2=PPM_RawDataStruct.PPM_RawCh6;//SWB
+    ANO_DT_SendRCDataStruct->ANO_DT_RCAUX3=PPM_RawDataStruct.PPM_RawCh7;//SWC
+    ANO_DT_SendRCDataStruct->ANO_DT_RCAUX4=PPM_RawDataStruct.PPM_RawCh8;//SWD
 }
 
 /**
@@ -78,6 +82,10 @@ void EXTI15_10_IRQHandler(void)
             }
             if(PPM_DemodFlagStruct.PPM_WorkFlag==SET)
             {
+                if(PPM_DemodTimeStruct.PPM_TimeSlce<1000)
+                PPM_DemodTimeStruct.PPM_TimeSlce=1000;
+                else if(PPM_DemodTimeStruct.PPM_TimeSlce>2000)
+                PPM_DemodTimeStruct.PPM_TimeSlce=2000;
                 *(&PPM_RawDataStruct.PPM_RawCh1+PPM_DemodTimeStruct.PPM_PWMCnt)=PPM_DemodTimeStruct.PPM_TimeSlce;
                 if(PPM_DemodTimeStruct.PPM_PWMCnt>=PPM_DemodTimeStruct.PPM_PWMMax)//对应通道数的参数传递完了
                 {
