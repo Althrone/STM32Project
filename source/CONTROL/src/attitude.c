@@ -80,7 +80,7 @@ void ATT_Angle2Quat(ATT_AngleDataTypeDef* ATT_AngleDataStruct,ATT_QuatDataTypeDe
  **/
 void ATT_Quat2Angle(ATT_QuatDataTypeDef* ATT_QuatDataStruct,ATT_AngleDataTypeDef* ATT_AngleDataStruct)
 {
-    float_t c11,c12,c13,c23,c33;
+    // float_t c11,c12,c13,c23,c33;
     float_t q0,q1,q2,q3;
 
     q0=ATT_QuatDataStruct->ATT_Quat0;
@@ -88,13 +88,21 @@ void ATT_Quat2Angle(ATT_QuatDataTypeDef* ATT_QuatDataStruct,ATT_AngleDataTypeDef
     q2=ATT_QuatDataStruct->ATT_Quat2;
     q3=ATT_QuatDataStruct->ATT_Quat3;
 
-    c11=q0*q0+q1*q1-q2*q2-q3*q3;
-    c12=2*(q1*q2-q0*q3);
-    c13=2*(q1*q3+q0*q2);
-    c23=2*(q2*q3-q0*q1);
-    c33=q0*q0-q1*q1-q2*q2+q3*q3;
+    // c11=q0*q0+q1*q1-q2*q2-q3*q3;
+    // c12=2*(q1*q2-q0*q3);
+    // c13=2*(q1*q3+q0*q2);
+    // c23=2*(q2*q3-q0*q1);
+    // c33=q0*q0-q1*q1-q2*q2+q3*q3;
 
-    ATT_AngleDataStruct->ATT_AnglePhi=atan2(c23,c33)*53.7;
-    ATT_AngleDataStruct->ATT_AngleTheta=asin(-c13)*53.7;
-    ATT_AngleDataStruct->ATT_AnglePsi=atan2(c12,c11)*53.7;
+    ATT_AngleDataStruct->ATT_AnglePhi=atan2(2*(q0*q1+q2*q3),1-2*(q1*q1+q2*q2))*53.7;
+    ATT_AngleDataStruct->ATT_AngleTheta=asin(2*(q0*q2-q1*q3))*53.7;
+    ATT_AngleDataStruct->ATT_AnglePsi=atan2(2*(q0*q3+q1*q2),1-2*(q2*q2+q3*q3))*53.7;
+}
+
+/**
+ * @brief   数据校正
+ **/
+void ATT_DataCal()
+{
+
 }

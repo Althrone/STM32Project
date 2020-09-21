@@ -9,6 +9,9 @@
 /* Includes ------------------------------------------------------------------*/
 #include "iic_moni.h"
 
+#include "at24c02.h"
+#include "iic_moni.h"
+
 /* Device Address ------------------------------------------------------------*/
 #define MPU6050_AD0_LOW             0x68
 #define MPU6050_AD0_HIGH            0x69
@@ -202,7 +205,17 @@ typedef struct
     float_t MPU6050_CalGyroX;
     float_t MPU6050_CalGyroY;
     float_t MPU6050_CalGyroZ;
-}MPU6050_CalDataTypeDef;
+}MPU6050_CalDataTypeDef;//校正后数据
+
+typedef struct
+{
+    float_t MPU6050_CalAccelX;
+    float_t MPU6050_CalAccelY;
+    float_t MPU6050_CalAccelZ;
+    float_t MPU6050_OffsetGyroX;//陀螺仪零漂
+    float_t MPU6050_OffsetGyroY;
+    float_t MPU6050_OffsetGyroZ;
+}MPU6050_CalParamTypeDef;//校正参数
 
 
 /* Exported functions --------------------------------------------------------*/ 
@@ -212,6 +225,7 @@ void MPU6050_AllRawDataRead(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct);
 
 void MPU6050_RawData2FloatData(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct,
                                MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct);
+void MPU6050_GyroCal(MPU6050_CalParamTypeDef* MPU6050_CalParamStruct);
 
 void MPU6050_IDRead(uint8_t* data);
 

@@ -24,39 +24,29 @@ void MPU6050_Init(void)
 /**
  * @brief   陀螺仪零漂校正
  **/
-void MPU6050_GyroCal()
+void MPU6050_GyroCal(MPU6050_CalParamTypeDef* MPU6050_CalParamStruct)
 {
     //静止状态取值1000次，算平均然后塞到存储芯片里面，开机读取里面的数值，如果是0就进入校准状态
     //暂存数据
     uint8_t temp[6];
-    MPU6050_CalDataTypeDef MPU6050_CalDataStruct;
-    MPU6050_RawDataTypeDef MPU6050_RawDataStruct;
-    MPU6050_FloatDataTypeDef MPU6050_FloatDataStruct;
-
-    float_t oldGyroX,oldGyroY,oldGyroZ;
-    float_t newGyroX,newGyroY,newGyroZ;
     for (uint16_t i = 0; i < 1000; i++)
     {
         IIC_ReadMultByteFromSlave(MPU6050_AD0_LOW,MPU6050_GYRO_XOUT_H,6,temp);
         //与前一数据对比，正负10之内都能接受
-        if(((MPU6050_CalDataStruct.MPU6050_CalGyroX-oldGyroX>=-10)||
-           (MPU6050_CalDataStruct.MPU6050_CalGyroX-oldGyroX<=10))&&
-           ((MPU6050_CalDataStruct.MPU6050_CalGyroY-oldGyroY>=-10)||
-           (MPU6050_CalDataStruct.MPU6050_CalGyroY-oldGyroY<=10))&&
-           ((MPU6050_CalDataStruct.MPU6050_CalGyroZ-oldGyroZ>=-10)||
-           (MPU6050_CalDataStruct.MPU6050_CalGyroZ-oldGyroZ<=10)))
-        {
-            MPU6050_CalDataStruct.MPU6050_CalGyroX+=((int16_t)temp[0]<<8)+temp[1];
-            MPU6050_CalDataStruct.MPU6050_CalGyroY+=((int16_t)temp[2]<<8)+temp[3];
-            MPU6050_CalDataStruct.MPU6050_CalGyroZ+=((int16_t)temp[4]<<8)+temp[5];
-        }
-        else
-            i--;
+        MPU6050_CalParamStruct->MPU6050_OffsetGyroX+=(((int16_t)temp[0]<<8)+temp[1])/32767.0f;
+        MPU6050_CalParamStruct->MPU6050_OffsetGyroY+=(((int16_t)temp[2]<<8)+temp[3])/32767.0f;
+        MPU6050_CalParamStruct->MPU6050_OffsetGyroZ+=(((int16_t)temp[4]<<8)+temp[5])/32767.0f;
+
     }
-    MPU6050_CalDataStruct.MPU6050_CalGyroX/=1000;
-    MPU6050_CalDataStruct.MPU6050_CalGyroY/=1000;
-    MPU6050_CalDataStruct.MPU6050_CalGyroZ/=1000;
+    MPU6050_CalParamStruct->MPU6050_OffsetGyroX/=1000;
+    MPU6050_CalParamStruct->MPU6050_OffsetGyroY/=1000;
+    MPU6050_CalParamStruct->MPU6050_OffsetGyroZ/=1000;
     //浮点数写入存储器，一个占四字节，从0x00开始
+    AT24C02_PageWrite(0x00,(uint8_t*)&(MPU6050_CalParamStruct->MPU6050_OffsetGyroX));
+    SysTick_DelayMs(2);
+    AT24C02_PageWrite(0x08,(uint8_t*)&(MPU6050_CalParamStruct->MPU6050_OffsetGyroY));
+    SysTick_DelayMs(2);
+    AT24C02_PageWrite(0x0F,(uint8_t*)&(MPU6050_CalParamStruct->MPU6050_OffsetGyroZ));
 }
 
 /**
@@ -104,6 +94,17 @@ void MPU6050_RawData2FloatData(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct,
     MPU6050_FloatDataStruct->MPU6050_FloatGyroX=Gyro_Full_Scale*MPU6050_RawDataStruct->MPU6050_RawGyroX/32767.0f;
     MPU6050_FloatDataStruct->MPU6050_FloatGyroY=Gyro_Full_Scale*MPU6050_RawDataStruct->MPU6050_RawGyroY/32767.0f;
     MPU6050_FloatDataStruct->MPU6050_FloatGyroZ=Gyro_Full_Scale*MPU6050_RawDataStruct->MPU6050_RawGyroZ/32767.0f;
+}
+
+/**
+ * @brief   将数据转换成校准过后的值，这个值会用来解算欧拉角，然后送卡尔曼滤波器
+ * @param  MPU6050_RawDataStruct: 原始数据结构体
+ * @param  MPU6050_CalDataStruct: 校准后数据结构体
+ **/
+void MPU6050_RawData2CalData(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct,
+                             MPU6050_CalDataTypeDef* MPU6050_CalDataStruct)
+{
+    //需要变成浮点数，然后滤波，然后添加校准值
 }
 
 void MPU6050_IDRead(uint8_t* data)
