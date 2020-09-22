@@ -11,16 +11,16 @@
 
 /* Exported types ------------------------------------------------------------*/
 
-typedef enum
-{
-    RGBLED_White    =0b000,
-    RGBLED_Yellow   =0b001,
-    RGBLED_Purple   =0b010,
-    RGBLED_Red      =0b011,
-    RGBLED_Cyan     =0b100,
-    RGBLED_Green    =0b101,
-    RGBLED_Blue     =0b110,
-}RGBLED_ColourTypeDef;
+// typedef enum
+// {
+//     RGBLED_White    =0b000,
+//     RGBLED_Yellow   =0b001,
+//     RGBLED_Purple   =0b010,
+//     RGBLED_Red      =0b011,
+//     RGBLED_Cyan     =0b100,
+//     RGBLED_Green    =0b101,
+//     RGBLED_Blue     =0b110,
+// }RGBLED_ColourTypeDef;
 
 typedef enum
 {

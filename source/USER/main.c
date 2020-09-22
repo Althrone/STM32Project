@@ -42,32 +42,6 @@ int main(void)
 
     Motor_PWMTypeDef Motor_PWMStruct;
 
-    MPU6050_CalParamTypeDef MPU6050_CalParamStruct;
-    MPU6050_GyroCal(&MPU6050_CalParamStruct);
-
-    uint32_t a=0;
-    float_t b=0.12345f;
-    float_t c=0.54341f;
-    float_t d=0.23333f;
-    // float_t e=0;
-    // float_t f=0;
-    // AT24C02_PageWrite(0x00,(uint8_t*)&a);
-    // SysTick_DelayMs(5);
-    // AT24C02_PageWrite(0x08,(uint8_t*)&b);
-    // SysTick_DelayMs(5);
-    // AT24C02_PageWrite(0x0F,(uint8_t*)&c);
-    // AT24C02_SequentialRead(0x00,4,(uint8_t*)&d);
-    // AT24C02_SequentialRead(0x08,4,(uint8_t*)&e);
-    // AT24C02_SequentialRead(0x0F,4,(uint8_t*)&f);
-
-    AT24C02_SequentialRead(0x00,4,(uint8_t*)&a);
-    AT24C02_SequentialRead(0x04,4,(uint8_t*)&b);
-    AT24C02_SequentialRead(0x08,4,(uint8_t*)&c);
-    AT24C02_SequentialRead(0x0C,4,(uint8_t*)&d);
-
-    // AT24C02_SequentialRead(0x04,4,(uint8_t*)&d);
-    // AT24C02_SequentialRead(0x0C,4,(uint8_t*)&e);
-    // AT24C02_SequentialRead(0x14,4,(uint8_t*)&f);
 
     while (1)
     {
@@ -90,13 +64,12 @@ int main(void)
         Motor_PWM(&Motor_PWMStruct);
 
         ATT_RawData(&MPU6050_FloatDataStruct,&AK8975_FloatDataStruct,&ATT_AngleDataStruct);
+        ATT_Angle2Quat(&ATT_AngleDataStruct,&ATT_QuatDataStruct);
+        ATT_Quat2Angle(&ATT_QuatDataStruct,&ATT_AngleDataStruct);
+
         ANO_DT_SendStatusStruct.ANO_DT_Pitch=(int16_t)(ATT_AngleDataStruct.ATT_AngleTheta*100);
         ANO_DT_SendStatusStruct.ANO_DT_Roll=(int16_t)(ATT_AngleDataStruct.ATT_AnglePhi*100);
         ANO_DT_SendStatusStruct.ANO_DT_Yaw=(int16_t)(ATT_AngleDataStruct.ATT_AnglePsi*100);
-
-        // ATT_Angle2Quat(&ATT_AngleDataStruct,&ATT_QuatDataStruct);
-        // ATT_Quat2Angle(&ATT_QuatDataStruct,&ATT_AngleDataStruct);
-
 
         ANO_DT_SendSenserStruct.ANO_DT_AccX=MPU6050_RawDataStruct.MPU6050_RawAccelX;
         ANO_DT_SendSenserStruct.ANO_DT_AccY=MPU6050_RawDataStruct.MPU6050_RawAccelY;
