@@ -102,7 +102,13 @@ void ATT_Quat2Angle(ATT_QuatDataTypeDef* ATT_QuatDataStruct,ATT_AngleDataTypeDef
 /**
  * @brief   数据校正
  **/
-void ATT_DataCal()
+void ATT_SensorCal(void)
 {
-
+    //读AT24C02的6050陀螺仪标志位
+    uint32_t flag;
+    AT24C02_SequentialRead(0x00,4,&flag);
+    if(flag!=0xAAAAAA00)//传感器未校准，或者校准数据出错
+    {
+        //死循环红灯快闪，
+    }
 }

@@ -11,7 +11,7 @@ void AT24C02_ByteWrite(uint8_t addr,uint8_t data)
 }
 
 /**
- * @brief   整页写入，1K/2K芯片8字节为一页，4K/8K/16K芯片16字节为一页
+ * @brief   整页写入，1K/2K芯片8字节为一页，4K/8K/16K芯片16字节为一页，页写入只支持从页头开始写，不然会出错
  * @param   addr: 写入的地址
  * @param   data: 写入的数据的指针
  **/

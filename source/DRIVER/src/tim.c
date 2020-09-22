@@ -113,8 +113,8 @@ void TIM6_Init(void)
     //NVI初始化结构体定义
     NVIC_InitTypeDef NVIC_InitStructure;
     NVIC_InitStructure.NVIC_IRQChannel=TIM6_DAC_IRQn ; //定时器6中断
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=0x01; //抢占优先级1
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority=0x03; //子优先级3
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=0x04; //抢占优先级4
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority=0x04; //子优先级4
     NVIC_InitStructure.NVIC_IRQChannelCmd=ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 
@@ -150,26 +150,4 @@ void TIM7_Init(void)
     TIM_ITConfig(TIM7,TIM_IT_Update,ENABLE);
     //TIM7使能
     TIM_Cmd(TIM7,ENABLE);
-}
-
-
-
-/**
- * 用于驱动LED1s闪烁
- **/
-uint8_t flag=0;
-
-void TIM6_DAC_IRQHandler(void)
-{
-    if(TIM_GetFlagStatus(TIM6,TIM_FLAG_Update)!=RESET)
-    {
-        flag=~flag;
-        if(flag==0)
-        {
-            RGBLED_OFF();
-        }
-        else
-            RGBLED_White();
-        TIM_ClearFlag(TIM6,TIM_FLAG_Update);
-    }
 }

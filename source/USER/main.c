@@ -5,13 +5,12 @@ int main(void)
 {
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//设置系统中断优先级分组2
 
-    // I2C1_Init();//硬件iic
     RGBLED_Init();
     TIM6_Init();
 
     IIC_Init();
     USART1_Init();
-    
+
     PPM_Init();
 
     MPU6050_Init();
@@ -46,14 +45,29 @@ int main(void)
     MPU6050_CalParamTypeDef MPU6050_CalParamStruct;
     MPU6050_GyroCal(&MPU6050_CalParamStruct);
 
-    // float_t a=0.2333f;
-    float_t b=0;
+    uint32_t a=0;
+    float_t b=0.12345f;
+    float_t c=0.54341f;
+    float_t d=0.23333f;
+    // float_t e=0;
+    // float_t f=0;
     // AT24C02_PageWrite(0x00,(uint8_t*)&a);
-    // AT24C02_SequentialRead(0x00,4,(uint8_t*)&b);
-    // AT24C02_SequentialRead(0x04,4,(uint8_t*)&b);
-    AT24C02_SequentialRead(0x00,4,(uint8_t*)&b);
-    AT24C02_SequentialRead(0x08,4,(uint8_t*)&b);
-    AT24C02_SequentialRead(0x0F,4,(uint8_t*)&b);
+    // SysTick_DelayMs(5);
+    // AT24C02_PageWrite(0x08,(uint8_t*)&b);
+    // SysTick_DelayMs(5);
+    // AT24C02_PageWrite(0x0F,(uint8_t*)&c);
+    // AT24C02_SequentialRead(0x00,4,(uint8_t*)&d);
+    // AT24C02_SequentialRead(0x08,4,(uint8_t*)&e);
+    // AT24C02_SequentialRead(0x0F,4,(uint8_t*)&f);
+
+    AT24C02_SequentialRead(0x00,4,(uint8_t*)&a);
+    AT24C02_SequentialRead(0x04,4,(uint8_t*)&b);
+    AT24C02_SequentialRead(0x08,4,(uint8_t*)&c);
+    AT24C02_SequentialRead(0x0C,4,(uint8_t*)&d);
+
+    // AT24C02_SequentialRead(0x04,4,(uint8_t*)&d);
+    // AT24C02_SequentialRead(0x0C,4,(uint8_t*)&e);
+    // AT24C02_SequentialRead(0x14,4,(uint8_t*)&f);
 
     while (1)
     {
@@ -98,6 +112,6 @@ int main(void)
         ANO_DT_SendRCData(USART1,&ANO_DT_SendRCDataStruct);
         ANO_DT_SendStatus(USART1,&ANO_DT_SendStatusStruct);
 
-        
+
     }
 }

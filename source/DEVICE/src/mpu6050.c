@@ -26,6 +26,9 @@ void MPU6050_Init(void)
  **/
 void MPU6050_GyroCal(MPU6050_CalParamTypeDef* MPU6050_CalParamStruct)
 {
+    MPU6050_CalParamStruct->MPU6050_OffsetGyroX=0;
+    MPU6050_CalParamStruct->MPU6050_OffsetGyroY=0;
+    MPU6050_CalParamStruct->MPU6050_OffsetGyroZ=0;
     //静止状态取值1000次，算平均然后塞到存储芯片里面，开机读取里面的数值，如果是0就进入校准状态
     //暂存数据
     uint8_t temp[6];
@@ -33,20 +36,23 @@ void MPU6050_GyroCal(MPU6050_CalParamTypeDef* MPU6050_CalParamStruct)
     {
         IIC_ReadMultByteFromSlave(MPU6050_AD0_LOW,MPU6050_GYRO_XOUT_H,6,temp);
         //与前一数据对比，正负10之内都能接受
-        MPU6050_CalParamStruct->MPU6050_OffsetGyroX+=(((int16_t)temp[0]<<8)+temp[1])/32767.0f;
-        MPU6050_CalParamStruct->MPU6050_OffsetGyroY+=(((int16_t)temp[2]<<8)+temp[3])/32767.0f;
-        MPU6050_CalParamStruct->MPU6050_OffsetGyroZ+=(((int16_t)temp[4]<<8)+temp[5])/32767.0f;
+        MPU6050_CalParamStruct->MPU6050_OffsetGyroX+=((int16_t)temp[0]<<8|temp[1])/32767.0f;
+        MPU6050_CalParamStruct->MPU6050_OffsetGyroY+=((int16_t)temp[2]<<8|temp[3])/32767.0f;
+        MPU6050_CalParamStruct->MPU6050_OffsetGyroZ+=((int16_t)temp[4]<<8|temp[5])/32767.0f;
 
     }
     MPU6050_CalParamStruct->MPU6050_OffsetGyroX/=1000;
     MPU6050_CalParamStruct->MPU6050_OffsetGyroY/=1000;
     MPU6050_CalParamStruct->MPU6050_OffsetGyroZ/=1000;
     //浮点数写入存储器，一个占四字节，从0x00开始
-    AT24C02_PageWrite(0x00,(uint8_t*)&(MPU6050_CalParamStruct->MPU6050_OffsetGyroX));
-    SysTick_DelayMs(2);
-    AT24C02_PageWrite(0x08,(uint8_t*)&(MPU6050_CalParamStruct->MPU6050_OffsetGyroY));
-    SysTick_DelayMs(2);
-    AT24C02_PageWrite(0x0F,(uint8_t*)&(MPU6050_CalParamStruct->MPU6050_OffsetGyroZ));
+    uint64_t write_tmp;//at24c02页写入中间量
+    //标志位+x轴零偏
+    write_tmp=*(uint64_t*)&MPU6050_CalParamStruct->MPU6050_OffsetGyroX<<32|0xAAAAAA00;
+    AT24C02_PageWrite(0x00,(uint8_t*)&write_tmp);
+    SysTick_DelayMs(5);
+    //y轴零偏+z轴零偏
+    write_tmp=*(uint64_t*)&MPU6050_CalParamStruct->MPU6050_OffsetGyroZ<<32|*(uint64_t*)&MPU6050_CalParamStruct->MPU6050_OffsetGyroY;
+    AT24C02_PageWrite(0x08,(uint8_t*)&write_tmp);
 }
 
 /**

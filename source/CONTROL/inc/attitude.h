@@ -13,6 +13,8 @@
 #include "ak8975.h"
 #include "spl06.h"
 
+#include "at24c02.h"
+
 #include "base.h"
 #include <math.h>
 
@@ -48,6 +50,9 @@ void ATT_Angle2Quat(ATT_AngleDataTypeDef* ATT_AngleDataStruct,
                     ATT_QuatDataTypeDef* ATT_QuatDataStruct);
 void ATT_Quat2Angle(ATT_QuatDataTypeDef* ATT_QuatDataStruct,
                     ATT_AngleDataTypeDef* ATT_AngleDataStruct);
+
+void ATT_SensorCal(void);
+
 
 #ifdef __cplusplus
 }
