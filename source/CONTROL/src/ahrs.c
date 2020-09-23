@@ -52,9 +52,10 @@ void AHRS_GetC(AK8975_FloatDataTypeDef* AK8975_FloatDataStruct,
     _dq2=-dq2;
     _dq3=-dq3;
 
-    C[0]=dq2;   C[1]=_dq3;  C[2]=dq0;   C[3]=_dq1;
-    C[4]=_dq1;  C[5]=_dq0;  C[6]=_dq3;  C[7]=_dq2;
-    C[8]=_dq0;  C[9]=dq1;   C[10]=dq2;  C[11]=_dq3;
-    C[12]=dq0*B0x+_dq2*B0z;C[13]=dq0*B0x+_dq2*B0z;C[13]=dq0*B0x+_dq2*B0z;C[13]=dq0*B0x+_dq2*B0z;
-
+    C[0]=dq2;               C[1]=_dq3;              C[2]=dq0;               C[3]=_dq1;
+    C[4]=_dq1;              C[5]=_dq0;              C[6]=_dq3;              C[7]=_dq2;
+    C[8]=_dq0;              C[9]=dq1;               C[10]=dq2;              C[11]=_dq3;
+    C[12]=dq0*B0x+_dq2*B0z; C[13]=dq1*B0x+dq3*B0z;  C[14]=_dq2*B0x+_dq0*B0z;C[15]=_dq3*B0x+dq1*B0z;
+    C[16]=_dq3*B0x+dq1*B0z; C[17]=dq2*B0x+dq0*B0z;  C[18]=dq1*B0x+dq3*B0z;  C[19]=_dq0*B0x+dq2*B0z;
+    C[20]=dq2*B0x+dq0*B0z;  C[21]=dq3*B0x+_dq1*B0z; C[22]=dq0*B0x+_dq2*B0z; C[23]=dq1*B0x+dq3*B0z;
 }
