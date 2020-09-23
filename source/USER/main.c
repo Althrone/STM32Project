@@ -1,5 +1,6 @@
 #include "main.h"
 
+#include "arm_math.h"
 
 int main(void)
 {

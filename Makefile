@@ -64,7 +64,7 @@ AS_DEFS =\
 
 # C defines
 # USE_STDPERIPH_DRIVER用于使用标准外设库，包含stm32f4xx_conf.h文件
-# __VFP_FP__用于启动407的浮点核
+# __VFP_FP__用于启动407的浮点核，这个是编译器自动生成的，所以不要写在这里
 C_DEFS = \
 -DUSE_STDPERIPH_DRIVER \
  
@@ -119,9 +119,6 @@ OCD_CHIP_FILE = stm32f4x.cfg	#芯片配置文件
 # 开始编译
 # 先编译startup文件
 #######################################
-	# @rm -rf $(BUILD_DIR)/*.bin
-	# @rm -rf $(BUILD_DIR)/*.hex
-	# @rm -rf $(BUILD_DIR)/*.elf
 
 ASM_OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
 STDPERIPH_OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(STDPERIPH_C_SOURCES:.c=.o)))
