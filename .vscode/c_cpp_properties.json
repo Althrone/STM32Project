@@ -10,7 +10,8 @@
                 "UNICODE",
                 "_UNICODE",
                 "USE_STDPERIPH_DRIVER",
-                "__VFP_FP__"
+                "__VFP_FP__",
+                "ARM_MATH_CM4"
             ],
             "intelliSenseMode": "msvc-x64"
         }

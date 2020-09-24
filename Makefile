@@ -67,6 +67,7 @@ AS_DEFS =\
 # __VFP_FP__用于启动407的浮点核，这个是编译器自动生成的，所以不要写在这里
 C_DEFS = \
 -DUSE_STDPERIPH_DRIVER \
+-DARM_MATH_CM4
  
 # AS includes
 AS_INCLUDES =\
@@ -79,7 +80,8 @@ C_INCLUDES = \
 -Isource/DRIVER/inc \
 -Isource/DEVICE/inc \
 -Isource/CONTROL/inc \
--Isource/MATH/inc
+-Isource/MATH/inc \
+-Isource/DSPLIB
 
 
 # compile gcc flags
@@ -160,6 +162,7 @@ $(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).elf: $(OBJECTS)
 -Wl,--defsym=malloc_getpagesize_P=0x80 \
 $^ \
 -Wl,--start-group -lm -lc -Wl,--end-group \
+-Lsource/DSPLIB -larm_cortexM4lf_math \
 -o $@
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

@@ -47,11 +47,11 @@ void MPU6050_GyroCal(MPU6050_CalParamTypeDef* MPU6050_CalParamStruct)
     //浮点数写入存储器，一个占四字节，从0x00开始
     uint64_t write_tmp;//at24c02页写入中间量
     //标志位+x轴零偏
-    write_tmp=*(uint64_t*)&MPU6050_CalParamStruct->MPU6050_OffsetGyroX<<32|0xAAAAAA00;
+    write_tmp=*(uint64_t*)&MPU6050_CalParamStruct->MPU6050_OffsetGyroX<<32|0xAAAAAA00;//大端小端写入问题，keil要反过来
     AT24C02_PageWrite(0x00,(uint8_t*)&write_tmp);
     SysTick_DelayMs(5);
     //y轴零偏+z轴零偏
-    write_tmp=*(uint64_t*)&MPU6050_CalParamStruct->MPU6050_OffsetGyroZ<<32|*(uint64_t*)&MPU6050_CalParamStruct->MPU6050_OffsetGyroY;
+    write_tmp=*(uint64_t*)&MPU6050_CalParamStruct->MPU6050_OffsetGyroZ<<32|*(uint64_t*)&MPU6050_CalParamStruct->MPU6050_OffsetGyroY;//大端小端写入问题，keil要反过来
     AT24C02_PageWrite(0x08,(uint8_t*)&write_tmp);
 }
 

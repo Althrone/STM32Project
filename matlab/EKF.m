@@ -3,7 +3,7 @@ close all;
 clear all;
 
 %计算均值，去除陀螺仪零偏，计算方差
-wave_data=csvread('D:\STM32Project\GetQRMean.csv');
+wave_data=csvread('D:\STM32Project\matlab\GetQRMean.csv');
 %获取前1000个值
 wave_data=wave_data(1:1000,:);
 %求各轴浮点数
@@ -21,7 +21,7 @@ mean(1,1:9)=mean(wave_data(:,1:9));
 var(1,1:9)=var(wave_data(:,1:9));
 
 %读入真正要计算的数据
-test_data=csvread('D:\STM32Project\Test.csv');
+test_data=csvread('D:\STM32Project\matlab\Test.csv');
 %求各轴浮点数
 test_data(:,1)=4*test_data(:,1)/32767;
 test_data(:,2)=4*test_data(:,2)/32767;
