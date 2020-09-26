@@ -8,9 +8,11 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <math.h>
+#include "arm_math.h"
 
 #include "mpu6050.h"
 #include "ak8975.h"
+#include "at24c02.h"
 
 #include "attitude.h"
 
@@ -19,28 +21,17 @@
 /** 
   * @brief  I2C Init structure definition  
   */
-
-// typedef struct
-// {
-//     float_t AHRS_a11;
-//     float_t AHRS_a12;
-//     float_t AHRS_a13;
-//     float_t AHRS_a14;
-//     float_t AHRS_a21;
-//     float_t AHRS_a22;
-//     float_t AHRS_a23;
-//     float_t AHRS_a24;
-//     float_t AHRS_a31;
-//     float_t AHRS_a32;
-//     float_t AHRS_a33;
-//     float_t AHRS_a34;
-//     float_t AHRS_a41;
-//     float_t AHRS_a42;
-//     float_t AHRS_a43;
-//     float_t AHRS_a44;
-// }AHRS_MatrixATypeDef;
-
-
+typedef struct
+{
+    arm_matrix_instance_f32 X;  //状态矩阵，四元数
+    arm_matrix_instance_f32 A;  //状态转移矩阵
+    arm_matrix_instance_f32 P;  //状态协方差矩阵
+    arm_matrix_instance_f32 Q;  //过程噪声方差
+    arm_matrix_instance_f32 C;
+    arm_matrix_instance_f32 H;  //卡尔曼增益
+    arm_matrix_instance_f32 R;  //测量噪声方差
+    arm_matrix_instance_f32 Z;  //观测矩阵
+}AHRS_EKFParamTypeDef;
 
 
 /* Exported functions --------------------------------------------------------*/ 

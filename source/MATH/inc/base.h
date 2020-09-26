@@ -22,7 +22,8 @@
 
 
 float_t Fast_InvSqrt(float_t input);
-float_t Fast_Mean(float_t mean,float_t x,uint16_t n);
+float_t Recursion_Mean(float_t mean,float_t x,uint16_t n);
+
 
 
 #ifdef __cplusplus

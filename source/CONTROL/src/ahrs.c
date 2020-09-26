@@ -1,8 +1,7 @@
 #include "ahrs.h"
 
 #define DT 20.0f//20ms，进去除1000
-
-
+float_t AHRS_B0x,AHRS_B0z;
 
 /**
  * @brief   通过陀螺仪获取A'状态转移矩阵
@@ -10,7 +9,7 @@
  * @param   A: 状态转移矩阵
  **/
 void AHRS_GetA(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
-               float_t* A)
+               arm_matrix_instance_f32* A)
 {
     float_t wx,wy,wz;
     float_t _wx,_wy,_wz;
@@ -20,11 +19,14 @@ void AHRS_GetA(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
     _wx=-wx;
     _wy=-wy;
     _wz=-wz;
-
-    A[0]=1;     A[1]=_wx;   A[2]=_wy;   A[3]=_wz;
-    A[4]=wx;    A[5]=1;     A[6]=wz;    A[7]=_wy;
-    A[8]=wy;    A[9]=_wz;   A[10]=1;    A[11]=wx;
-    A[12]=wz;   A[13]=wy;   A[14]=_wx;  A[15]=1;
+    float_t Aparam[16]=
+    {
+        1,     _wx,    _wy,    _wz,
+        wx,     1,      wz,    _wy,
+        wy,    _wz,     1,      wx,
+        wz,     wy,    _wx,     1
+    };
+    arm_mat_init_f32(A,4,4,Aparam);
 }
 
 /**
@@ -35,12 +37,8 @@ void AHRS_GetA(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
  **/
 void AHRS_GetC(AK8975_FloatDataTypeDef* AK8975_FloatDataStruct,
                ATT_QuatDataTypeDef* ATT_QuatDataStruct,
-               float_t* C)
+               arm_matrix_instance_f32* C)
 {
-    float_t B0x,B0y,B0z;
-    B0x=AK8975_FloatDataStruct->AK8975_FloatMagX;
-    B0y=AK8975_FloatDataStruct->AK8975_FloatMagY;
-    B0z=AK8975_FloatDataStruct->AK8975_FloatMagZ;
     float_t dq0,dq1,dq2,dq3;
     float_t _dq0,_dq1,_dq2,_dq3;
     dq0=2*ATT_QuatDataStruct->ATT_Quat0;
@@ -51,11 +49,67 @@ void AHRS_GetC(AK8975_FloatDataTypeDef* AK8975_FloatDataStruct,
     _dq1=-dq1;
     _dq2=-dq2;
     _dq3=-dq3;
+    float_t Cparam[12]=
+    {
+        dq2,   _dq3,    dq0,   _dq1,
+       _dq1,   _dq0,   _dq3,   _dq2,
+       _dq0,    dq1,    dq2,   _dq3
+    };
+    // C[12]=dq0*AHRS_B0x+_dq2*AHRS_B0z; C[13]=dq1*AHRS_B0x+dq3*AHRS_B0z;
+    // C[14]=_dq2*AHRS_B0x+_dq0*AHRS_B0z;C[15]=_dq3*AHRS_B0x+dq1*AHRS_B0z;
+    // C[16]=_dq3*AHRS_B0x+dq1*AHRS_B0z; C[17]=dq2*AHRS_B0x+dq0*AHRS_B0z;
+    // C[18]=dq1*AHRS_B0x+dq3*AHRS_B0z;  C[19]=_dq0*AHRS_B0x+dq2*AHRS_B0z;
+    // C[20]=dq2*AHRS_B0x+dq0*AHRS_B0z;  C[21]=dq3*AHRS_B0x+_dq1*AHRS_B0z;
+    // C[22]=dq0*AHRS_B0x+_dq2*AHRS_B0z; C[23]=dq1*AHRS_B0x+dq3*AHRS_B0z;
+    arm_mat_init_f32(C,3,4,Cparam);
+}
 
-    C[0]=dq2;               C[1]=_dq3;              C[2]=dq0;               C[3]=_dq1;
-    C[4]=_dq1;              C[5]=_dq0;              C[6]=_dq3;              C[7]=_dq2;
-    C[8]=_dq0;              C[9]=dq1;               C[10]=dq2;              C[11]=_dq3;
-    C[12]=dq0*B0x+_dq2*B0z; C[13]=dq1*B0x+dq3*B0z;  C[14]=_dq2*B0x+_dq0*B0z;C[15]=_dq3*B0x+dq1*B0z;
-    C[16]=_dq3*B0x+dq1*B0z; C[17]=dq2*B0x+dq0*B0z;  C[18]=dq1*B0x+dq3*B0z;  C[19]=_dq0*B0x+dq2*B0z;
-    C[20]=dq2*B0x+dq0*B0z;  C[21]=dq3*B0x+_dq1*B0z; C[22]=dq0*B0x+_dq2*B0z; C[23]=dq1*B0x+dq3*B0z;
+/**
+ * @brief   从AT24C02获取参数，设为全局变量
+ **/
+void AHRS_GetGeomagneticVector()
+{
+    AT24C02_SequentialRead(0x10,4,(uint8_t*)&AHRS_B0x);
+    AT24C02_SequentialRead(0x14,4,(uint8_t*)&AHRS_B0z);
+}
+
+
+/**
+ * @brief   扩展卡尔曼计算
+ * @param   AHRS_EKFParamStruct: 机体四元数
+ **/
+void AHRS_EKF(AHRS_EKFParamTypeDef* AHRS_EKFParamStruct)
+{
+    arm_matrix_instance_f32 P1,P2,H1,H2,H2_,At,Ct;
+    //X(k)=A*X(k-1)
+    arm_mat_mult_f32(&AHRS_EKFParamStruct->A,&AHRS_EKFParamStruct->X,
+                     &AHRS_EKFParamStruct->X);
+    //A*P(k-1)*At+Q
+    arm_mat_mult_f32(&AHRS_EKFParamStruct->A,&AHRS_EKFParamStruct->P,
+                     &P1);
+    arm_mat_trans_f32(&AHRS_EKFParamStruct->A,&At);
+    arm_mat_mult_f32(&P1,&At,
+                     &AHRS_EKFParamStruct->P);
+    arm_mat_add_f32(&AHRS_EKFParamStruct->P,&AHRS_EKFParamStruct->Q,
+                    &AHRS_EKFParamStruct->P);
+    //H(k)
+    arm_mat_trans_f32(&AHRS_EKFParamStruct->C,&Ct);
+    arm_mat_mult_f32(&AHRS_EKFParamStruct->P,&Ct,
+                     &H1);
+    arm_mat_mult_f32(&AHRS_EKFParamStruct->C,&AHRS_EKFParamStruct->P,
+                     &P2);
+    arm_mat_mult_f32(&P2,&Ct,&H2);
+    arm_mat_add_f32(&H2,&AHRS_EKFParamStruct->R,&H2);
+    arm_mat_inverse_f32(&H2,&H2_);
+    arm_mat_mult_f32(&H1,&H2_,&AHRS_EKFParamStruct->H);
+    //X(k)校正
+    arm_matrix_instance_f32 X1,Z1;
+    arm_mat_mult_f32(&AHRS_EKFParamStruct->C,&AHRS_EKFParamStruct->X,&Z1);
+    arm_mat_sub_f32(&AHRS_EKFParamStruct->Z,&Z1,&Z1);
+    arm_mat_mult_f32(&AHRS_EKFParamStruct->H,&Z1,&X1);
+    arm_mat_add_f32(&AHRS_EKFParamStruct->X,&X1,&AHRS_EKFParamStruct->X);
+    //P(k)校正
+    arm_matrix_instance_f32 I,I1,I2;//单位阵
+    arm_mat_mult_f32(&AHRS_EKFParamStruct->H,&AHRS_EKFParamStruct->C,&I1);
+    arm_mat_sub_f32(&I,&I1,&I2);
 }

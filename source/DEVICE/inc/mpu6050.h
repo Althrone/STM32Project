@@ -10,7 +10,6 @@
 #include "iic_moni.h"
 
 #include "at24c02.h"
-#include "iic_moni.h"
 
 /* Device Address ------------------------------------------------------------*/
 #define MPU6050_AD0_LOW             0x68

@@ -1,6 +1,6 @@
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __AHRS_H
-#define __AHRS_H
+#ifndef __AT24C02_H
+#define __AT24C02_H
 
 #ifdef __cplusplus
     extern "C" {
@@ -39,4 +39,4 @@ void AT24C02_SequentialRead(uint8_t addr,uint8_t length,uint8_t* data);
 }
 #endif
 
-#endif /*__AHRS_H */
+#endif /*__AT24C02_H */

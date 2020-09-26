@@ -17,6 +17,7 @@
 
 #include "base.h"
 #include <math.h>
+#include "arm_math.h"
 
 #include "ANO_DT.h"
 

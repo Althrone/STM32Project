@@ -67,7 +67,8 @@ AS_DEFS =\
 # __VFP_FP__用于启动407的浮点核，这个是编译器自动生成的，所以不要写在这里
 C_DEFS = \
 -DUSE_STDPERIPH_DRIVER \
--DARM_MATH_CM4
+-DARM_MATH_CM4 \
+-DARM_MATH_MATRIX_CHECK
  
 # AS includes
 AS_INCLUDES =\

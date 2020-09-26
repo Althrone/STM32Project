@@ -7,9 +7,9 @@
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f4xx.h"
-
 #include "iic_moni.h"
+#include "at24c02.h"
+#include "base.h"
 
 /* Device Address ------------------------------------------------------------*/
 #define AK8975_CAD1_LOW_CAD0_LOW    0x0C
@@ -77,6 +77,23 @@ typedef struct
     float_t AK8975_FloatMagY;
     float_t AK8975_FloatMagZ;
 }AK8975_FloatDataTypeDef;
+
+typedef struct
+{
+    float_t AK8975_CalMagX;
+    float_t AK8975_CalMagY;
+    float_t AK8975_CalMagZ;
+}AK8975_CalDataTypeDef;
+
+typedef struct
+{
+    float_t AK8975_FixGainX;//标度因数，我习惯叫它修正系数
+    float_t AK8975_FixGainY;
+    float_t AK8975_FixGainZ;
+    float_t AK8975_CenterX;//磁罗盘零偏
+    float_t AK8975_CenterY;
+    float_t AK8975_CenterZ;
+}AK8975_CalParamTypeDef;//修正参数
 
 /* Exported functions --------------------------------------------------------*/ 
 

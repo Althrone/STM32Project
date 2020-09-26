@@ -1,5 +1,7 @@
 #include "attitude.h"
 
+arm_matrix_instance_f32 MixerMatrix;//混控矩阵
+
 void ATT_RawData(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
                  AK8975_FloatDataTypeDef* AK8975_FloatDataStruct,
                  ATT_AngleDataTypeDef* ATT_AngleDataStruct)
@@ -18,7 +20,7 @@ void ATT_RawData(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
     a_z=MPU6050_FloatDataStruct->MPU6050_FloatAccelZ*nomo;
 
     xita=asin(a_x*nomo);
-    phi=atan2(a_y,a_z);
+    phi=atan2(-a_y,-a_z);
     
     Bx=AK8975_FloatDataStruct->AK8975_FloatMagX*cos(xita)+
        AK8975_FloatDataStruct->AK8975_FloatMagY*sin(xita)*cos(phi)+
@@ -29,20 +31,20 @@ void ATT_RawData(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
     xita*=53.7;
     phi*=53.7;
 
-    if((By==0)&&(Bx>0))
-    psi=0;
-    if(By<0)
-    psi=90+atan(Bx/By)*53.7;
-    if((By==0)&&(Bx<0))
-    psi=180;
-    if(By>0)
-    psi=270+atan(Bx/By)*53.7;
+    // if((By==0)&&(Bx>0))
+    // psi=0;
+    // if(By<0)
+    // psi=90+atan(Bx/By)*53.7;
+    // if((By==0)&&(Bx<0))
+    // psi=180;
+    // if(By>0)
+    // psi=270+atan(Bx/By)*53.7;
 
 
     ATT_AngleDataStruct->ATT_AngleTheta=xita;
     ATT_AngleDataStruct->ATT_AnglePhi=phi;
-    ATT_AngleDataStruct->ATT_AnglePsi=psi;
-    // ATT_AngleDataStruct->ATT_AnglePsi=0;
+    // ATT_AngleDataStruct->ATT_AnglePsi=psi;
+    ATT_AngleDataStruct->ATT_AnglePsi=0;
 }
 
 /**
@@ -106,9 +108,39 @@ void ATT_SensorCal(void)
 {
     //读AT24C02的6050陀螺仪标志位
     uint32_t flag;
-    AT24C02_SequentialRead(0x00,4,&flag);
+    AT24C02_SequentialRead(0x00,4,(uint8_t*)&flag);
     if(flag!=0xAAAAAA00)//传感器未校准，或者校准数据出错
     {
         //死循环红灯快闪，
     }
+}
+
+void Control(void)
+{
+    //
+}
+
+/**
+ * @brief   选择对应的混控矩阵
+ **/
+void ATT_MixerMatrixInit(void)
+{
+    /*
+    X模式，RPTY是摇杆通道顺序
+    ┌         ┐┌   ┐ ┌    ┐
+    │ - - + + ││ R │ │ M1 │
+    │ + + + + ││ P │=│ M2 │
+    │ + - + - ││ T │ │ M3 │
+    │ - + + - ││ Y │ │ M4 │
+    └         ┘└   ┘ └    ┘
+    */
+    float32_t param[16]=
+    {
+       -0.70710678f,   -0.70710678f,    1.0f,   1.0f,
+        0.70710678f,    0.70710678f,    1.0f,   1.0f,
+        0.70710678f,   -0.70710678f,    1.0f,  -1.0f,
+       -0.70710678f,    0.70710678f,    1.0f,  -1.0f
+    };
+
+    arm_mat_init_f32(&MixerMatrix,4,4,param);
 }

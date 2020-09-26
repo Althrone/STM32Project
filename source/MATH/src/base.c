@@ -20,13 +20,13 @@ float_t Fast_InvSqrt(float_t x)
 }
 
 /**
- * @brief   均值速算法
- * @param   x: 输入的累加数据
- * @param   n: 第几个n
+ * @brief   递推法计算均值
+ * @param   mean: 目前的平均值
+ * @param   x: 需要累加的数据
+ * @param   n: 第几个累加数据，从1开始
  **/
-float_t Fast_Mean(float_t mean,float_t x,uint16_t n)
+float_t Recursion_Mean(float_t mean,float_t x,uint16_t n)
 {
-    n=n+1;
     mean=mean+(x-mean)/n;
     return mean;
 }
