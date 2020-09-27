@@ -19,6 +19,8 @@
 #include <math.h>
 #include "arm_math.h"
 
+#include "ahrs.h"
+
 #include "ANO_DT.h"
 
 /* Exported types ------------------------------------------------------------*/
@@ -51,8 +53,9 @@ void ATT_Angle2Quat(ATT_AngleDataTypeDef* ATT_AngleDataStruct,
                     ATT_QuatDataTypeDef* ATT_QuatDataStruct);
 void ATT_Quat2Angle(ATT_QuatDataTypeDef* ATT_QuatDataStruct,
                     ATT_AngleDataTypeDef* ATT_AngleDataStruct);
-
 void ATT_SensorCal(void);
+void ATT_Init(void);
+
 
 
 #ifdef __cplusplus

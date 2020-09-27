@@ -1,7 +1,23 @@
 #include "ahrs.h"
 
-#define DT 20.0f//20ms，进去除1000
-float_t AHRS_B0x,AHRS_B0z;
+#define DT 0.02f//20ms，进去除1000
+// float_t AHRS_B0x,AHRS_B0z;//地磁矢量
+
+/**
+ * @brief   初始化X状态矩阵
+ * @param   X: 状态矩阵，四元数
+ **/
+void AHRS_InitX(arm_matrix_instance_f32* X)
+{
+    float32_t initQuatParam[4]=
+    {
+        1,
+        0,
+        0,
+        0
+    };
+    arm_mat_init_f32(X,4,1,initQuatParam);
+}
 
 /**
  * @brief   通过陀螺仪获取A'状态转移矩阵
@@ -31,20 +47,18 @@ void AHRS_GetA(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
 
 /**
  * @brief   获取C'观测矩阵
- * @param   AK8975_FloatDataStruct: 磁罗盘数据
- * @param   ATT_QuatDataStruct: 四元数
+ * @param   X: 四元数
  * @param   C: 观测矩阵
  **/
-void AHRS_GetC(AK8975_FloatDataTypeDef* AK8975_FloatDataStruct,
-               ATT_QuatDataTypeDef* ATT_QuatDataStruct,
+void AHRS_GetC(arm_matrix_instance_f32* X,
                arm_matrix_instance_f32* C)
 {
     float_t dq0,dq1,dq2,dq3;
     float_t _dq0,_dq1,_dq2,_dq3;
-    dq0=2*ATT_QuatDataStruct->ATT_Quat0;
-    dq1=2*ATT_QuatDataStruct->ATT_Quat1;
-    dq2=2*ATT_QuatDataStruct->ATT_Quat2;
-    dq3=2*ATT_QuatDataStruct->ATT_Quat3;
+    dq0=2*X->pData[0];
+    dq1=2*X->pData[1];
+    dq2=2*X->pData[2];
+    dq3=2*X->pData[3];
     _dq0=-dq0;
     _dq1=-dq1;
     _dq2=-dq2;
@@ -64,15 +78,46 @@ void AHRS_GetC(AK8975_FloatDataTypeDef* AK8975_FloatDataStruct,
     arm_mat_init_f32(C,3,4,Cparam);
 }
 
+// /**
+//  * @brief   从AT24C02获取参数，设为全局变量
+//  **/
+// void AHRS_GetGeomagneticVector()
+// {
+//     AT24C02_SequentialRead(0x10,4,(uint8_t*)&AHRS_B0x);
+//     AT24C02_SequentialRead(0x14,4,(uint8_t*)&AHRS_B0z);
+// }
 /**
- * @brief   从AT24C02获取参数，设为全局变量
+ * @brief   初始化P状态矩阵协方差矩阵
  **/
-void AHRS_GetGeomagneticVector()
+void AHRS_InitP(arm_matrix_instance_f32* P)
 {
-    AT24C02_SequentialRead(0x10,4,(uint8_t*)&AHRS_B0x);
-    AT24C02_SequentialRead(0x14,4,(uint8_t*)&AHRS_B0z);
+    float32_t initQuatVarParam[16]=
+    {
+        1,0,0,0,
+        0,1,0,0,
+        0,0,1,0,
+        0,0,0,1
+    };
+    arm_mat_init_f32(P,4,4,initQuatVarParam);
 }
 
+/**
+ * @brief   获取测量噪声方差
+ * @param   R: 噪声方差矩阵，3X3
+ **/
+void AHRS_InitR(arm_matrix_instance_f32* R)
+{
+    float32_t Rparam[9]=
+    {
+        0,0,0,
+        0,0,0,
+        0,0,0
+    };
+    AT24C02_SequentialRead(0x28,4,(uint8_t*)&Rparam[0]);
+    AT24C02_SequentialRead(0x2C,4,(uint8_t*)&Rparam[4]);
+    AT24C02_SequentialRead(0x30,4,(uint8_t*)&Rparam[8]);
+    arm_mat_init_f32(R,3,3,Rparam);
+}
 
 /**
  * @brief   扩展卡尔曼计算
@@ -80,11 +125,11 @@ void AHRS_GetGeomagneticVector()
  **/
 void AHRS_EKF(AHRS_EKFParamTypeDef* AHRS_EKFParamStruct)
 {
-    arm_matrix_instance_f32 P1,P2,H1,H2,H2_,At,Ct;
-    //X(k)=A*X(k-1)
+    //X(k)=A*X(k-1)，X(k)估计
     arm_mat_mult_f32(&AHRS_EKFParamStruct->A,&AHRS_EKFParamStruct->X,
                      &AHRS_EKFParamStruct->X);
-    //A*P(k-1)*At+Q
+    //P(k)=A*P(k-1)*At+Q，P(k)估计
+    arm_matrix_instance_f32 P1,At;
     arm_mat_mult_f32(&AHRS_EKFParamStruct->A,&AHRS_EKFParamStruct->P,
                      &P1);
     arm_mat_trans_f32(&AHRS_EKFParamStruct->A,&At);
@@ -93,6 +138,7 @@ void AHRS_EKF(AHRS_EKFParamTypeDef* AHRS_EKFParamStruct)
     arm_mat_add_f32(&AHRS_EKFParamStruct->P,&AHRS_EKFParamStruct->Q,
                     &AHRS_EKFParamStruct->P);
     //H(k)
+    arm_matrix_instance_f32 Ct,P2,H1,H2,H2_;
     arm_mat_trans_f32(&AHRS_EKFParamStruct->C,&Ct);
     arm_mat_mult_f32(&AHRS_EKFParamStruct->P,&Ct,
                      &H1);
@@ -112,4 +158,6 @@ void AHRS_EKF(AHRS_EKFParamTypeDef* AHRS_EKFParamStruct)
     arm_matrix_instance_f32 I,I1,I2;//单位阵
     arm_mat_mult_f32(&AHRS_EKFParamStruct->H,&AHRS_EKFParamStruct->C,&I1);
     arm_mat_sub_f32(&I,&I1,&I2);
+    arm_mat_mult_f32(&I2,&AHRS_EKFParamStruct->P,
+                     &AHRS_EKFParamStruct->P);
 }

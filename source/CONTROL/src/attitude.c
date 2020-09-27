@@ -2,6 +2,8 @@
 
 arm_matrix_instance_f32 MixerMatrix;//混控矩阵
 
+AHRS_EKFParamTypeDef AHRS_EKFParamStruct;
+
 void ATT_RawData(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
                  AK8975_FloatDataTypeDef* AK8975_FloatDataStruct,
                  ATT_AngleDataTypeDef* ATT_AngleDataStruct)
@@ -143,4 +145,31 @@ void ATT_MixerMatrixInit(void)
     };
 
     arm_mat_init_f32(&MixerMatrix,4,4,param);
+}
+
+/**
+ * @brief   飞机初始姿态四元数初始化
+ **/
+void ATT_Init(void)
+{
+    //初始化飞机姿态
+    AHRS_InitX(&AHRS_EKFParamStruct.X);
+    //初始化状态矩阵协方差矩阵
+    AHRS_InitP(&AHRS_EKFParamStruct.P);
+    //初始化观测噪声方差矩阵，这个矩阵一直都是不变的，非常重要
+    AHRS_InitR(&AHRS_EKFParamStruct.R);
+}
+
+/**
+ * @brief   姿态解算
+ * @param   MPU6050_FloatDataStruct: 6050数据
+ * @param   ATT_AngleDataStruct: 解算出来的姿态数据
+ **/
+void ATT_Calculation(MPU6050_RawDataTypeDef* MPU6050_FloatDataStruct,
+                     ATT_AngleDataTypeDef* ATT_AngleDataStruct)
+{
+    
+    AHRS_GetA(MPU6050_FloatDataStruct,&AHRS_EKFParamStruct.A);
+    AHRS_GetC(&AHRS_EKFParamStruct.X,&AHRS_EKFParamStruct.C);
+    AHRS_EKF(&AHRS_EKFParamStruct);
 }

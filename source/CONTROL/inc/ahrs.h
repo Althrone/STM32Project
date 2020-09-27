@@ -34,9 +34,15 @@ typedef struct
 }AHRS_EKFParamTypeDef;
 
 
-/* Exported functions --------------------------------------------------------*/ 
-
-
+/* Exported functions --------------------------------------------------------*/
+void AHRS_InitX(arm_matrix_instance_f32* X);
+void AHRS_GetA(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
+               arm_matrix_instance_f32* A);
+void AHRS_GetC(arm_matrix_instance_f32* A,
+               arm_matrix_instance_f32* C);
+void AHRS_InitP(arm_matrix_instance_f32* P);
+void AHRS_InitR(arm_matrix_instance_f32* R);
+void AHRS_EKF(AHRS_EKFParamTypeDef* AHRS_EKFParamStruct);
 
 #ifdef __cplusplus
 }

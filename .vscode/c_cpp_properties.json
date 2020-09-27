@@ -10,6 +10,7 @@
                 "UNICODE",
                 "_UNICODE",
                 "USE_STDPERIPH_DRIVER",
+                "__FPU_PRESENT",
                 "__VFP_FP__",
                 "ARM_MATH_CM4"
             ],
