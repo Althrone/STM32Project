@@ -39,6 +39,8 @@ int main(void)
     MPU6050_RawDataTypeDef MPU6050_RawDataStruct;
     MPU6050_FloatDataTypeDef MPU6050_FloatDataStruct;
 
+    ATT_AngleDataTypeDef ATT_AngleDataStruct;
+
     while (1)
     {
         //发送传感器原始数据，机体坐标系
@@ -56,7 +58,10 @@ int main(void)
         ANO_DT_SendRCData(USART1,&ANO_DT_SendRCDataStruct);
 
         //姿态解算
-        
+        // ATT_Calculation(&MPU6050_FloatDataStruct,&ATT_AngleDataStruct);
+        ANO_DT_SendStatusStruct.ANO_DT_Roll=ATT_AngleDataStruct.ATT_AnglePhi;
+        ANO_DT_SendStatusStruct.ANO_DT_Pitch=ATT_AngleDataStruct.ATT_AngleTheta;
+        ANO_DT_SendStatusStruct.ANO_DT_Yaw=ATT_AngleDataStruct.ATT_AnglePsi;
         ANO_DT_SendStatus(USART1,&ANO_DT_SendStatusStruct);
     }
 }

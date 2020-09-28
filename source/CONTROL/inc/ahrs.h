@@ -25,12 +25,13 @@ typedef struct
 {
     arm_matrix_instance_f32 X;  //状态矩阵，四元数
     arm_matrix_instance_f32 A;  //状态转移矩阵
+    arm_matrix_instance_f32 Z;  //观测矩阵
+    arm_matrix_instance_f32 C;
     arm_matrix_instance_f32 P;  //状态协方差矩阵
     arm_matrix_instance_f32 Q;  //过程噪声方差
-    arm_matrix_instance_f32 C;
     arm_matrix_instance_f32 H;  //卡尔曼增益
     arm_matrix_instance_f32 R;  //测量噪声方差
-    arm_matrix_instance_f32 Z;  //观测矩阵
+    arm_matrix_instance_f32 I;  //初始化一个单位阵
 }AHRS_EKFParamTypeDef;
 
 
@@ -38,9 +39,12 @@ typedef struct
 void AHRS_InitX(arm_matrix_instance_f32* X);
 void AHRS_GetA(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
                arm_matrix_instance_f32* A);
+void AHRS_GetZ(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
+               arm_matrix_instance_f32* Z);
 void AHRS_GetC(arm_matrix_instance_f32* A,
                arm_matrix_instance_f32* C);
 void AHRS_InitP(arm_matrix_instance_f32* P);
+void AHRS_InitQ(arm_matrix_instance_f32* Q);
 void AHRS_InitR(arm_matrix_instance_f32* R);
 void AHRS_EKF(AHRS_EKFParamTypeDef* AHRS_EKFParamStruct);
 

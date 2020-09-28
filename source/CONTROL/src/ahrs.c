@@ -5,24 +5,24 @@
 
 /**
  * @brief   初始化X状态矩阵
- * @param   X: 状态矩阵，四元数
+ * @param   X: 状态矩阵，四元数，4X1
  **/
 void AHRS_InitX(arm_matrix_instance_f32* X)
 {
-    float32_t initQuatParam[4]=
+    float32_t XParam[4]=
     {
         1,
         0,
         0,
         0
     };
-    arm_mat_init_f32(X,4,1,initQuatParam);
+    arm_mat_init_f32(X,4,1,XParam);
 }
 
 /**
  * @brief   通过陀螺仪获取A'状态转移矩阵
  * @param   MPU6050_FloatDataStruct: 6050浮点数据
- * @param   A: 状态转移矩阵
+ * @param   A: 状态转移矩阵，4X4
  **/
 void AHRS_GetA(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
                arm_matrix_instance_f32* A)
@@ -46,9 +46,29 @@ void AHRS_GetA(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
 }
 
 /**
+ * @brief   获取Z观测矩阵
+ * @param   MPU6050_FloatDataStruct: 获取加速度计数据，记得单位化
+ * @param   Z: 观测矩阵
+ **/
+void AHRS_GetZ(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
+               arm_matrix_instance_f32* Z)
+{
+    float_t norm=Fast_InvSqrt(MPU6050_FloatDataStruct->MPU6050_FloatAccelX*MPU6050_FloatDataStruct->MPU6050_FloatAccelX+
+                              MPU6050_FloatDataStruct->MPU6050_FloatAccelY*MPU6050_FloatDataStruct->MPU6050_FloatAccelY+
+                              MPU6050_FloatDataStruct->MPU6050_FloatAccelZ*MPU6050_FloatDataStruct->MPU6050_FloatAccelZ);
+    float_t Zparam[3]=
+    {
+        MPU6050_FloatDataStruct->MPU6050_FloatAccelX*norm,
+        MPU6050_FloatDataStruct->MPU6050_FloatAccelY*norm,
+        MPU6050_FloatDataStruct->MPU6050_FloatAccelZ*norm,
+    };
+    arm_mat_init_f32(Z,3,1,Zparam);
+}
+
+/**
  * @brief   获取C'观测矩阵
  * @param   X: 四元数
- * @param   C: 观测矩阵
+ * @param   C: 观测矩阵，3X4
  **/
 void AHRS_GetC(arm_matrix_instance_f32* X,
                arm_matrix_instance_f32* C)
@@ -69,6 +89,7 @@ void AHRS_GetC(arm_matrix_instance_f32* X,
        _dq1,   _dq0,   _dq3,   _dq2,
        _dq0,    dq1,    dq2,   _dq3
     };
+    //地磁矢量有点问题，准确来说是磁罗盘有点问题，先不用磁罗盘
     // C[12]=dq0*AHRS_B0x+_dq2*AHRS_B0z; C[13]=dq1*AHRS_B0x+dq3*AHRS_B0z;
     // C[14]=_dq2*AHRS_B0x+_dq0*AHRS_B0z;C[15]=_dq3*AHRS_B0x+dq1*AHRS_B0z;
     // C[16]=_dq3*AHRS_B0x+dq1*AHRS_B0z; C[17]=dq2*AHRS_B0x+dq0*AHRS_B0z;
@@ -91,14 +112,34 @@ void AHRS_GetC(arm_matrix_instance_f32* X,
  **/
 void AHRS_InitP(arm_matrix_instance_f32* P)
 {
-    float32_t initQuatVarParam[16]=
+    float32_t Pparam[16]=
     {
         1,0,0,0,
         0,1,0,0,
         0,0,1,0,
         0,0,0,1
     };
-    arm_mat_init_f32(P,4,4,initQuatVarParam);
+    arm_mat_init_f32(P,4,4,Pparam);
+}
+
+/**
+ * @brief   初始化过程噪声方差矩阵
+ * @param   Q: 过程噪声方差矩阵，需要灵魂调参，4X4
+ **/
+void AHRS_InitQ(arm_matrix_instance_f32* Q)
+{
+    float32_t Qparam[16]=
+    {
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0
+    };
+    Qparam[0]=0.0001;
+    Qparam[5]=0.0001;
+    Qparam[10]=0.0001;
+    Qparam[15]=0.0001;
+    arm_mat_init_f32(Q,4,4,Qparam);
 }
 
 /**
@@ -117,6 +158,22 @@ void AHRS_InitR(arm_matrix_instance_f32* R)
     AT24C02_SequentialRead(0x2C,4,(uint8_t*)&Rparam[4]);
     AT24C02_SequentialRead(0x30,4,(uint8_t*)&Rparam[8]);
     arm_mat_init_f32(R,3,3,Rparam);
+}
+
+/**
+ * @brief   初始化一个单位阵，用于状态矩阵协方差矩阵校正
+ * @param   I: 单位阵
+ **/
+void AHRS_InitI(arm_matrix_instance_f32* I)
+{
+    float32_t Iparam[16]=
+    {
+        1,0,0,0,
+        0,1,0,0,
+        0,0,1,0,
+        0,0,0,1
+    };
+    arm_mat_init_f32(I,4,4,Iparam);
 }
 
 /**
@@ -155,9 +212,9 @@ void AHRS_EKF(AHRS_EKFParamTypeDef* AHRS_EKFParamStruct)
     arm_mat_mult_f32(&AHRS_EKFParamStruct->H,&Z1,&X1);
     arm_mat_add_f32(&AHRS_EKFParamStruct->X,&X1,&AHRS_EKFParamStruct->X);
     //P(k)校正
-    arm_matrix_instance_f32 I,I1,I2;//单位阵
+    arm_matrix_instance_f32 I1,I2;
     arm_mat_mult_f32(&AHRS_EKFParamStruct->H,&AHRS_EKFParamStruct->C,&I1);
-    arm_mat_sub_f32(&I,&I1,&I2);
+    arm_mat_sub_f32(&AHRS_EKFParamStruct->I,&I1,&I2);
     arm_mat_mult_f32(&I2,&AHRS_EKFParamStruct->P,
                      &AHRS_EKFParamStruct->P);
 }

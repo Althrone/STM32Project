@@ -55,6 +55,8 @@ void ATT_Quat2Angle(ATT_QuatDataTypeDef* ATT_QuatDataStruct,
                     ATT_AngleDataTypeDef* ATT_AngleDataStruct);
 void ATT_SensorCal(void);
 void ATT_Init(void);
+void ATT_Calculation(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
+                     ATT_AngleDataTypeDef* ATT_AngleDataStruct);
 
 
 
