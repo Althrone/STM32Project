@@ -14,8 +14,6 @@
 #include "ak8975.h"
 #include "at24c02.h"
 
-#include "attitude.h"
-
 /* Exported types ------------------------------------------------------------*/
 
 /** 
@@ -45,7 +43,9 @@ void AHRS_GetC(arm_matrix_instance_f32* A,
                arm_matrix_instance_f32* C);
 void AHRS_InitP(arm_matrix_instance_f32* P);
 void AHRS_InitQ(arm_matrix_instance_f32* Q);
+void AHRS_InitH(arm_matrix_instance_f32* H);
 void AHRS_InitR(arm_matrix_instance_f32* R);
+void AHRS_InitI(arm_matrix_instance_f32* I);
 void AHRS_EKF(AHRS_EKFParamTypeDef* AHRS_EKFParamStruct);
 
 #ifdef __cplusplus

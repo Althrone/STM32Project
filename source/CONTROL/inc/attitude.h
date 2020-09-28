@@ -21,8 +21,6 @@
 
 #include "ahrs.h"
 
-#include "ANO_DT.h"
-
 /* Exported types ------------------------------------------------------------*/
 typedef struct
 {
@@ -54,9 +52,10 @@ void ATT_Angle2Quat(ATT_AngleDataTypeDef* ATT_AngleDataStruct,
 void ATT_Quat2Angle(ATT_QuatDataTypeDef* ATT_QuatDataStruct,
                     ATT_AngleDataTypeDef* ATT_AngleDataStruct);
 void ATT_SensorCal(void);
-void ATT_Init(void);
+void ATT_Init(AHRS_EKFParamTypeDef* AHRS_EKFParamStruct);
 void ATT_Calculation(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
-                     ATT_AngleDataTypeDef* ATT_AngleDataStruct);
+                     ATT_AngleDataTypeDef* ATT_AngleDataStruct,
+                     AHRS_EKFParamTypeDef* AHRS_EKFParamStruct);
 
 
 

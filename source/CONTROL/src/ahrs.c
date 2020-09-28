@@ -142,6 +142,12 @@ void AHRS_InitQ(arm_matrix_instance_f32* Q)
     arm_mat_init_f32(Q,4,4,Qparam);
 }
 
+void AHRS_InitH(arm_matrix_instance_f32* H)
+{
+    float32_t Hparam[12]={0};
+    arm_mat_init_f32(H,4,3,Hparam);
+}
+
 /**
  * @brief   获取测量噪声方差
  * @param   R: 噪声方差矩阵，3X3
@@ -150,13 +156,13 @@ void AHRS_InitR(arm_matrix_instance_f32* R)
 {
     float32_t Rparam[9]=
     {
-        0,0,0,
-        0,0,0,
-        0,0,0
+        0.0001,0,0,
+        0,0.0001,0,
+        0,0,0.0001
     };
-    AT24C02_SequentialRead(0x28,4,(uint8_t*)&Rparam[0]);
-    AT24C02_SequentialRead(0x2C,4,(uint8_t*)&Rparam[4]);
-    AT24C02_SequentialRead(0x30,4,(uint8_t*)&Rparam[8]);
+    // AT24C02_SequentialRead(0x28,4,(uint8_t*)&Rparam[0]);
+    // AT24C02_SequentialRead(0x2C,4,(uint8_t*)&Rparam[4]);
+    // AT24C02_SequentialRead(0x30,4,(uint8_t*)&Rparam[8]);
     arm_mat_init_f32(R,3,3,Rparam);
 }
 
@@ -182,11 +188,16 @@ void AHRS_InitI(arm_matrix_instance_f32* I)
  **/
 void AHRS_EKF(AHRS_EKFParamTypeDef* AHRS_EKFParamStruct)
 {
+    int16_t status;
     //X(k)=A*X(k-1)，X(k)估计
     arm_mat_mult_f32(&AHRS_EKFParamStruct->A,&AHRS_EKFParamStruct->X,
                      &AHRS_EKFParamStruct->X);
     //P(k)=A*P(k-1)*At+Q，P(k)估计
     arm_matrix_instance_f32 P1,At;
+    float32_t Init16[16]={0};
+    arm_mat_init_f32(&P1,4,4,Init16);
+    arm_mat_init_f32(&At,4,4,Init16);
+
     arm_mat_mult_f32(&AHRS_EKFParamStruct->A,&AHRS_EKFParamStruct->P,
                      &P1);
     arm_mat_trans_f32(&AHRS_EKFParamStruct->A,&At);
@@ -196,6 +207,14 @@ void AHRS_EKF(AHRS_EKFParamTypeDef* AHRS_EKFParamStruct)
                     &AHRS_EKFParamStruct->P);
     //H(k)
     arm_matrix_instance_f32 Ct,P2,H1,H2,H2_;
+    float32_t Init9[9]={0};
+    float32_t Init12[12]={0};
+    arm_mat_init_f32(&Ct,4,3,Init12);
+    arm_mat_init_f32(&H1,4,3,Init12);
+    arm_mat_init_f32(&P2,3,4,Init12);
+    arm_mat_init_f32(&H2,3,3,Init9);
+    arm_mat_init_f32(&H2_,3,3,Init9);
+
     arm_mat_trans_f32(&AHRS_EKFParamStruct->C,&Ct);
     arm_mat_mult_f32(&AHRS_EKFParamStruct->P,&Ct,
                      &H1);
@@ -207,12 +226,20 @@ void AHRS_EKF(AHRS_EKFParamTypeDef* AHRS_EKFParamStruct)
     arm_mat_mult_f32(&H1,&H2_,&AHRS_EKFParamStruct->H);
     //X(k)校正
     arm_matrix_instance_f32 X1,Z1;
+    float32_t Init3[3]={0};
+    float32_t Init4[4]={0};
+    arm_mat_init_f32(&Z1,3,1,Init3);
+    arm_mat_init_f32(&X1,4,1,Init4);
+
     arm_mat_mult_f32(&AHRS_EKFParamStruct->C,&AHRS_EKFParamStruct->X,&Z1);
     arm_mat_sub_f32(&AHRS_EKFParamStruct->Z,&Z1,&Z1);
     arm_mat_mult_f32(&AHRS_EKFParamStruct->H,&Z1,&X1);
     arm_mat_add_f32(&AHRS_EKFParamStruct->X,&X1,&AHRS_EKFParamStruct->X);
     //P(k)校正
     arm_matrix_instance_f32 I1,I2;
+    arm_mat_init_f32(&I1,4,4,Init16);
+    arm_mat_init_f32(&I2,4,4,Init16);
+
     arm_mat_mult_f32(&AHRS_EKFParamStruct->H,&AHRS_EKFParamStruct->C,&I1);
     arm_mat_sub_f32(&AHRS_EKFParamStruct->I,&I1,&I2);
     arm_mat_mult_f32(&I2,&AHRS_EKFParamStruct->P,

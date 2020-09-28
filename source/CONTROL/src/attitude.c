@@ -2,27 +2,25 @@
 
 arm_matrix_instance_f32 MixerMatrix;//混控矩阵
 
-AHRS_EKFParamTypeDef AHRS_EKFParamStruct;
-
 void ATT_RawData(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
                  AK8975_FloatDataTypeDef* AK8975_FloatDataStruct,
                  ATT_AngleDataTypeDef* ATT_AngleDataStruct)
 {
     float_t xita,phi,psi;
-    float_t nomo;//用于单位化
+    float_t norm;//用于单位化
     float_t a_x,a_y,a_z;
     float_t Bx,By;
 
-    nomo=Fast_InvSqrt(MPU6050_FloatDataStruct->MPU6050_FloatAccelX*MPU6050_FloatDataStruct->MPU6050_FloatAccelX+
+    norm=Fast_InvSqrt(MPU6050_FloatDataStruct->MPU6050_FloatAccelX*MPU6050_FloatDataStruct->MPU6050_FloatAccelX+
                       MPU6050_FloatDataStruct->MPU6050_FloatAccelY*MPU6050_FloatDataStruct->MPU6050_FloatAccelY+
                       MPU6050_FloatDataStruct->MPU6050_FloatAccelZ*MPU6050_FloatDataStruct->MPU6050_FloatAccelZ);
 
-    a_x=MPU6050_FloatDataStruct->MPU6050_FloatAccelX*nomo;
-    a_y=MPU6050_FloatDataStruct->MPU6050_FloatAccelY*nomo;
-    a_z=MPU6050_FloatDataStruct->MPU6050_FloatAccelZ*nomo;
+    a_x=MPU6050_FloatDataStruct->MPU6050_FloatAccelX*norm;
+    a_y=MPU6050_FloatDataStruct->MPU6050_FloatAccelY;
+    a_z=MPU6050_FloatDataStruct->MPU6050_FloatAccelZ;
 
-    xita=asin(a_x*nomo);
-    phi=atan2(-a_y,-a_z);
+    xita=asin(-a_x);
+    phi=atan2(a_y,a_z);
     
     Bx=AK8975_FloatDataStruct->AK8975_FloatMagX*cos(xita)+
        AK8975_FloatDataStruct->AK8975_FloatMagY*sin(xita)*cos(phi)+
@@ -150,16 +148,18 @@ void ATT_MixerMatrixInit(void)
 /**
  * @brief   飞机初始姿态四元数初始化
  **/
-void ATT_Init(void)
+void ATT_Init(AHRS_EKFParamTypeDef* AHRS_EKFParamStruct)
 {
     //初始化飞机姿态
-    AHRS_InitX(&AHRS_EKFParamStruct.X);
+    AHRS_InitX(&AHRS_EKFParamStruct->X);
     //初始化状态矩阵协方差矩阵
-    AHRS_InitP(&AHRS_EKFParamStruct.P);
+    AHRS_InitP(&AHRS_EKFParamStruct->P);
     //初始化过程噪声协方差，灵魂调参
-    AHRS_InitQ(&AHRS_EKFParamStruct.Q);
+    AHRS_InitQ(&AHRS_EKFParamStruct->Q);
     //初始化观测噪声方差矩阵，这个矩阵一直都是不变的，非常重要
-    AHRS_InitR(&AHRS_EKFParamStruct.R);
+    AHRS_InitR(&AHRS_EKFParamStruct->R);
+    AHRS_InitH(&AHRS_EKFParamStruct->H);
+    AHRS_InitI(&AHRS_EKFParamStruct->I);
 }
 
 /**
@@ -168,16 +168,17 @@ void ATT_Init(void)
  * @param   ATT_AngleDataStruct: 解算出来的姿态数据
  **/
 void ATT_Calculation(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
-                     ATT_AngleDataTypeDef* ATT_AngleDataStruct)
+                     ATT_AngleDataTypeDef* ATT_AngleDataStruct,
+                     AHRS_EKFParamTypeDef* AHRS_EKFParamStruct)
 {
     ATT_QuatDataTypeDef ATT_QuatDataStruct;
-    AHRS_GetA(MPU6050_FloatDataStruct,&AHRS_EKFParamStruct.A);
-    AHRS_GetC(&AHRS_EKFParamStruct.X,&AHRS_EKFParamStruct.C);
-    AHRS_GetZ(MPU6050_FloatDataStruct,&AHRS_EKFParamStruct.Z);
-    AHRS_EKF(&AHRS_EKFParamStruct);
-    ATT_QuatDataStruct.ATT_Quat0=AHRS_EKFParamStruct.X.pData[0];
-    ATT_QuatDataStruct.ATT_Quat1=AHRS_EKFParamStruct.X.pData[1];
-    ATT_QuatDataStruct.ATT_Quat2=AHRS_EKFParamStruct.X.pData[2];
-    ATT_QuatDataStruct.ATT_Quat3=AHRS_EKFParamStruct.X.pData[3];
+    AHRS_GetA(MPU6050_FloatDataStruct,&AHRS_EKFParamStruct->A);
+    AHRS_GetC(&AHRS_EKFParamStruct->X,&AHRS_EKFParamStruct->C);
+    AHRS_GetZ(MPU6050_FloatDataStruct,&AHRS_EKFParamStruct->Z);
+    AHRS_EKF(AHRS_EKFParamStruct);
+    ATT_QuatDataStruct.ATT_Quat0=AHRS_EKFParamStruct->X.pData[0];
+    ATT_QuatDataStruct.ATT_Quat1=AHRS_EKFParamStruct->X.pData[1];
+    ATT_QuatDataStruct.ATT_Quat2=AHRS_EKFParamStruct->X.pData[2];
+    ATT_QuatDataStruct.ATT_Quat3=AHRS_EKFParamStruct->X.pData[3];
     ATT_Quat2Angle(&ATT_QuatDataStruct,ATT_AngleDataStruct);
 }
