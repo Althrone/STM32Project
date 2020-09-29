@@ -19,7 +19,7 @@
 
 #include "ANO_DT.h"
 
-#include "attitude.h"
+#include "ahrs.h"
 
 #include "rgbled.h"
 #include "motor.h"
@@ -33,6 +33,10 @@
 #include "at24c02.h"
 
 #include "kalman.h"
+
+/* Extern variates -----------------------------------------------------------*/
+extern uint8_t CalFlag;
+extern uint8_t LEDFlag;
 
 #ifdef __cplusplus
 }

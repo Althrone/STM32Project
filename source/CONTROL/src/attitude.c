@@ -148,37 +148,37 @@ void ATT_MixerMatrixInit(void)
 /**
  * @brief   飞机初始姿态四元数初始化
  **/
-void ATT_Init(AHRS_EKFParamTypeDef* AHRS_EKFParamStruct)
-{
-    //初始化飞机姿态
-    AHRS_InitX(&AHRS_EKFParamStruct->X);
-    //初始化状态矩阵协方差矩阵
-    AHRS_InitP(&AHRS_EKFParamStruct->P);
-    //初始化过程噪声协方差，灵魂调参
-    AHRS_InitQ(&AHRS_EKFParamStruct->Q);
-    //初始化观测噪声方差矩阵，这个矩阵一直都是不变的，非常重要
-    AHRS_InitR(&AHRS_EKFParamStruct->R);
-    AHRS_InitH(&AHRS_EKFParamStruct->H);
-    AHRS_InitI(&AHRS_EKFParamStruct->I);
-}
+// void ATT_Init(AHRS_EKFParamTypeDef* AHRS_EKFParamStruct)
+// {
+//     //初始化飞机姿态
+//     AHRS_InitX(&AHRS_EKFParamStruct->X);
+//     //初始化状态矩阵协方差矩阵
+//     AHRS_InitP(&AHRS_EKFParamStruct->P);
+//     //初始化过程噪声协方差，灵魂调参
+//     AHRS_InitQ(&AHRS_EKFParamStruct->Q);
+//     //初始化观测噪声方差矩阵，这个矩阵一直都是不变的，非常重要
+//     AHRS_InitR(&AHRS_EKFParamStruct->R);
+//     AHRS_InitH(&AHRS_EKFParamStruct->H);
+//     AHRS_InitI(&AHRS_EKFParamStruct->I);
+// }
 
 /**
  * @brief   姿态解算
  * @param   MPU6050_FloatDataStruct: 6050数据
  * @param   ATT_AngleDataStruct: 解算出来的姿态数据
  **/
-void ATT_Calculation(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
-                     ATT_AngleDataTypeDef* ATT_AngleDataStruct,
-                     AHRS_EKFParamTypeDef* AHRS_EKFParamStruct)
-{
-    ATT_QuatDataTypeDef ATT_QuatDataStruct;
-    AHRS_GetA(MPU6050_FloatDataStruct,&AHRS_EKFParamStruct->A);
-    AHRS_GetC(&AHRS_EKFParamStruct->X,&AHRS_EKFParamStruct->C);
-    AHRS_GetZ(MPU6050_FloatDataStruct,&AHRS_EKFParamStruct->Z);
-    AHRS_EKF(AHRS_EKFParamStruct);
-    ATT_QuatDataStruct.ATT_Quat0=AHRS_EKFParamStruct->X.pData[0];
-    ATT_QuatDataStruct.ATT_Quat1=AHRS_EKFParamStruct->X.pData[1];
-    ATT_QuatDataStruct.ATT_Quat2=AHRS_EKFParamStruct->X.pData[2];
-    ATT_QuatDataStruct.ATT_Quat3=AHRS_EKFParamStruct->X.pData[3];
-    ATT_Quat2Angle(&ATT_QuatDataStruct,ATT_AngleDataStruct);
-}
+// void ATT_Calculation(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
+//                      ATT_AngleDataTypeDef* ATT_AngleDataStruct,
+//                      AHRS_EKFParamTypeDef* AHRS_EKFParamStruct)
+// {
+//     ATT_QuatDataTypeDef ATT_QuatDataStruct;
+//     AHRS_GetA(MPU6050_FloatDataStruct,&AHRS_EKFParamStruct->A);
+//     AHRS_GetC(&AHRS_EKFParamStruct->X,&AHRS_EKFParamStruct->C);
+//     AHRS_GetZ(MPU6050_FloatDataStruct,&AHRS_EKFParamStruct->Z);
+//     AHRS_EKF(AHRS_EKFParamStruct);
+//     ATT_QuatDataStruct.ATT_Quat0=AHRS_EKFParamStruct->X.pData[0];
+//     ATT_QuatDataStruct.ATT_Quat1=AHRS_EKFParamStruct->X.pData[1];
+//     ATT_QuatDataStruct.ATT_Quat2=AHRS_EKFParamStruct->X.pData[2];
+//     ATT_QuatDataStruct.ATT_Quat3=AHRS_EKFParamStruct->X.pData[3];
+//     ATT_Quat2Angle(&ATT_QuatDataStruct,ATT_AngleDataStruct);
+// }

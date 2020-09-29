@@ -162,6 +162,34 @@ void SysTick_Handler(void)
 {
 }*/
 
+uint8_t CalFlag=0;
+uint8_t LEDFlag=0;
+/**
+ * @brief   系统定时，时基10ms
+ * @param   CalFlag: 解算时间片，10ms一次
+ * @param   LEDFlag: led闪烁时间片，100ms一次
+ **/
+void TIM6_DAC_IRQHandler(void)
+{
+    static uint16_t ms10=0,ms100=0;
+    if(TIM_GetFlagStatus(TIM6,TIM_FLAG_Update)!=RESET)
+    {
+        ms10++;
+        ms100++;
+        if(ms10>=1)
+        {
+            ms10=0;
+            CalFlag=1;
+        }
+        if(ms100>=10)
+        {
+            ms100=0;
+            LEDFlag=1;
+        }
+        TIM_ClearFlag(TIM6,TIM_FLAG_Update);
+    }
+}
+
 /**
   * @}
   */ 

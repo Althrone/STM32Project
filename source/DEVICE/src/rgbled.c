@@ -28,44 +28,37 @@ void RGBLED_Init(void)
 
 /**
  * @brief   设定RGB的颜色和闪烁频率
- * @param   colour: 指定led颜色
+ * @param   RGBLED_ColourEnum: 指定led颜色
  * @param   mode: 闪烁模式
  **/
-void RGBLED_StateSet(uint8_t colour,uint8_t mode)
+void RGBLED_StateSet(RGBLED_ColourTypeDef RGBLED_ColourEnum,
+                     RGBLED_ModeTypeDef RGBLED_ModeEnum)
 {
-
+    if ((RGBLED_ColourEnum&0b001)==0b001)
+        GPIO_SetBits(GPIOE,GPIO_Pin_0);
+    else
+        GPIO_ResetBits(GPIOE,GPIO_Pin_0);
+    if ((RGBLED_ColourEnum&0b010)==0b010)
+        GPIO_SetBits(GPIOE,GPIO_Pin_1);
+    else
+        GPIO_ResetBits(GPIOE,GPIO_Pin_1);
+    if ((RGBLED_ColourEnum&0b100)==0b100)
+        GPIO_SetBits(GPIOE,GPIO_Pin_2);
+    else
+        GPIO_ResetBits(GPIOE,GPIO_Pin_2);
 }
 
-void RGBLED_OFF(void)
-{
-    GPIO_SetBits(GPIOE,GPIO_Pin_0);
-    GPIO_SetBits(GPIOE,GPIO_Pin_1);
-    GPIO_SetBits(GPIOE,GPIO_Pin_2);
-}
+// void RGBLED_OFF(void)
+// {
+//     GPIO_SetBits(GPIOE,GPIO_Pin_0);
+//     GPIO_SetBits(GPIOE,GPIO_Pin_1);
+//     GPIO_SetBits(GPIOE,GPIO_Pin_2);
+// }
 
-void RGBLED_White(void)
-{
-    GPIO_ResetBits(GPIOE,GPIO_Pin_0);
-    GPIO_ResetBits(GPIOE,GPIO_Pin_1);
-    GPIO_ResetBits(GPIOE,GPIO_Pin_2);
-}
+// void RGBLED_White(void)
+// {
+//     GPIO_ResetBits(GPIOE,GPIO_Pin_0);
+//     GPIO_ResetBits(GPIOE,GPIO_Pin_1);
+//     GPIO_ResetBits(GPIOE,GPIO_Pin_2);
+// }
 
-/**
- * 用于驱动LED1s闪烁
- **/
-uint8_t flag=0;
-
-void TIM6_DAC_IRQHandler(void)
-{
-    if(TIM_GetFlagStatus(TIM6,TIM_FLAG_Update)!=RESET)
-    {
-        flag=~flag;
-        if(flag==0)
-        {
-            RGBLED_OFF();
-        }
-        else
-            RGBLED_White();
-        TIM_ClearFlag(TIM6,TIM_FLAG_Update);
-    }
-}

@@ -94,8 +94,8 @@ void TIM5_Init(void)
 }
 
 /**
- * 试试定时1s
- * LED
+ * 定时10ms
+ * LED和数据采集
  **/
 void TIM6_Init(void)
 {
@@ -105,12 +105,12 @@ void TIM6_Init(void)
     TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;
     TIM_TimeBaseInitStructure.TIM_Prescaler=8400-1;
     // TIM_TimeBaseInitStructure.TIM_CounterMode=TIM_CounterMode_Up;//TIM6只有向上计数模式
-    TIM_TimeBaseInitStructure.TIM_Period=10000-1;
+    TIM_TimeBaseInitStructure.TIM_Period=100-1;
     // TIM_TimeBaseInitStructure.TIM_ClockDivision=;//TIM6没有时钟分频
     // TIM_TimeBaseInitStructure.TIM_RepetitionCounter=;//只有TIM1和TIM8才有
     TIM_TimeBaseInit(TIM6,&TIM_TimeBaseInitStructure);
 
-    //NVI初始化结构体定义
+    //NVIC初始化结构体定义
     NVIC_InitTypeDef NVIC_InitStructure;
     NVIC_InitStructure.NVIC_IRQChannel=TIM6_DAC_IRQn ; //定时器6中断
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=0x04; //抢占优先级4

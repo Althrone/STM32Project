@@ -1,19 +1,7 @@
 #include "main.h"
-#include "arm_math.h"
 
 int main(void)
 {
-    AHRS_EKFParamTypeDef AHRS_EKFParamStruct;
-
-    ANO_DT_SendSenserTypeDef ANO_DT_SendSenserStruct;//发送到上位机的传感器数据结构体
-    ANO_DT_SendRCDataTypeDef ANO_DT_SendRCDataStruct;//发送到上位机的遥控数据
-    ANO_DT_SendStatusTypeDef ANO_DT_SendStatusStruct;//无人机当前姿态，这里我只是随便塞两个数进去看看
-
-    MPU6050_RawDataTypeDef MPU6050_RawDataStruct;
-    MPU6050_FloatDataTypeDef MPU6050_FloatDataStruct;
-    AK8975_FloatDataTypeDef AK8975_FloatDataStruct;
-
-    static ATT_AngleDataTypeDef ATT_AngleDataStruct;
     //测试dsp功能
     // float_t sinx,cosx,add;
     // sinx=arm_sin_f32(0.5f);
@@ -37,26 +25,27 @@ int main(void)
     Motor_Init();
     Steer_Init();
 
-    // AHRS_EKFParamTypeDef AHRS_EKFParamStruct;
-
-    ATT_Init(&AHRS_EKFParamStruct);
-
     //校准代码区
     //获取遥控器数值
 
 
-    // ANO_DT_SendSenserTypeDef ANO_DT_SendSenserStruct;//发送到上位机的传感器数据结构体
-    // ANO_DT_SendRCDataTypeDef ANO_DT_SendRCDataStruct;//发送到上位机的遥控数据
-    // ANO_DT_SendStatusTypeDef ANO_DT_SendStatusStruct;//无人机当前姿态，这里我只是随便塞两个数进去看看
+    ANO_DT_SendSenserTypeDef ANO_DT_SendSenserStruct;//发送到上位机的传感器数据结构体
+    ANO_DT_SendRCDataTypeDef ANO_DT_SendRCDataStruct;//发送到上位机的遥控数据
+    ANO_DT_SendStatusTypeDef ANO_DT_SendStatusStruct;//无人机当前姿态，这里我只是随便塞两个数进去看看
 
-    // MPU6050_RawDataTypeDef MPU6050_RawDataStruct;
-    // MPU6050_FloatDataTypeDef MPU6050_FloatDataStruct;
-    // AK8975_FloatDataTypeDef AK8975_FloatDataStruct;
+    MPU6050_RawDataTypeDef MPU6050_RawDataStruct;
+    MPU6050_FloatDataTypeDef MPU6050_FloatDataStruct;
+    AK8975_FloatDataTypeDef AK8975_FloatDataStruct;
 
-    // ATT_AngleDataTypeDef ATT_AngleDataStruct;
+    ATT_AngleDataTypeDef ATT_AngleDataStruct;
 
     while (1)
     {
+        if(CalFlag==1)
+        {
+            
+            CalFlag=0;
+        }
         //发送传感器原始数据，机体坐标系
         MPU6050_AllRawDataRead(&MPU6050_RawDataStruct);
         MPU6050_RawData2FloatData(&MPU6050_RawDataStruct,&MPU6050_FloatDataStruct);
@@ -72,8 +61,9 @@ int main(void)
         ANO_DT_SendRCData(USART1,&ANO_DT_SendRCDataStruct);
 
         //姿态解算
-        ATT_RawData(&MPU6050_FloatDataStruct,&AK8975_FloatDataStruct,&ATT_AngleDataStruct);
+        // ATT_RawData(&MPU6050_FloatDataStruct,&AK8975_FloatDataStruct,&ATT_AngleDataStruct);
         // ATT_Calculation(&MPU6050_FloatDataStruct,&ATT_AngleDataStruct,&AHRS_EKFParamStruct);
+        AHRS_EKF(&MPU6050_FloatDataStruct,&ATT_AngleDataStruct);
         ANO_DT_SendStatusStruct.ANO_DT_Roll=ATT_AngleDataStruct.ATT_AnglePhi*100;
         ANO_DT_SendStatusStruct.ANO_DT_Pitch=ATT_AngleDataStruct.ATT_AngleTheta*100;
         ANO_DT_SendStatusStruct.ANO_DT_Yaw=ATT_AngleDataStruct.ATT_AnglePsi*100;
