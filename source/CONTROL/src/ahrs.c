@@ -1,6 +1,6 @@
 #include "ahrs.h"
 
-#define DT 0.02f//20ms，进去除1000
+#define DT 0.01f//20ms，进去除1000
 
 //以下就是卡尔曼滤波非临时矩阵的存储区域
 
@@ -11,6 +11,8 @@ float32_t Pdata[16]={1,0,0,0,
                      0,0,0,1};
 float32_t Qdata[16]={0};
 float32_t Rdata[9]={0};
+
+arm_matrix_instance_f32 X,P,Q,R;
 
 void AHRS_InitX(arm_matrix_instance_f32* X)
 {
@@ -39,15 +41,17 @@ void AHRS_InitR(arm_matrix_instance_f32* R)
     arm_mat_init_f32(R,3,3,Rdata);
 }
 
+void AHRS_Init(void)
+{
+    AHRS_InitX(&X);
+    AHRS_InitP(&P);
+    AHRS_InitQ(&Q);
+    AHRS_InitR(&R);
+}
+
 void AHRS_EKF(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
               ATT_AngleDataTypeDef* ATT_AngleDataStruct)
 {
-    arm_matrix_instance_f32 X,P,Q,R;
-    AHRS_InitX(&X);
-    AHRS_InitX(&P);
-    AHRS_InitX(&Q);
-    AHRS_InitX(&R);
-
     //获取A矩阵
     float_t wx,wy,wz;
     float_t _wx,_wy,_wz;

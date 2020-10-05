@@ -47,18 +47,3 @@ void RGBLED_StateSet(RGBLED_ColourTypeDef RGBLED_ColourEnum,
     else
         GPIO_ResetBits(GPIOE,GPIO_Pin_2);
 }
-
-// void RGBLED_OFF(void)
-// {
-//     GPIO_SetBits(GPIOE,GPIO_Pin_0);
-//     GPIO_SetBits(GPIOE,GPIO_Pin_1);
-//     GPIO_SetBits(GPIOE,GPIO_Pin_2);
-// }
-
-// void RGBLED_White(void)
-// {
-//     GPIO_ResetBits(GPIOE,GPIO_Pin_0);
-//     GPIO_ResetBits(GPIOE,GPIO_Pin_1);
-//     GPIO_ResetBits(GPIOE,GPIO_Pin_2);
-// }
-

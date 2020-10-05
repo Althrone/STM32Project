@@ -1,6 +1,6 @@
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __AHRS_H
-#define __AHRS_H
+#ifndef __AHRS_MAHONY_H
+#define __AHRS_MAHONY_H
 
 #ifdef __cplusplus
     extern "C" {
@@ -24,12 +24,12 @@
 
 
 /* Exported functions --------------------------------------------------------*/
-void AHRS_Init(void);
-void AHRS_EKF(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
-              ATT_AngleDataTypeDef* ATT_AngleDataStruct);
+void AHRS_MahonyUpdate(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
+                       AK8975_FloatDataTypeDef* AK8975_FloatDataStruct,
+                       ATT_AngleDataTypeDef* ATT_AngleDataStruct);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /*__AHRS_H */
+#endif /*__AHRS_MAHONY_H */

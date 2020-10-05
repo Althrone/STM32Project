@@ -19,7 +19,9 @@
 
 #include "ANO_DT.h"
 
-#include "ahrs.h"
+// #include "ahrs.h"
+#include "ahrs_mahony.h"
+#include "attitude.h"
 
 #include "rgbled.h"
 #include "motor.h"

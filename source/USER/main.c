@@ -28,7 +28,6 @@ int main(void)
     //校准代码区
     //获取遥控器数值
 
-
     ANO_DT_SendSenserTypeDef ANO_DT_SendSenserStruct;//发送到上位机的传感器数据结构体
     ANO_DT_SendRCDataTypeDef ANO_DT_SendRCDataStruct;//发送到上位机的遥控数据
     ANO_DT_SendStatusTypeDef ANO_DT_SendStatusStruct;//无人机当前姿态，这里我只是随便塞两个数进去看看
@@ -43,12 +42,20 @@ int main(void)
     {
         if(CalFlag==1)
         {
-            
+            MPU6050_AllRawDataRead(&MPU6050_RawDataStruct);
+            MPU6050_RawData2FloatData(&MPU6050_RawDataStruct,&MPU6050_FloatDataStruct);
+            //姿态解算
+            // AHRS_EKF(&MPU6050_FloatDataStruct,&ATT_AngleDataStruct);
+            AHRS_MahonyUpdate(&MPU6050_FloatDataStruct,
+                              &AK8975_FloatDataStruct,
+                              &ATT_AngleDataStruct);
+            ATT_AngleDataStruct.ATT_AnglePsi=0;
             CalFlag=0;
         }
-        //发送传感器原始数据，机体坐标系
-        MPU6050_AllRawDataRead(&MPU6050_RawDataStruct);
-        MPU6050_RawData2FloatData(&MPU6050_RawDataStruct,&MPU6050_FloatDataStruct);
+        if(LEDFlag==1)
+        {
+            RGBLED_StateSet(RGBLED_Yellow,RGBLED_1sMode);
+        }
         ANO_DT_SendSenserStruct.ANO_DT_AccX=MPU6050_RawDataStruct.MPU6050_RawAccelX;
         ANO_DT_SendSenserStruct.ANO_DT_AccY=MPU6050_RawDataStruct.MPU6050_RawAccelY;
         ANO_DT_SendSenserStruct.ANO_DT_AccZ=MPU6050_RawDataStruct.MPU6050_RawAccelZ;
@@ -60,10 +67,6 @@ int main(void)
         PPM_GetRCData(&ANO_DT_SendRCDataStruct);
         ANO_DT_SendRCData(USART1,&ANO_DT_SendRCDataStruct);
 
-        //姿态解算
-        // ATT_RawData(&MPU6050_FloatDataStruct,&AK8975_FloatDataStruct,&ATT_AngleDataStruct);
-        // ATT_Calculation(&MPU6050_FloatDataStruct,&ATT_AngleDataStruct,&AHRS_EKFParamStruct);
-        AHRS_EKF(&MPU6050_FloatDataStruct,&ATT_AngleDataStruct);
         ANO_DT_SendStatusStruct.ANO_DT_Roll=ATT_AngleDataStruct.ATT_AnglePhi*100;
         ANO_DT_SendStatusStruct.ANO_DT_Pitch=ATT_AngleDataStruct.ATT_AngleTheta*100;
         ANO_DT_SendStatusStruct.ANO_DT_Yaw=ATT_AngleDataStruct.ATT_AnglePsi*100;
