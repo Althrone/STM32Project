@@ -46,10 +46,13 @@ int main(void)
             MPU6050_RawData2FloatData(&MPU6050_RawDataStruct,&MPU6050_FloatDataStruct);
             //姿态解算
             // AHRS_EKF(&MPU6050_FloatDataStruct,&ATT_AngleDataStruct);
-            AHRS_MahonyUpdate(&MPU6050_FloatDataStruct,
-                              &AK8975_FloatDataStruct,
-                              &ATT_AngleDataStruct);
-            ATT_AngleDataStruct.ATT_AnglePsi=0;
+            ATT_RawData(&MPU6050_FloatDataStruct,
+                        &AK8975_FloatDataStruct,
+                        &ATT_AngleDataStruct);
+            // AHRS_MahonyUpdate(&MPU6050_FloatDataStruct,
+            //                   &AK8975_FloatDataStruct,
+            //                   &ATT_AngleDataStruct);
+            // ATT_AngleDataStruct.ATT_AnglePsi=0;
             CalFlag=0;
         }
         if(LEDFlag==1)
