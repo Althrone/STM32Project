@@ -6,7 +6,7 @@
  * Date         Author          Notes
  * 29/09/2011   SOH Madgwick    Initial release
  * 02/10/2011   SOH Madgwick    Optimised for reduced CPU load
- * 05/10/2020   Althrone        汉化并适配自己的代码
+ * 07/10/2020   Althrone        汉化并适配自己的代码，未使用磁力计
  *******************************************************************************
  **/
 
@@ -15,7 +15,7 @@
 
 // Definitions
 #define sampleFreq	100.0f			// sample frequency in Hz
-#define twoKpDef	(2.0f * 0.75f)	// 2 * proportional gain
+#define twoKpDef	(2.0f * 1.5f)	// 2 * proportional gain
 #define twoKiDef	(2.0f * 0.0005f)	// 2 * integral gain
 
 // Variable definitions
@@ -49,9 +49,9 @@ void AHRS_MahonyUpdate(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
     ay=MPU6050_FloatDataStruct->MPU6050_FloatAccelY;
     az=MPU6050_FloatDataStruct->MPU6050_FloatAccelZ;
 
-    gx=MPU6050_FloatDataStruct->MPU6050_FloatGyroX;
-    gy=MPU6050_FloatDataStruct->MPU6050_FloatGyroY;
-    gz=MPU6050_FloatDataStruct->MPU6050_FloatGyroZ;
+    gx=MPU6050_FloatDataStruct->MPU6050_FloatGyroX*0.01745;
+    gy=MPU6050_FloatDataStruct->MPU6050_FloatGyroY*0.01745;
+    gz=MPU6050_FloatDataStruct->MPU6050_FloatGyroZ*0.01745;
 
     //只有所有值非零的时候才进行计算，防止归一化的时候值变成NaN
     if(!((ax == 0.0f) && (ay == 0.0f) && (az == 0.0f)))

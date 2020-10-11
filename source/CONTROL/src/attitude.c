@@ -1,6 +1,6 @@
 #include "attitude.h"
 
-arm_matrix_instance_f32 MixerMatrix;//混控矩阵
+// arm_matrix_instance_f32 MixerMatrix;//混控矩阵
 
 void ATT_RawData(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
                  AK8975_FloatDataTypeDef* AK8975_FloatDataStruct,
@@ -134,15 +134,15 @@ void ATT_MixerMatrixInit(void)
     │ - + + - ││ Y │ │ M4 │
     └         ┘└   ┘ └    ┘
     */
-    float32_t param[16]=
-    {
-       -0.70710678f,   -0.70710678f,    1.0f,   1.0f,
-        0.70710678f,    0.70710678f,    1.0f,   1.0f,
-        0.70710678f,   -0.70710678f,    1.0f,  -1.0f,
-       -0.70710678f,    0.70710678f,    1.0f,  -1.0f
-    };
+    // float32_t param[16]=
+    // {
+    //    -0.70710678f,   -0.70710678f,    1.0f,   1.0f,
+    //     0.70710678f,    0.70710678f,    1.0f,   1.0f,
+    //     0.70710678f,   -0.70710678f,    1.0f,  -1.0f,
+    //    -0.70710678f,    0.70710678f,    1.0f,  -1.0f
+    // };
 
-    arm_mat_init_f32(&MixerMatrix,4,4,param);
+    // arm_mat_init_f32(&MixerMatrix,4,4,param);
 }
 
 /**

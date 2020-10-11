@@ -36,6 +36,8 @@
 
 #include "kalman.h"
 
+#include "fly.h"
+
 /* Extern variates -----------------------------------------------------------*/
 extern uint8_t CalFlag;
 extern uint8_t LEDFlag;

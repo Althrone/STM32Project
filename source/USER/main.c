@@ -25,6 +25,8 @@ int main(void)
     Motor_Init();
     Steer_Init();
 
+    PID_ParamInit();
+
     //校准代码区
     //获取遥控器数值
 
@@ -37,6 +39,7 @@ int main(void)
     AK8975_FloatDataTypeDef AK8975_FloatDataStruct;
 
     ATT_AngleDataTypeDef ATT_AngleDataStruct;
+    AK8975_RawDataTypeDef AK8975_RawDataStruct;
 
     while (1)
     {
@@ -44,15 +47,19 @@ int main(void)
         {
             MPU6050_AllRawDataRead(&MPU6050_RawDataStruct);
             MPU6050_RawData2FloatData(&MPU6050_RawDataStruct,&MPU6050_FloatDataStruct);
+            AK8975_AllRawDataRead(&AK8975_RawDataStruct);
             //姿态解算
             // AHRS_EKF(&MPU6050_FloatDataStruct,&ATT_AngleDataStruct);
-            ATT_RawData(&MPU6050_FloatDataStruct,
-                        &AK8975_FloatDataStruct,
-                        &ATT_AngleDataStruct);
-            // AHRS_MahonyUpdate(&MPU6050_FloatDataStruct,
-            //                   &AK8975_FloatDataStruct,
-            //                   &ATT_AngleDataStruct);
-            // ATT_AngleDataStruct.ATT_AnglePsi=0;
+            // ATT_RawData(&MPU6050_FloatDataStruct,
+            //             &AK8975_FloatDataStruct,
+            //             &ATT_AngleDataStruct);
+            AHRS_MahonyUpdate(&MPU6050_FloatDataStruct,
+                              &AK8975_FloatDataStruct,
+                              &ATT_AngleDataStruct);
+            //暴力矫正
+            ATT_AngleDataStruct.ATT_AnglePhi-=4.3;
+            ATT_AngleDataStruct.ATT_AngleTheta+=3.8;
+            ATT_AngleDataStruct.ATT_AnglePsi=0;
             CalFlag=0;
         }
         if(LEDFlag==1)
@@ -65,6 +72,11 @@ int main(void)
         ANO_DT_SendSenserStruct.ANO_DT_GyroX=MPU6050_RawDataStruct.MPU6050_RawGyroX;
         ANO_DT_SendSenserStruct.ANO_DT_GyroY=MPU6050_RawDataStruct.MPU6050_RawGyroY;
         ANO_DT_SendSenserStruct.ANO_DT_GyroZ=MPU6050_RawDataStruct.MPU6050_RawGyroZ;
+
+        ANO_DT_SendSenserStruct.ANO_DT_MagX=AK8975_RawDataStruct.AK8975_RawMagX;
+        ANO_DT_SendSenserStruct.ANO_DT_MagY=AK8975_RawDataStruct.AK8975_RawMagY;
+        ANO_DT_SendSenserStruct.ANO_DT_MagZ=AK8975_RawDataStruct.AK8975_RawMagZ;
+
         ANO_DT_SendSenser(USART1,&ANO_DT_SendSenserStruct);
         //发送遥控器参数到上位机
         PPM_GetRCData(&ANO_DT_SendRCDataStruct);
@@ -74,5 +86,7 @@ int main(void)
         ANO_DT_SendStatusStruct.ANO_DT_Pitch=ATT_AngleDataStruct.ATT_AngleTheta*100;
         ANO_DT_SendStatusStruct.ANO_DT_Yaw=ATT_AngleDataStruct.ATT_AnglePsi*100;
         ANO_DT_SendStatus(USART1,&ANO_DT_SendStatusStruct);
+
+        FLY_DroneCtrl(&ANO_DT_SendRCDataStruct,&ATT_AngleDataStruct,&MPU6050_FloatDataStruct);
     }
 }

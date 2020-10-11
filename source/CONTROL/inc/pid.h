@@ -33,7 +33,10 @@ typedef struct
 
 
 /* Exported functions --------------------------------------------------------*/ 
-
+void PID_IncCtrl(PID_InfoTypeDef* PID_InfoStruct,
+                 PID_ParamTypeDef* PID_ParamStruct,
+                 float_t target,float_t measure);
+void PID_ParamInit(void);
 
 
 #ifdef __cplusplus
