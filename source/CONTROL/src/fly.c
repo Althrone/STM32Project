@@ -79,15 +79,30 @@ void FLY_DroneCtrl(ANO_DT_SendRCDataTypeDef* ANO_DT_SendRCDataStruct,
     arm_mat_init_f32(&MotoMatrix,4,1,MotoData);
     arm_mat_mult_f32(&MixerMatrix,&RCMatrix,&MotoMatrix);
 
-    TIM_SetCompare1(TIM3,(uint32_t)MotoData[0]*2);
-    TIM_SetCompare2(TIM3,(uint32_t)MotoData[1]*2);
-    TIM_SetCompare3(TIM3,(uint32_t)MotoData[2]*2);
-    TIM_SetCompare4(TIM3,(uint32_t)MotoData[3]*2);
+    //归一化，再分配到各路pwm
+    uint32_t OutputPWM1,OutputPWM2,OutputPWM3,OutputPWM4;
+
+    for(uint8_t i=0;i<4;i++)
+    {
+        if(MotoData[i]>2000)
+        MotoData[i]=2000;
+        if(MotoData[i]<1000)
+        MotoData[i]=1000;
+    }
+    OutputPWM1=(uint32_t)MotoData[0]*2;
+    OutputPWM2=(uint32_t)MotoData[1]*2;
+    OutputPWM3=(uint32_t)MotoData[2]*2;
+    OutputPWM4=(uint32_t)MotoData[3]*2;
+
+    TIM_SetCompare1(TIM3,OutputPWM1);
+    TIM_SetCompare2(TIM3,OutputPWM2);
+    TIM_SetCompare3(TIM3,OutputPWM3);
+    TIM_SetCompare4(TIM3,OutputPWM4);
 
     ANO_DT_SendMotoTypeDef ANO_DT_SendMotoStruct;
-    ANO_DT_SendMotoStruct.ANO_DT_Moto1=(uint32_t)MotoData[0]*2;
-    ANO_DT_SendMotoStruct.ANO_DT_Moto2=(uint32_t)MotoData[0]*2;
-    ANO_DT_SendMotoStruct.ANO_DT_Moto3=(uint32_t)MotoData[0]*2;
-    ANO_DT_SendMotoStruct.ANO_DT_Moto4=(uint32_t)MotoData[0]*2;
+    ANO_DT_SendMotoStruct.ANO_DT_Moto1=OutputPWM1;
+    ANO_DT_SendMotoStruct.ANO_DT_Moto2=OutputPWM2;
+    ANO_DT_SendMotoStruct.ANO_DT_Moto3=OutputPWM3;
+    ANO_DT_SendMotoStruct.ANO_DT_Moto4=OutputPWM4;
     ANO_DT_SendMoto(USART1,&ANO_DT_SendMotoStruct);
 }

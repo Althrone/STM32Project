@@ -46,11 +46,11 @@ void PID_ParamSet(void)
 void PID_ParamInit(void)
 {
     //横滚角度环
-    PID_RollAngleParam.P=0;
+    PID_RollAngleParam.P=1;
     PID_RollAngleParam.I=0;
     PID_RollAngleParam.D=0;
     //俯仰角度环
-    PID_PitchAngleParam.P=0;
+    PID_PitchAngleParam.P=1;
     PID_PitchAngleParam.I=0;
     PID_PitchAngleParam.D=0;
 
@@ -63,7 +63,7 @@ void PID_ParamInit(void)
     PID_PitchRateParam.I=0;
     PID_PitchRateParam.D=0;
     //偏航角速度环
-    PID_YawRateParam.P=0;
+    PID_YawRateParam.P=200;
     PID_YawRateParam.I=0;
     PID_YawRateParam.D=0;
 }
