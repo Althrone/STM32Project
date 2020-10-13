@@ -38,7 +38,7 @@ void AK8975_AllRawDataRead(AK8975_RawDataTypeDef* AK8975_RawDataStruct)
     //抽取数据
     IIC_ReadMultByteFromSlave(AK8975_CAD1_LOW_CAD0_LOW,AK8975_HXL,6,temp);
     //转化成有符号整型
-    AK8975_RawDataStruct->AK8975_RawMagX=-((int16_t)temp[3]<<8)|temp[2];
+    AK8975_RawDataStruct->AK8975_RawMagX=-(((int16_t)temp[3]<<8)|temp[2]);
     AK8975_RawDataStruct->AK8975_RawMagY=((int16_t)temp[1]<<8)|temp[0];
     AK8975_RawDataStruct->AK8975_RawMagZ=((int16_t)temp[5]<<8)|temp[4];
 }
