@@ -348,6 +348,7 @@ void USART_Init(USART_TypeDef* USARTx, USART_InitTypeDef* USART_InitStruct)
   
   /* Write to USART BRR register */
   USARTx->BRR = (uint16_t)tmpreg;
+//   USARTx->BRR = (0x2D<<4)|0x09;
 }
 
 /**

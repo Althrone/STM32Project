@@ -147,6 +147,7 @@ void ANO_DT_SendPower(USART_TypeDef* USARTx,ANO_DT_SendPowerTypeDef* ANO_DT_Send
 void ANO_DT_SendMoto(USART_TypeDef* USARTx,ANO_DT_SendMotoTypeDef* ANO_DT_SendMotoStruct);
 void ANO_DT_SendSenser2(USART_TypeDef* USARTx,ANO_DT_SendSenser2TypeDef* ANO_DT_SendSenser2Struct);
 
+void USART1_Send(const unsigned char *data,unsigned char len);
 
 
 

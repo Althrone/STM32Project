@@ -23,12 +23,14 @@ void USART1_Init(void)
     GPIO_PinAFConfig(GPIOA,GPIO_PinSource9,GPIO_AF_USART1);
     GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_OType=GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_PuPd=GPIO_PuPd_UP;
     GPIO_Init(GPIOA,&GPIO_InitStructure);
     //USART1_RX
     GPIO_InitStructure.GPIO_Pin=GPIO_Pin_10;
     GPIO_InitStructure.GPIO_Mode=GPIO_Mode_AF;
     GPIO_PinAFConfig(GPIOA,GPIO_PinSource10,GPIO_AF_USART1);
     GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_OType=GPIO_OType_PP;//GPIO_PuPd_UP
     GPIO_InitStructure.GPIO_PuPd=GPIO_PuPd_UP;
     GPIO_Init(GPIOA,&GPIO_InitStructure);
 
@@ -36,7 +38,7 @@ void USART1_Init(void)
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1,ENABLE);
     //USART初始化结构体定义
     USART_InitTypeDef USART_InitStructure;
-    USART_InitStructure.USART_BaudRate=115200;
+    USART_InitStructure.USART_BaudRate=115200;//460800
     USART_InitStructure.USART_WordLength=USART_WordLength_8b;
     USART_InitStructure.USART_StopBits=USART_StopBits_1;
     USART_InitStructure.USART_Parity=USART_Parity_No;

@@ -2,19 +2,13 @@
 
 int main(void)
 {
-    //测试dsp功能
-    // float_t sinx,cosx,add;
-    // sinx=arm_sin_f32(0.5f);
-    // cosx=arm_cos_f32(0.5f);
-    // add=sinx*sinx+cosx*cosx;
-
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//设置系统中断优先级分组2
 
     RGBLED_Init();
     TIM6_Init();
 
     IIC_Init();
-    USART1_Init();
+    USART1_Init();//上位机串口
 
     PPM_Init();
 
@@ -66,6 +60,7 @@ int main(void)
         {
             RGBLED_StateSet(RGBLED_Yellow,RGBLED_1sMode);
         }
+
         ANO_DT_SendSenserStruct.ANO_DT_AccX=MPU6050_RawDataStruct.MPU6050_RawAccelX;
         ANO_DT_SendSenserStruct.ANO_DT_AccY=MPU6050_RawDataStruct.MPU6050_RawAccelY;
         ANO_DT_SendSenserStruct.ANO_DT_AccZ=MPU6050_RawDataStruct.MPU6050_RawAccelZ;
@@ -78,7 +73,7 @@ int main(void)
         ANO_DT_SendSenserStruct.ANO_DT_MagZ=AK8975_RawDataStruct.AK8975_RawMagZ;
 
         ANO_DT_SendSenser(USART1,&ANO_DT_SendSenserStruct);
-        //发送遥控器参数到上位机
+        // 发送遥控器参数到上位机
         PPM_GetRCData(&ANO_DT_SendRCDataStruct);
         ANO_DT_SendRCData(USART1,&ANO_DT_SendRCDataStruct);
 

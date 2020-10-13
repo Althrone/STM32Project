@@ -8,7 +8,7 @@
             "name": "IDCC",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/IDCC_2020_10_05.elf",
+            "program": "${workspaceFolder}/build/IDCC_2020_10_13.elf",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -18,7 +18,7 @@
             "miDebuggerPath": "arm-none-eabi-gdb.exe",
             "setupCommands": [
                 {"text": "target remote localhost:3333"},
-                {"text": "file ${workspaceFolder}/build/IDCC_2020_10_05.elf"},
+                {"text": "file ${workspaceFolder}/build/IDCC_2020_10_13.elf"},
                 {"text": "monitor reset"},
                 {"text": "monitor halt"},
                 {"text": "load"},

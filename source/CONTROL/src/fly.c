@@ -104,5 +104,5 @@ void FLY_DroneCtrl(ANO_DT_SendRCDataTypeDef* ANO_DT_SendRCDataStruct,
     ANO_DT_SendMotoStruct.ANO_DT_Moto2=OutputPWM2;
     ANO_DT_SendMotoStruct.ANO_DT_Moto3=OutputPWM3;
     ANO_DT_SendMotoStruct.ANO_DT_Moto4=OutputPWM4;
-    ANO_DT_SendMoto(USART1,&ANO_DT_SendMotoStruct);
+    // ANO_DT_SendMoto(USART1,&ANO_DT_SendMotoStruct);
 }
