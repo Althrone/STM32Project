@@ -22,6 +22,7 @@ int main(void)
     PID_ParamInit();
 
     //校准代码区
+    CAL_Senser();
     //获取遥控器数值
 
     ANO_DT_SendSenserTypeDef ANO_DT_SendSenserStruct;//发送到上位机的传感器数据结构体
@@ -41,7 +42,8 @@ int main(void)
         {
             MPU6050_AllRawDataRead(&MPU6050_RawDataStruct);
             MPU6050_RawData2FloatData(&MPU6050_RawDataStruct,&MPU6050_FloatDataStruct);
-            AK8975_AllRawDataRead(&AK8975_RawDataStruct);
+            // AK8975_AllRawDataRead(&AK8975_RawDataStruct);
+            AK8975_RawData2FloatData(&AK8975_RawDataStruct,&AK8975_FloatDataStruct);
             //姿态解算
             // AHRS_EKF(&MPU6050_FloatDataStruct,&ATT_AngleDataStruct);
             // ATT_RawData(&MPU6050_FloatDataStruct,
@@ -53,7 +55,6 @@ int main(void)
             //暴力矫正
             ATT_AngleDataStruct.ATT_AnglePhi-=4.3;
             ATT_AngleDataStruct.ATT_AngleTheta+=3.8;
-            ATT_AngleDataStruct.ATT_AnglePsi=0;
             CalFlag=0;
         }
         if(LEDFlag==1)

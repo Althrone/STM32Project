@@ -37,6 +37,7 @@
 #include "kalman.h"
 
 #include "fly.h"
+#include "calibrate.h"
 
 /* Extern variates -----------------------------------------------------------*/
 extern uint8_t CalFlag;

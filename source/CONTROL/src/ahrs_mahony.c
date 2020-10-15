@@ -15,7 +15,7 @@
 
 // Definitions
 #define sampleFreq	100.0f			// sample frequency in Hz
-#define twoKpDef	(2.0f * 1.5f)	// 2 * proportional gain
+#define twoKpDef	(2.0f * 15.0f)	// 2 * proportional gain
 #define twoKiDef	(2.0f * 0.0005f)	// 2 * integral gain
 
 // Variable definitions
@@ -36,14 +36,15 @@ void AHRS_MahonyUpdate(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
 {
     float_t norm;//归一化参数
     float_t q0q0, q0q1, q0q2, q0q3, q1q1, q1q2, q1q3, q2q2, q2q3, q3q3;
-    // float_t hx, hy;//计算地磁矢量的中间量
-    // float_t bx, bz;//地磁矢量
+    float_t hx, hy;//计算地磁矢量的中间量
+    float_t bx, bz;//地磁矢量
     float_t halfvx, halfvy, halfvz;//加速度计估计的姿态向量
-    // float_t halfwx, halfwy, halfwz;//磁罗盘估计的资态向量
+    float_t halfwx, halfwy, halfwz;//磁罗盘估计的姿态向量
     float_t halfex, halfey, halfez;//姿态估计误差
     // float_t qx, qy, qz;
     float_t ax, ay, az;//测量得到的加速度各轴分量
     float_t gx, gy, gz;//测量得到的角速度各轴分量,弧度制
+    float_t mx, my, mz;//测量得到的磁力计各轴分量
 
     ax=MPU6050_FloatDataStruct->MPU6050_FloatAccelX;
     ay=MPU6050_FloatDataStruct->MPU6050_FloatAccelY;
@@ -52,6 +53,10 @@ void AHRS_MahonyUpdate(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
     gx=MPU6050_FloatDataStruct->MPU6050_FloatGyroX*0.01745;
     gy=MPU6050_FloatDataStruct->MPU6050_FloatGyroY*0.01745;
     gz=MPU6050_FloatDataStruct->MPU6050_FloatGyroZ*0.01745;
+
+    mx=AK8975_FloatDataStruct->AK8975_FloatMagX;
+    my=AK8975_FloatDataStruct->AK8975_FloatMagY;
+    mz=AK8975_FloatDataStruct->AK8975_FloatMagZ;
 
     //只有所有值非零的时候才进行计算，防止归一化的时候值变成NaN
     if(!((ax == 0.0f) && (ay == 0.0f) && (az == 0.0f)))
@@ -63,6 +68,10 @@ void AHRS_MahonyUpdate(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
         az *= norm;
 
         //归一化磁力计测量值
+        norm=Fast_InvSqrt(mx * mx + my * my + mz * mz);
+        mx *= norm;
+        my *= norm;
+        mz *= norm;
 
         //辅助变量，避免重复计算浮点乘法
         q0q0 = q0 * q0;
@@ -76,15 +85,30 @@ void AHRS_MahonyUpdate(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
         q2q3 = q2 * q3;
         q3q3 = q3 * q3;
 
+        //求取地磁矢量
+        hx=2.0f*(mx*(q0q0+q1q1-0.5f)+my*(q1q2-q0q3)+mz*(q1q3+q0q2));
+        hy=2.0f*(mx*(q1q2+q0q3)+my*(q0q0+q2q2-0.5f)+mz*(q2q3-q0q1));
+        bx=sqrt(hx*hx+hy*hy);
+        bz=2.0f*(mx*(q1q3-q0q2)+my*(q2q3+q0q1)+mz*(q0q0+q3q3-0.5f));
+
         //通过四元数估计各轴重力分量
         halfvx = q1q3 - q0q2;
         halfvy = q0q1 + q2q3;
         halfvz = q0q0 - 0.5f + q3q3;//q1q1 + q2q2 = 0.5?
 
+        //通过地磁矢量和四元数，估计各轴磁力计分量
+        halfwx=bx*(q0q0+q1q1-0.5f)+bz*(q1q3-q0q2);
+        halfwy=bx*(q1q2-q0q3)+bz*(q2q3+q0q1);
+        halfwz=bx*(q1q3+q0q2)+bz*(q0q0+q3q3-0.5f);
+
         //计算测量值与估计值的叉积求取误差
-        halfex = (ay * halfvz - az * halfvy);
-        halfey = (az * halfvx - ax * halfvz);
-        halfez = (ax * halfvy - ay * halfvx);
+        halfex = (ay * halfvz - az * halfvy) + (my * halfwz - mz * halfwy);
+        halfey = (az * halfvx - ax * halfvz) + (mz * halfwx - mx * halfwz);
+        halfez = (ax * halfvy - ay * halfvx) + (mx * halfwy - my * halfwx);
+
+        // halfex = (ay * halfvz - az * halfvy);
+        // halfey = (az * halfvx - ax * halfvz);
+        // halfez = (ax * halfvy - ay * halfvx);
 
         // Compute and apply integral feedback if enabled
         if(twoKi > 0.0f) {

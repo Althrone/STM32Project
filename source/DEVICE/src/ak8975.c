@@ -52,12 +52,13 @@ void AK8975_RawData2FloatData(AK8975_RawDataTypeDef* AK8975_RawDataStruct,
                               AK8975_FloatDataTypeDef* AK8975_FloatDataStruct)
 {
     AK8975_AllRawDataRead(AK8975_RawDataStruct);
-    AK8975_FloatDataStruct->AK8975_FloatMagX=(float_t)AK8975_RawDataStruct->AK8975_RawMagX*
-                                             ((AK8975_PRMStruct.ASAX-128)*0.5/128+1);
-    AK8975_FloatDataStruct->AK8975_FloatMagY=(float_t)AK8975_RawDataStruct->AK8975_RawMagY*
-                                             ((AK8975_PRMStruct.ASAY-128)*0.5/128+1);
-    AK8975_FloatDataStruct->AK8975_FloatMagZ=(float_t)AK8975_RawDataStruct->AK8975_RawMagZ*
-                                             ((AK8975_PRMStruct.ASAZ-128)*0.5/128+1);
+    AK8975_FloatDataStruct->AK8975_FloatMagX=(float_t)AK8975_RawDataStruct->AK8975_RawMagX*0.3f;
+    AK8975_FloatDataStruct->AK8975_FloatMagY=(float_t)AK8975_RawDataStruct->AK8975_RawMagY*0.3f;
+    AK8975_FloatDataStruct->AK8975_FloatMagZ=(float_t)AK8975_RawDataStruct->AK8975_RawMagZ*0.3f;
+
+    AK8975_FloatDataStruct->AK8975_FloatMagX*=(AK8975_PRMStruct.ASAX-128)*0.5f/128+1;
+    AK8975_FloatDataStruct->AK8975_FloatMagY*=(AK8975_PRMStruct.ASAY-128)*0.5f/128+1;
+    AK8975_FloatDataStruct->AK8975_FloatMagZ*=(AK8975_PRMStruct.ASAZ-128)*0.5f/128+1;
 }
 
 /**

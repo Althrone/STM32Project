@@ -45,6 +45,10 @@ void PPM_Init(void)
     TIM7_Init();
 }
 
+/**
+ * @brief   从全局变量获取到一个结构体，用于导出参数的值
+ * @param   ANO_DT_SendRCDataStruct: 发送给上位机的遥控器参数结构体
+ **/
 void PPM_GetRCData(ANO_DT_SendRCDataTypeDef* ANO_DT_SendRCDataStruct)
 {
     ANO_DT_SendRCDataStruct->ANO_DT_RCRoll=PPM_RawDataStruct.PPM_RawCh1;
