@@ -11,11 +11,20 @@ void CAL_Senser(void)
     if(ANO_DT_SendRCDataStruct.ANO_DT_RCAUX1<=1800)
         return;
     //接近2000，就进行下面的计算
-    
     while (ANO_DT_SendRCDataStruct.ANO_DT_RCAUX1>1900)
     {
         PPM_GetRCData(&ANO_DT_SendRCDataStruct);
         RGBLED_StateSet(RGBLED_Red,RGBLED_1sMode);
+    }
+    if (ANO_DT_SendRCDataStruct.ANO_DT_RCAUX1<1100)//获取陀螺仪零偏，地磁矢量
+    {
+        MPU6050_GyroCal();
+        AK8975_GetGeomagneticVector();
+        while (1)
+        {
+            // RGBLED_StateSet(RGBLED_Blue,RGBLED_1sMode);//矫正完成，显示绿色
+        }
+        
     }
 
     

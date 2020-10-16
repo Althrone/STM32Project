@@ -31,10 +31,19 @@ int main(void)
 
     MPU6050_RawDataTypeDef MPU6050_RawDataStruct;
     MPU6050_FloatDataTypeDef MPU6050_FloatDataStruct;
+    MPU6050_CalDataTypeDef MPU6050_CalDataStruct;
     AK8975_FloatDataTypeDef AK8975_FloatDataStruct;
 
     ATT_AngleDataTypeDef ATT_AngleDataStruct;
     AK8975_RawDataTypeDef AK8975_RawDataStruct;
+
+    float_t testx,testy,testz,bx,bz;
+
+    AT24C02_SequentialRead(0x04,4,(uint8_t*)&testx);
+    AT24C02_SequentialRead(0x08,4,(uint8_t*)&testy);
+    AT24C02_SequentialRead(0x0C,4,(uint8_t*)&testz);
+    AT24C02_SequentialRead(0x40,4,(uint8_t*)&bx);
+    AT24C02_SequentialRead(0x44,4,(uint8_t*)&bz);
 
     while (1)
     {
@@ -42,6 +51,7 @@ int main(void)
         {
             MPU6050_AllRawDataRead(&MPU6050_RawDataStruct);
             MPU6050_RawData2FloatData(&MPU6050_RawDataStruct,&MPU6050_FloatDataStruct);
+            MPU6050_RawData2CalData(&MPU6050_RawDataStruct,&MPU6050_CalDataStruct);
             // AK8975_AllRawDataRead(&AK8975_RawDataStruct);
             AK8975_RawData2FloatData(&AK8975_RawDataStruct,&AK8975_FloatDataStruct);
             //姿态解算

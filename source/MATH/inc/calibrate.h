@@ -11,10 +11,13 @@
 
 /* Exported types ------------------------------------------------------------*/
 #include "arm_math.h"
+#include "base.h"
 
 #include "ppm.h"
 #include "rgbled.h"
 
+#include "mpu6050.h"
+#include "ak8975.h"
 
 /* Exported functions --------------------------------------------------------*/ 
 void CAL_Senser(void);

@@ -27,6 +27,6 @@ float_t Fast_InvSqrt(float_t x)
  **/
 float_t Recursion_Mean(float_t mean,float_t x,uint16_t n)
 {
-    mean=mean+(x-mean)/n;
+    mean=mean+(x-mean)/(float_t)n;
     return mean;
 }

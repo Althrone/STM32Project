@@ -10,6 +10,8 @@
 #include "iic_moni.h"
 
 #include "at24c02.h"
+#include "rgbled.h"
+#include "base.h"
 
 /* Device Address ------------------------------------------------------------*/
 #define MPU6050_AD0_LOW             0x68
@@ -221,10 +223,11 @@ typedef struct
 
 void MPU6050_Init(void);
 void MPU6050_AllRawDataRead(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct);
-
 void MPU6050_RawData2FloatData(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct,
                                MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct);
-void MPU6050_GyroCal(MPU6050_CalParamTypeDef* MPU6050_CalParamStruct);
+void MPU6050_RawData2CalData(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct,
+                             MPU6050_CalDataTypeDef* MPU6050_CalDataStruct);
+void MPU6050_GyroCal(void);
 
 void MPU6050_IDRead(uint8_t* data);
 

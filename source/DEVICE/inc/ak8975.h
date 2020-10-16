@@ -8,7 +8,10 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "iic_moni.h"
+
 #include "at24c02.h"
+#include "rgbled.h"
+
 #include "base.h"
 
 /* Device Address ------------------------------------------------------------*/
@@ -101,7 +104,9 @@ void AK8975_Init(void);
 void AK8975_AllRawDataRead(AK8975_RawDataTypeDef* AK8975_RawDataStruct);
 void AK8975_RawData2FloatData(AK8975_RawDataTypeDef* AK8975_RawDataStruct,
                               AK8975_FloatDataTypeDef* AK8975_FloatDataStruct);
-
+void AK8975_RawData2CalData(AK8975_RawDataTypeDef* AK8975_RawDataStruct,
+                            AK8975_CalDataTypeDef* AK8975_CalDataStruct);
+void AK8975_GetGeomagneticVector(void);
 void AK8975_IDRead(uint8_t* data);
 
 #ifdef __cplusplus
