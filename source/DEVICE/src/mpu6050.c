@@ -40,7 +40,7 @@ void MPU6050_GyroCal(void)
     MPU6050_FloatDataTypeDef MPU6050_FloatDataStruct;
     for (uint16_t i = 0; i < 1000; i++)
     {
-        RGBLED_StateSet(RGBLED_Red,RGBLED_1sMode);
+        // RGBLED_StateSet(RGBLED_Red,RGBLED_1sMode);
         //迭代法计算陀螺仪均值，因为飞机处于静止状态，实际上这个值就是零偏了
         MPU6050_AllRawDataRead(&MPU6050_RawDataStruct);
         MPU6050_RawData2FloatData(&MPU6050_RawDataStruct,&MPU6050_FloatDataStruct);
@@ -57,15 +57,47 @@ void MPU6050_GyroCal(void)
     //y轴零偏+z轴零偏
     write_tmp=(uint64_t)*(uint32_t*)&meanz<<32|(uint64_t)*(uint32_t*)&meany;//大端小端写入问题，keil要反过来
     AT24C02_PageWrite(0x08,(uint8_t*)&write_tmp);
-    RGBLED_StateSet(RGBLED_Green,RGBLED_1sMode);//矫正完成，显示绿色
+    // RGBLED_StateSet(RGBLED_Green,RGBLED_1sMode);//矫正完成，显示绿色
 }
 
 /**
- * @brief   加速度计六面矫正
+ * @brief   加速度计椭球矫正，写入AT24C02
  **/
-void MPU6050_AccelCal()
+void MPU6050_AccelCal(void)
 {
-    //
+    //采集六次参数
+    MPU6050_RawDataTypeDef MPU6050_RawDataStruct;
+    MPU6050_FloatDataTypeDef MPU6050_FloatDataStruct;
+    CAL_EllipsoidParamTypeDef CAL_EllipsoidParamStruct;
+    for (uint8_t i = 0; i < 6; i++)
+    {
+        MPU6050_AllRawDataRead(&MPU6050_RawDataStruct);
+        MPU6050_RawData2FloatData(&MPU6050_RawDataStruct,&MPU6050_FloatDataStruct);
+        CAL_Ellipsoid(MPU6050_FloatDataStruct.MPU6050_FloatAccelX,
+                      MPU6050_FloatDataStruct.MPU6050_FloatAccelY,
+                      MPU6050_FloatDataStruct.MPU6050_FloatAccelZ,
+                      i,
+                      &CAL_EllipsoidParamStruct);
+    }
+    // while (1)
+    // {
+    //     RGBLED_StateSet(RGBLED_Purple,RGBLED_1sMode);//矫正完成，显示绿色
+    // }
+    
+    //写入AT24C02
+    uint64_t write_tmp;//at24c02页写入中间量
+    write_tmp=(uint64_t)*(uint32_t*)&CAL_EllipsoidParamStruct.X0<<32
+             |(uint64_t)*(uint32_t*)&CAL_EllipsoidParamStruct.rX;//大端小端写入问题，keil要反过来
+    AT24C02_PageWrite(0x10,(uint8_t*)&write_tmp);
+    SysTick_DelayMs(5);
+    write_tmp=(uint64_t)*(uint32_t*)&CAL_EllipsoidParamStruct.Y0<<32
+             |(uint64_t)*(uint32_t*)&CAL_EllipsoidParamStruct.rY;//大端小端写入问题，keil要反过来
+    AT24C02_PageWrite(0x18,(uint8_t*)&write_tmp);
+    SysTick_DelayMs(5);
+    write_tmp=(uint64_t)*(uint32_t*)&CAL_EllipsoidParamStruct.Z0<<32
+             |(uint64_t)*(uint32_t*)&CAL_EllipsoidParamStruct.rZ;//大端小端写入问题，keil要反过来
+    AT24C02_PageWrite(0x20,(uint8_t*)&write_tmp);
+    // RGBLED_StateSet(RGBLED_Green,RGBLED_1sMode);//矫正完成，显示绿色
 }
 
 /**

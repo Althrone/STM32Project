@@ -12,6 +12,7 @@
 #include "at24c02.h"
 #include "rgbled.h"
 #include "base.h"
+#include "calibrate.h"
 
 /* Device Address ------------------------------------------------------------*/
 #define MPU6050_AD0_LOW             0x68
@@ -228,6 +229,7 @@ void MPU6050_RawData2FloatData(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct,
 void MPU6050_RawData2CalData(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct,
                              MPU6050_CalDataTypeDef* MPU6050_CalDataStruct);
 void MPU6050_GyroCal(void);
+void MPU6050_AccelCal(void);
 
 void MPU6050_IDRead(uint8_t* data);
 

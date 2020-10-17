@@ -19,6 +19,28 @@
 #define AT24C02_A2_HIGH_A1_HIGH_A0_LOW  0x56
 #define AT24C02_A2_HIGH_A1_HIGH_A0_HIGH 0x57
 
+/* Memory Map ----------------------------------------------------------------*/
+#define AT24C02_HASH                    0x00//AT24C02整个表的哈希值
+
+#define AT24C02_GORY_X_OFFSET           0x04//陀螺仪零漂，浮点数
+#define AT24C02_GORY_Y_OFFSET           0x08
+#define AT24C02_GORY_Z_OFFSET           0x0C
+
+#define AT24C02_ACCEL_X_SCALE           0x10//加速度计刻度因子
+#define AT24C02_ACCEL_Y_SCALE           0x18
+#define AT24C02_ACCEL_Z_SCALE           0x20
+#define AT24C02_ACCEL_X_BIAS            0x14//加速度计偏移
+#define AT24C02_ACCEL_Y_BIAS            0x1C
+#define AT24C02_ACCEL_Z_BIAS            0x24
+
+#define AT24C02_MAG_X_SCALE             0x28//磁力计刻度因子
+#define AT24C02_MAG_Y_SCALE             0x30
+#define AT24C02_MAG_Z_SCALE             0x38
+#define AT24C02_MAG_X_BIAS              0x2C//磁力计偏移
+#define AT24C02_MAG_Y_BIAS              0x34
+#define AT24C02_MAG_Z_BIAS              0x3C
+
+
 /* Exported types ------------------------------------------------------------*/
 
 /** 

@@ -91,7 +91,7 @@ void AK8975_GetGeomagneticVector(void)
     //递归1000次，计算各轴平均值
     for (uint16_t i = 0; i < 1000; i++)
     {
-        RGBLED_StateSet(RGBLED_Red,RGBLED_1sMode);
+        // RGBLED_StateSet(RGBLED_Red,RGBLED_1sMode);
         AK8975_RawData2CalData(&AK8975_RawDataStruct,&AK8975_CalDataStruct);
         B0x=Recursion_Mean(B0x,AK8975_CalDataStruct.AK8975_CalMagX,i+1);
         By=Recursion_Mean(By,AK8975_CalDataStruct.AK8975_CalMagY,i+1);
@@ -102,7 +102,15 @@ void AK8975_GetGeomagneticVector(void)
     uint64_t write_tmp;//at24c02页写入中间量
     write_tmp=(uint64_t)*(uint32_t*)&B0z<<32|(uint64_t)*(uint32_t*)&B0x;//大端小端写入问题，keil要反过来
     AT24C02_PageWrite(0x40,(uint8_t*)&write_tmp);
-    RGBLED_StateSet(RGBLED_Green,RGBLED_1sMode);//矫正完成，显示绿色
+    // RGBLED_StateSet(RGBLED_Green,RGBLED_1sMode);//矫正完成，显示绿色
+}
+
+/**
+ * @brief   磁力计椭球校正，写入AT24C02
+ **/
+void AK8975_MagCal(void)
+{
+
 }
 
 void AK8975_IDRead(uint8_t* data)
