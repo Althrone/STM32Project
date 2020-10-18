@@ -18,6 +18,14 @@ void AK8975_Init(void)
     //获取完之后回到关闭模式
     IIC_WriteByteToSlave(AK8975_CAD1_LOW_CAD0_LOW,AK8975_CNTL,AK8975_CNTL_MODE_POWERDOWN);
 
+    //从存储器获取修正参数，送全局变量
+    AT24C02_SequentialRead(0x28,4,(uint8_t*)&AK8975_CalParamStruct.AK8975_ScaleMagX);
+    AT24C02_SequentialRead(0x30,4,(uint8_t*)&AK8975_CalParamStruct.AK8975_ScaleMagY);
+    AT24C02_SequentialRead(0x38,4,(uint8_t*)&AK8975_CalParamStruct.AK8975_ScaleMagZ);
+
+    AT24C02_SequentialRead(0x2C,4,(uint8_t*)&AK8975_CalParamStruct.AK8975_BiasMagX);
+    AT24C02_SequentialRead(0x34,4,(uint8_t*)&AK8975_CalParamStruct.AK8975_BiasMagY);
+    AT24C02_SequentialRead(0x3C,4,(uint8_t*)&AK8975_CalParamStruct.AK8975_BiasMagZ);
 }
 
 /**
@@ -73,13 +81,61 @@ void AK8975_RawData2CalData(AK8975_RawDataTypeDef* AK8975_RawDataStruct,
     AK8975_FloatDataTypeDef AK8975_FloatDataStruct;
     AK8975_RawData2FloatData(AK8975_RawDataStruct,&AK8975_FloatDataStruct);
     //先不写校正，直接上
-    AK8975_CalDataStruct->AK8975_CalMagX=AK8975_FloatDataStruct.AK8975_FloatMagX;
-    AK8975_CalDataStruct->AK8975_CalMagY=AK8975_FloatDataStruct.AK8975_FloatMagY;
-    AK8975_CalDataStruct->AK8975_CalMagZ=AK8975_FloatDataStruct.AK8975_FloatMagZ;
+    AK8975_CalDataStruct->AK8975_CalMagX=(AK8975_FloatDataStruct.AK8975_FloatMagX-
+                                          AK8975_CalParamStruct.AK8975_BiasMagX)*
+                                          AK8975_CalParamStruct.AK8975_ScaleMagX;
+    AK8975_CalDataStruct->AK8975_CalMagY=(AK8975_FloatDataStruct.AK8975_FloatMagY-
+                                          AK8975_CalParamStruct.AK8975_BiasMagY)*
+                                          AK8975_CalParamStruct.AK8975_ScaleMagY;
+    AK8975_CalDataStruct->AK8975_CalMagZ=(AK8975_FloatDataStruct.AK8975_FloatMagZ-
+                                          AK8975_CalParamStruct.AK8975_BiasMagZ)-
+                                          AK8975_CalParamStruct.AK8975_ScaleMagZ;
+}
+
+
+
+/**
+ * @brief   磁力计椭球校正，写入AT24C02
+ **/
+void AK8975_MagCal(void)
+{
+    //采集六次参数
+    AK8975_RawDataTypeDef AK8975_RawDataStruct;
+    AK8975_FloatDataTypeDef AK8975_FloatDataStruct;
+    CAL_EllipsoidParamTypeDef CAL_EllipsoidParamStruct;
+    for (uint8_t i = 0; i < 6; i++)
+    {
+        float_t magx=0;
+        float_t magy=0;
+        float_t magz=0;
+        for(uint8_t j=0;j<10;j++)
+        {
+            AK8975_RawData2FloatData(&AK8975_RawDataStruct,&AK8975_FloatDataStruct);
+            magx=Recursion_Mean(magx,AK8975_FloatDataStruct.AK8975_FloatMagX,j+1);
+            magy=Recursion_Mean(magy,AK8975_FloatDataStruct.AK8975_FloatMagY,j+1);
+            magz=Recursion_Mean(magz,AK8975_FloatDataStruct.AK8975_FloatMagZ,j+1);
+        }
+        CAL_Ellipsoid(magx,magy,magz,i,&CAL_EllipsoidParamStruct);
+    }
+    //写入AT24C02
+    uint64_t write_tmp;//at24c02页写入中间量
+    write_tmp=(uint64_t)*(uint32_t*)&CAL_EllipsoidParamStruct.X0<<32
+             |(uint64_t)*(uint32_t*)&CAL_EllipsoidParamStruct.rX;//大端小端写入问题，keil要反过来
+    AT24C02_PageWrite(0x28,(uint8_t*)&write_tmp);
+    SysTick_DelayMs(5);
+    write_tmp=(uint64_t)*(uint32_t*)&CAL_EllipsoidParamStruct.Y0<<32
+             |(uint64_t)*(uint32_t*)&CAL_EllipsoidParamStruct.rY;//大端小端写入问题，keil要反过来
+    AT24C02_PageWrite(0x30,(uint8_t*)&write_tmp);
+    SysTick_DelayMs(5);
+    write_tmp=(uint64_t)*(uint32_t*)&CAL_EllipsoidParamStruct.Z0<<32
+             |(uint64_t)*(uint32_t*)&CAL_EllipsoidParamStruct.rZ;//大端小端写入问题，keil要反过来
+    AT24C02_PageWrite(0x38,(uint8_t*)&write_tmp);
 }
 
 /**
  * @brief   获取地磁矢量，写入AT24C02
+ * @note    由于获取地磁矢量是在加速度计校正，磁力计校正之后完成的，
+ * 所以这里要先读取一次at24c02的值作为最新的修正系数
  **/
 void AK8975_GetGeomagneticVector(void)
 {
@@ -88,6 +144,16 @@ void AK8975_GetGeomagneticVector(void)
     float_t By=0;//计算地磁矢量的中间值
     AK8975_RawDataTypeDef AK8975_RawDataStruct;
     AK8975_CalDataTypeDef AK8975_CalDataStruct;
+
+    //从存储器获取修正参数，送全局变量
+    AT24C02_SequentialRead(0x28,4,(uint8_t*)&AK8975_CalParamStruct.AK8975_ScaleMagX);
+    AT24C02_SequentialRead(0x30,4,(uint8_t*)&AK8975_CalParamStruct.AK8975_ScaleMagY);
+    AT24C02_SequentialRead(0x38,4,(uint8_t*)&AK8975_CalParamStruct.AK8975_ScaleMagZ);
+
+    AT24C02_SequentialRead(0x2C,4,(uint8_t*)&AK8975_CalParamStruct.AK8975_BiasMagX);
+    AT24C02_SequentialRead(0x34,4,(uint8_t*)&AK8975_CalParamStruct.AK8975_BiasMagY);
+    AT24C02_SequentialRead(0x3C,4,(uint8_t*)&AK8975_CalParamStruct.AK8975_BiasMagZ);
+
     //递归1000次，计算各轴平均值
     for (uint16_t i = 0; i < 1000; i++)
     {
@@ -106,13 +172,9 @@ void AK8975_GetGeomagneticVector(void)
 }
 
 /**
- * @brief   磁力计椭球校正，写入AT24C02
+ * @brief   读取磁力计ID，看看芯片正不正常
+ * @param   data: 读出磁力计ID
  **/
-void AK8975_MagCal(void)
-{
-
-}
-
 void AK8975_IDRead(uint8_t* data)
 {
     IIC_ReadByteFromSlave(AK8975_CAD1_LOW_CAD0_LOW,AK8975_WIA,data);

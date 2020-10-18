@@ -24,21 +24,22 @@ int main(void)
     //校准代码区
     CAL_Senser();
     //获取遥控器数值
-
     ANO_DT_SendSenserTypeDef ANO_DT_SendSenserStruct;//发送到上位机的传感器数据结构体
     ANO_DT_SendRCDataTypeDef ANO_DT_SendRCDataStruct;//发送到上位机的遥控数据
     ANO_DT_SendStatusTypeDef ANO_DT_SendStatusStruct;//无人机当前姿态，这里我只是随便塞两个数进去看看
 
     MPU6050_RawDataTypeDef MPU6050_RawDataStruct;
-    MPU6050_FloatDataTypeDef MPU6050_FloatDataStruct;
     MPU6050_CalDataTypeDef MPU6050_CalDataStruct;
+
+    AK8975_RawDataTypeDef AK8975_RawDataStruct;
     AK8975_FloatDataTypeDef AK8975_FloatDataStruct;
+    AK8975_CalDataTypeDef AK8975_CalDataStruct;
 
     ATT_AngleDataTypeDef ATT_AngleDataStruct;
-    AK8975_RawDataTypeDef AK8975_RawDataStruct;
-
+    
     float_t testx,testy,testz,bx,bz;
     float_t x0,y0,z0,rx,ry,rz;
+    float_t mx,my,mz,rmx,rmy,rmz;
 
     AT24C02_SequentialRead(0x04,4,(uint8_t*)&testx);
     AT24C02_SequentialRead(0x08,4,(uint8_t*)&testy);
@@ -53,24 +54,29 @@ int main(void)
     AT24C02_SequentialRead(0x1C,4,(uint8_t*)&y0);
     AT24C02_SequentialRead(0x24,4,(uint8_t*)&z0);
 
+    AT24C02_SequentialRead(0x28,4,(uint8_t*)&rmx);
+    AT24C02_SequentialRead(0x30,4,(uint8_t*)&rmy);
+    AT24C02_SequentialRead(0x38,4,(uint8_t*)&rmz);
+    AT24C02_SequentialRead(0x2C,4,(uint8_t*)&mx);
+    AT24C02_SequentialRead(0x34,4,(uint8_t*)&my);
+    AT24C02_SequentialRead(0x3C,4,(uint8_t*)&mz);
 
     while (1)
     {
         if(CalFlag==1)
         {
-            MPU6050_AllRawDataRead(&MPU6050_RawDataStruct);
-            MPU6050_RawData2FloatData(&MPU6050_RawDataStruct,&MPU6050_FloatDataStruct);
             MPU6050_RawData2CalData(&MPU6050_RawDataStruct,&MPU6050_CalDataStruct);
-            // AK8975_AllRawDataRead(&AK8975_RawDataStruct);
             AK8975_RawData2FloatData(&AK8975_RawDataStruct,&AK8975_FloatDataStruct);
+            AK8975_RawData2CalData(&AK8975_RawDataStruct,&AK8975_CalDataStruct);
             //姿态解算
             // AHRS_EKF(&MPU6050_FloatDataStruct,&ATT_AngleDataStruct);
             // ATT_RawData(&MPU6050_FloatDataStruct,
             //             &AK8975_FloatDataStruct,
             //             &ATT_AngleDataStruct);
-            AHRS_MahonyUpdate(&MPU6050_FloatDataStruct,
-                              &AK8975_FloatDataStruct,
-                              &ATT_AngleDataStruct);
+
+            // AHRS_MahonyUpdate(&MPU6050_FloatDataStruct,
+            //                   &AK8975_FloatDataStruct,
+            //                   &ATT_AngleDataStruct);
             //暴力矫正
             ATT_AngleDataStruct.ATT_AnglePhi-=4.3;
             ATT_AngleDataStruct.ATT_AngleTheta+=3.8;
@@ -102,6 +108,6 @@ int main(void)
         ANO_DT_SendStatusStruct.ANO_DT_Yaw=ATT_AngleDataStruct.ATT_AnglePsi*100;
         ANO_DT_SendStatus(USART1,&ANO_DT_SendStatusStruct);
 
-        FLY_DroneCtrl(&ANO_DT_SendRCDataStruct,&ATT_AngleDataStruct,&MPU6050_FloatDataStruct);
+        // FLY_DroneCtrl(&ANO_DT_SendRCDataStruct,&ATT_AngleDataStruct,&MPU6050_FloatDataStruct);
     }
 }

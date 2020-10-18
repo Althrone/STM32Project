@@ -17,15 +17,52 @@ void CAL_Senser(void)
         RGBLED_StateSet(RGBLED_Red,RGBLED_1sMode);
         if(ANO_DT_SendRCDataStruct.ANO_DT_RCAUX1<1100)//SWA拨杆↑
         {
-            RGBLED_StateSet(RGBLED_Yellow,RGBLED_1sMode);
+            // RGBLED_StateSet(RGBLED_Yellow,RGBLED_1sMode);
             MPU6050_AccelCal();
         }
     }
+
+    for (uint8_t j = 0; j < 10; j++)
+    {
+        SysTick_DelayMs(1);
+        PPM_GetRCData(&ANO_DT_SendRCDataStruct);
+    }
+
     while (ANO_DT_SendRCDataStruct.ANO_DT_RCAUX1<1100)//校准加速度计和磁力计
     {
         PPM_GetRCData(&ANO_DT_SendRCDataStruct);
         RGBLED_StateSet(RGBLED_Blue,RGBLED_1sMode);
     }
+
+    // for (uint8_t j = 0; j < 10; j++)
+    // {
+    //     SysTick_DelayMs(1);
+    //     PPM_GetRCData(&ANO_DT_SendRCDataStruct);
+    // }
+
+    while (ANO_DT_SendRCDataStruct.ANO_DT_RCAUX1>1900)//在此之前SWA拨杆↓，
+    {
+        PPM_GetRCData(&ANO_DT_SendRCDataStruct);
+        RGBLED_StateSet(RGBLED_Red,RGBLED_1sMode);
+        if(ANO_DT_SendRCDataStruct.ANO_DT_RCAUX1<1100)//SWA拨杆↑
+        {
+            // RGBLED_StateSet(RGBLED_Yellow,RGBLED_1sMode);
+            AK8975_MagCal();
+        }
+    }
+
+    // for (uint8_t j = 0; j < 10; j++)
+    // {
+    //     SysTick_DelayMs(1);
+    //     PPM_GetRCData(&ANO_DT_SendRCDataStruct);
+    // }
+
+    while (ANO_DT_SendRCDataStruct.ANO_DT_RCAUX1<1100)//校准加速度计和磁力计
+    {
+        PPM_GetRCData(&ANO_DT_SendRCDataStruct);
+        RGBLED_StateSet(RGBLED_Blue,RGBLED_1sMode);
+    }
+
     while (ANO_DT_SendRCDataStruct.ANO_DT_RCAUX1>1900)//在此之前SWA拨杆↓，准备修正
     {
         PPM_GetRCData(&ANO_DT_SendRCDataStruct);
@@ -40,7 +77,7 @@ void CAL_Senser(void)
     }
     while (1)
     {
-        // RGBLED_StateSet(RGBLED_Cyan,RGBLED_1sMode);//矫正完成，显示绿色
+        RGBLED_StateSet(RGBLED_Cyan,RGBLED_1sMode);//矫正完成，显示绿色
     }
 }
 
@@ -124,15 +161,19 @@ void CAL_Ellipsoid(float_t x,float_t y,float_t z,uint8_t i,
     }
     
 
-    if(i==6)
+    if(i==5)
     {
-        arm_mat_inverse_f32(&X,&X);//求个逆
+        arm_matrix_instance_f32 X_;
+        float_t X_Param[36]={0};
+        arm_mat_init_f32(&X_,6,6,X_Param);
+
+        arm_mat_inverse_f32(&X,&X_);//求个逆
 
         arm_matrix_instance_f32 GenMat;//椭球方程一般式矩阵
         float_t GenParam[6]={0};//椭球方程一般式参数
         arm_mat_init_f32(&GenMat,6,1,GenParam);
 
-        arm_mat_mult_f32(&Y,&X,&GenMat);
+        arm_mat_mult_f32(&X_,&Y,&GenMat);
 
         CAL_EllipsoidParamStruct->X0=-GenParam[2]/2;
         CAL_EllipsoidParamStruct->Y0=-GenParam[3]/(2*GenParam[0]);
@@ -150,6 +191,11 @@ void CAL_Ellipsoid(float_t x,float_t y,float_t z,uint8_t i,
                                      Fast_InvSqrt(CAL_EllipsoidParamStruct->rX);
         CAL_EllipsoidParamStruct->rZ=CAL_EllipsoidParamStruct->rX*
                                      Fast_InvSqrt(CAL_EllipsoidParamStruct->rY);
+        //因为这个函数要多次使用，所以静态量要清零
+        for(uint8_t j=0;j<36;j++)
+            XParam[j]=0;
+        for(uint8_t j=0;j<6;j++)
+            YParam[j]=0;
     }
     for (uint8_t j = 0; j < 10; j++)
     {

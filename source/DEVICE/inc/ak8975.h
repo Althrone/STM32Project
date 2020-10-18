@@ -14,6 +14,8 @@
 
 #include "base.h"
 
+#include "calibrate.h"
+
 /* Device Address ------------------------------------------------------------*/
 #define AK8975_CAD1_LOW_CAD0_LOW    0x0C
 #define AK8975_CAD1_LOW_CAD0_HIGH   0x0D
@@ -90,12 +92,12 @@ typedef struct
 
 typedef struct
 {
-    float_t AK8975_FixGainX;//标度因数，我习惯叫它修正系数
-    float_t AK8975_FixGainY;
-    float_t AK8975_FixGainZ;
-    float_t AK8975_CenterX;//磁罗盘零偏
-    float_t AK8975_CenterY;
-    float_t AK8975_CenterZ;
+    float_t AK8975_ScaleMagX;//标度因数，我习惯叫它修正系数
+    float_t AK8975_ScaleMagY;
+    float_t AK8975_ScaleMagZ;
+    float_t AK8975_BiasMagX;//磁罗盘零偏
+    float_t AK8975_BiasMagY;
+    float_t AK8975_BiasMagZ;
 }AK8975_CalParamTypeDef;//修正参数
 
 /* Exported functions --------------------------------------------------------*/ 
@@ -107,6 +109,7 @@ void AK8975_RawData2FloatData(AK8975_RawDataTypeDef* AK8975_RawDataStruct,
 void AK8975_RawData2CalData(AK8975_RawDataTypeDef* AK8975_RawDataStruct,
                             AK8975_CalDataTypeDef* AK8975_CalDataStruct);
 void AK8975_GetGeomagneticVector(void);
+void AK8975_MagCal(void);
 void AK8975_IDRead(uint8_t* data);
 
 #ifdef __cplusplus

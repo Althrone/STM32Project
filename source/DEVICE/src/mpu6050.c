@@ -3,7 +3,7 @@
 MPU6050_CalParamTypeDef MPU6050_CalParamStruct;//真值修正参数
 
 /**
- * @brief  初始化6050
+ * @brief  初始化6050，并且从存储器读出参数修正值
  * @note  这个传感器也是sb，初始化之后MPU6050_PWR_MGMT_1
  * 的SLEEP位是1，然后这个状态下你修改其他寄存器是没鸟用的
  **/
@@ -21,10 +21,90 @@ void MPU6050_Init(void)
     IIC_WriteByteToSlave(MPU6050_AD0_LOW,MPU6050_CONFIG,MPU6050_CONFIG_DLPF_CFG_BW_20);//Gyroscope Output Rate=1kHz
     //设置采样率
     IIC_WriteByteToSlave(MPU6050_AD0_LOW,MPU6050_SMPLRT_DIV,MPU6050_SMPLRT_DIV_(0));//采样频率1kHz
+    
     //从存储器获取修正参数，送全局变量
     AT24C02_SequentialRead(0x04,4,(uint8_t*)&MPU6050_CalParamStruct.MPU6050_OffsetGyroX);
     AT24C02_SequentialRead(0x08,4,(uint8_t*)&MPU6050_CalParamStruct.MPU6050_OffsetGyroY);
     AT24C02_SequentialRead(0x0C,4,(uint8_t*)&MPU6050_CalParamStruct.MPU6050_OffsetGyroZ);
+
+    AT24C02_SequentialRead(0x10,4,(uint8_t*)&MPU6050_CalParamStruct.MPU6050_ScaleAccelX);
+    AT24C02_SequentialRead(0x18,4,(uint8_t*)&MPU6050_CalParamStruct.MPU6050_ScaleAccelY);
+    AT24C02_SequentialRead(0x20,4,(uint8_t*)&MPU6050_CalParamStruct.MPU6050_ScaleAccelZ);
+
+    AT24C02_SequentialRead(0x14,4,(uint8_t*)&MPU6050_CalParamStruct.MPU6050_BiasAccelX);
+    AT24C02_SequentialRead(0x1C,4,(uint8_t*)&MPU6050_CalParamStruct.MPU6050_BiasAccelY);
+    AT24C02_SequentialRead(0x24,4,(uint8_t*)&MPU6050_CalParamStruct.MPU6050_BiasAccelZ);
+}
+
+
+
+/**
+ * @brief  读取6050的加速度，温度，角速度数据
+ * @param  MPU6050_RawDataStruct: 读取到的数据提取到这个结构体
+ **/
+void MPU6050_AllRawDataRead(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct)
+{
+    //暂存数据
+    uint8_t temp[14];
+    //抽取数据
+    IIC_ReadMultByteFromSlave(MPU6050_AD0_LOW,MPU6050_ACCEL_XOUT_H,14,temp);
+    //转化成有符号整型
+    MPU6050_RawDataStruct->MPU6050_RawAccelX=-((int16_t)temp[2]<<8)+temp[3];
+    MPU6050_RawDataStruct->MPU6050_RawAccelY=-((int16_t)temp[0]<<8)+temp[1];
+    MPU6050_RawDataStruct->MPU6050_RawAccelZ=((int16_t)temp[4]<<8)+temp[5];
+    MPU6050_RawDataStruct->MPU6050_RawTemp=((int16_t)temp[6]<<8)+temp[7];
+    MPU6050_RawDataStruct->MPU6050_RawGyroX=((int16_t)temp[10]<<8)+temp[11];
+    MPU6050_RawDataStruct->MPU6050_RawGyroY=((int16_t)temp[8]<<8)+temp[9];
+    MPU6050_RawDataStruct->MPU6050_RawGyroZ=-((int16_t)temp[12]<<8)+temp[13];
+}
+
+/**
+ * @brief  将数据转换成真值
+ * @param  MPU6050_RawDataStruct: 原始数据结构体
+ * @param  MPU6050_FloatDataStruct: 真值结构体
+ **/
+void MPU6050_RawData2FloatData(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct,
+                               MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct)
+{
+    int16_t Accel_Full_Scale=4;
+    int16_t Gyro_Full_Scale=2000;
+    MPU6050_AllRawDataRead(MPU6050_RawDataStruct);
+    MPU6050_FloatDataStruct->MPU6050_FloatAccelX=Accel_Full_Scale*MPU6050_RawDataStruct->MPU6050_RawAccelX/32767.0f;
+    MPU6050_FloatDataStruct->MPU6050_FloatAccelY=Accel_Full_Scale*MPU6050_RawDataStruct->MPU6050_RawAccelY/32767.0f;
+    MPU6050_FloatDataStruct->MPU6050_FloatAccelZ=Accel_Full_Scale*MPU6050_RawDataStruct->MPU6050_RawAccelZ/32767.0f;
+    MPU6050_FloatDataStruct->MPU6050_FloatTemp=36.53f+MPU6050_RawDataStruct->MPU6050_RawTemp/340.0f;
+    MPU6050_FloatDataStruct->MPU6050_FloatGyroX=Gyro_Full_Scale*MPU6050_RawDataStruct->MPU6050_RawGyroX/32767.0f;
+    MPU6050_FloatDataStruct->MPU6050_FloatGyroY=Gyro_Full_Scale*MPU6050_RawDataStruct->MPU6050_RawGyroY/32767.0f;
+    MPU6050_FloatDataStruct->MPU6050_FloatGyroZ=Gyro_Full_Scale*MPU6050_RawDataStruct->MPU6050_RawGyroZ/32767.0f;
+}
+
+/**
+ * @brief   将数据转换成校准过后的值，这个值会用来解算欧拉角，然后送卡尔曼滤波器
+ * @param  MPU6050_RawDataStruct: 原始数据结构体
+ * @param  MPU6050_CalDataStruct: 校准后数据结构体
+ **/
+void MPU6050_RawData2CalData(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct,
+                             MPU6050_CalDataTypeDef* MPU6050_CalDataStruct)
+{
+    MPU6050_FloatDataTypeDef MPU6050_FloatDataStruct;
+    MPU6050_RawData2FloatData(MPU6050_RawDataStruct,&MPU6050_FloatDataStruct);
+    //需要变成浮点数，然后滤波，然后添加校准值
+    MPU6050_CalDataStruct->MPU6050_CalGyroX=MPU6050_FloatDataStruct.MPU6050_FloatGyroX-
+                                            MPU6050_CalParamStruct.MPU6050_OffsetGyroX;
+    MPU6050_CalDataStruct->MPU6050_CalGyroY=MPU6050_FloatDataStruct.MPU6050_FloatGyroY-
+                                            MPU6050_CalParamStruct.MPU6050_OffsetGyroY;
+    MPU6050_CalDataStruct->MPU6050_CalGyroZ=MPU6050_FloatDataStruct.MPU6050_FloatGyroZ-
+                                            MPU6050_CalParamStruct.MPU6050_OffsetGyroZ;
+
+    MPU6050_CalDataStruct->MPU6050_CalAccelX=(MPU6050_FloatDataStruct.MPU6050_FloatAccelX-
+                                              MPU6050_CalParamStruct.MPU6050_BiasAccelX)*
+                                              MPU6050_CalParamStruct.MPU6050_ScaleAccelX;
+    MPU6050_CalDataStruct->MPU6050_CalAccelY=(MPU6050_FloatDataStruct.MPU6050_FloatAccelY-
+                                              MPU6050_CalParamStruct.MPU6050_BiasAccelY)*
+                                              MPU6050_CalParamStruct.MPU6050_ScaleAccelY;
+    MPU6050_CalDataStruct->MPU6050_CalAccelZ=(MPU6050_FloatDataStruct.MPU6050_FloatAccelZ-
+                                              MPU6050_CalParamStruct.MPU6050_BiasAccelZ)*
+                                              MPU6050_CalParamStruct.MPU6050_ScaleAccelZ;
 }
 
 /**
@@ -71,13 +151,17 @@ void MPU6050_AccelCal(void)
     CAL_EllipsoidParamTypeDef CAL_EllipsoidParamStruct;
     for (uint8_t i = 0; i < 6; i++)
     {
-        MPU6050_AllRawDataRead(&MPU6050_RawDataStruct);
-        MPU6050_RawData2FloatData(&MPU6050_RawDataStruct,&MPU6050_FloatDataStruct);
-        CAL_Ellipsoid(MPU6050_FloatDataStruct.MPU6050_FloatAccelX,
-                      MPU6050_FloatDataStruct.MPU6050_FloatAccelY,
-                      MPU6050_FloatDataStruct.MPU6050_FloatAccelZ,
-                      i,
-                      &CAL_EllipsoidParamStruct);
+        float_t accx=0;
+        float_t accy=0;
+        float_t accz=0;
+        for(uint8_t j=0;j<10;j++)
+        {
+            MPU6050_RawData2FloatData(&MPU6050_RawDataStruct,&MPU6050_FloatDataStruct);
+            accx=Recursion_Mean(accx,MPU6050_FloatDataStruct.MPU6050_FloatAccelX,j+1);
+            accy=Recursion_Mean(accy,MPU6050_FloatDataStruct.MPU6050_FloatAccelY,j+1);
+            accz=Recursion_Mean(accz,MPU6050_FloatDataStruct.MPU6050_FloatAccelZ,j+1);
+        }
+        CAL_Ellipsoid(accx,accy,accz,i,&CAL_EllipsoidParamStruct);
     }
     // while (1)
     // {
@@ -101,64 +185,9 @@ void MPU6050_AccelCal(void)
 }
 
 /**
- * @brief  读取6050的加速度，温度，角速度数据
- * @param  MPU6050_RawDataStruct: 读取到的数据提取到这个结构体
+ * @brief   读取6050的ID，看看芯片是否正常
+ * @param   data: 读出6050ID
  **/
-void MPU6050_AllRawDataRead(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct)
-{
-    //暂存数据
-    uint8_t temp[14];
-    //抽取数据
-    IIC_ReadMultByteFromSlave(MPU6050_AD0_LOW,MPU6050_ACCEL_XOUT_H,14,temp);
-    //转化成有符号整型
-    MPU6050_RawDataStruct->MPU6050_RawAccelX=-((int16_t)temp[2]<<8)+temp[3];
-    MPU6050_RawDataStruct->MPU6050_RawAccelY=-((int16_t)temp[0]<<8)+temp[1];
-    MPU6050_RawDataStruct->MPU6050_RawAccelZ=((int16_t)temp[4]<<8)+temp[5];
-    MPU6050_RawDataStruct->MPU6050_RawTemp=((int16_t)temp[6]<<8)+temp[7];
-    MPU6050_RawDataStruct->MPU6050_RawGyroX=((int16_t)temp[10]<<8)+temp[11];
-    MPU6050_RawDataStruct->MPU6050_RawGyroY=((int16_t)temp[8]<<8)+temp[9];
-    MPU6050_RawDataStruct->MPU6050_RawGyroZ=-((int16_t)temp[12]<<8)+temp[13];
-}
-
-/**
- * @brief  将数据转换成真值
- * @param  MPU6050_RawDataStruct: 原始数据结构体
- * @param  MPU6050_FloatDataStruct: 真值结构体
- **/
-void MPU6050_RawData2FloatData(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct,
-                               MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct)
-{
-    int16_t Accel_Full_Scale=4;
-    int16_t Gyro_Full_Scale=2000;
-    MPU6050_FloatDataStruct->MPU6050_FloatAccelX=Accel_Full_Scale*MPU6050_RawDataStruct->MPU6050_RawAccelX/32767.0f;
-    MPU6050_FloatDataStruct->MPU6050_FloatAccelY=Accel_Full_Scale*MPU6050_RawDataStruct->MPU6050_RawAccelY/32767.0f;
-    MPU6050_FloatDataStruct->MPU6050_FloatAccelZ=Accel_Full_Scale*MPU6050_RawDataStruct->MPU6050_RawAccelZ/32767.0f;
-    MPU6050_FloatDataStruct->MPU6050_FloatTemp=36.53f+MPU6050_RawDataStruct->MPU6050_RawTemp/340.0f;
-    MPU6050_FloatDataStruct->MPU6050_FloatGyroX=Gyro_Full_Scale*MPU6050_RawDataStruct->MPU6050_RawGyroX/32767.0f;
-    MPU6050_FloatDataStruct->MPU6050_FloatGyroY=Gyro_Full_Scale*MPU6050_RawDataStruct->MPU6050_RawGyroY/32767.0f;
-    MPU6050_FloatDataStruct->MPU6050_FloatGyroZ=Gyro_Full_Scale*MPU6050_RawDataStruct->MPU6050_RawGyroZ/32767.0f;
-}
-
-/**
- * @brief   将数据转换成校准过后的值，这个值会用来解算欧拉角，然后送卡尔曼滤波器
- * @param  MPU6050_RawDataStruct: 原始数据结构体
- * @param  MPU6050_CalDataStruct: 校准后数据结构体
- **/
-void MPU6050_RawData2CalData(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct,
-                             MPU6050_CalDataTypeDef* MPU6050_CalDataStruct)
-{
-    MPU6050_FloatDataTypeDef MPU6050_FloatDataStruct;
-    MPU6050_RawData2FloatData(MPU6050_RawDataStruct,&MPU6050_FloatDataStruct);
-    //需要变成浮点数，然后滤波，然后添加校准值
-    MPU6050_CalDataStruct->MPU6050_CalGyroX=MPU6050_FloatDataStruct.MPU6050_FloatGyroX-
-                                            MPU6050_CalParamStruct.MPU6050_OffsetGyroX;
-    MPU6050_CalDataStruct->MPU6050_CalGyroY=MPU6050_FloatDataStruct.MPU6050_FloatGyroY-
-                                            MPU6050_CalParamStruct.MPU6050_OffsetGyroY;
-    MPU6050_CalDataStruct->MPU6050_CalGyroZ=MPU6050_FloatDataStruct.MPU6050_FloatGyroZ-
-                                            MPU6050_CalParamStruct.MPU6050_OffsetGyroZ;
-    
-}
-
 void MPU6050_IDRead(uint8_t* data)
 {
     IIC_ReadByteFromSlave(MPU6050_AD0_LOW,MPU6050_WHO_AM_I,data);

@@ -211,9 +211,12 @@ typedef struct
 
 typedef struct
 {
-    float_t MPU6050_CalAccelX;
-    float_t MPU6050_CalAccelY;
-    float_t MPU6050_CalAccelZ;
+    float_t MPU6050_ScaleAccelX;//加速度计刻度因子
+    float_t MPU6050_ScaleAccelY;
+    float_t MPU6050_ScaleAccelZ;
+    float_t MPU6050_BiasAccelX;//加速度计零偏
+    float_t MPU6050_BiasAccelY;
+    float_t MPU6050_BiasAccelZ;
     float_t MPU6050_OffsetGyroX;//陀螺仪零漂
     float_t MPU6050_OffsetGyroY;
     float_t MPU6050_OffsetGyroZ;
