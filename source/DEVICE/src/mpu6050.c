@@ -105,6 +105,8 @@ void MPU6050_RawData2CalData(MPU6050_RawDataTypeDef* MPU6050_RawDataStruct,
     MPU6050_CalDataStruct->MPU6050_CalAccelZ=(MPU6050_FloatDataStruct.MPU6050_FloatAccelZ-
                                               MPU6050_CalParamStruct.MPU6050_BiasAccelZ)*
                                               MPU6050_CalParamStruct.MPU6050_ScaleAccelZ;
+
+    MPU6050_CalDataStruct->MPU6050_CalTemp=MPU6050_FloatDataStruct.MPU6050_FloatTemp;
 }
 
 /**

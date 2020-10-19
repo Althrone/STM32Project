@@ -24,8 +24,8 @@
 
 
 /* Exported functions --------------------------------------------------------*/
-void AHRS_MahonyUpdate(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
-                       AK8975_FloatDataTypeDef* AK8975_FloatDataStruct,
+void AHRS_MahonyUpdate(MPU6050_CalDataTypeDef* MPU6050_CalDataStruct,
+                       AK8975_CalDataTypeDef* AK8975_CalDataStruct,
                        ATT_AngleDataTypeDef* ATT_AngleDataStruct);
 
 #ifdef __cplusplus

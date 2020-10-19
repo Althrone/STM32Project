@@ -109,7 +109,7 @@
 #define SPL06_FIFO_STS_FIFO_EMPTY               (1<<0)
 #define SPL06_FIFO_STS_FIFO_FULL                (1<<1)
 
-#define SPL06_RESET_SOFT_RST                    (0b1001<<0)
+#define SPL06_RESET_SOFT_RST                    (0x09<<0)
 #define SPL06_RESET_FIFO_FLUSH                  (1<<7)
 
 #define SPL06_ID_REV_ID                         ()
@@ -165,6 +165,7 @@ void SPL06_Init(void);
 void SPL06_AllRawDataRead(SPL06_RawDataTypeDef* SPL06_RawDataStruct);
 void SPL06_RawData2FloatData(SPL06_RawDataTypeDef* SPL06_RawDataStruct,
                              SPL06_FloatDataTypeDef* SPL06_FloatDataStruct);
+void SPL06_RawData2Altitude(SPL06_RawDataTypeDef* SPL06_RawDataStruct,float_t* alt);
 void SPL06_IDRead(uint8_t* data);
 
 

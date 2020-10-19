@@ -88,7 +88,7 @@ void AK8975_RawData2CalData(AK8975_RawDataTypeDef* AK8975_RawDataStruct,
                                           AK8975_CalParamStruct.AK8975_BiasMagY)*
                                           AK8975_CalParamStruct.AK8975_ScaleMagY;
     AK8975_CalDataStruct->AK8975_CalMagZ=(AK8975_FloatDataStruct.AK8975_FloatMagZ-
-                                          AK8975_CalParamStruct.AK8975_BiasMagZ)-
+                                          AK8975_CalParamStruct.AK8975_BiasMagZ)*
                                           AK8975_CalParamStruct.AK8975_ScaleMagZ;
 }
 

@@ -204,6 +204,7 @@ typedef struct
     float_t MPU6050_CalAccelX;
     float_t MPU6050_CalAccelY;
     float_t MPU6050_CalAccelZ;
+    float_t MPU6050_CalTemp;
     float_t MPU6050_CalGyroX;
     float_t MPU6050_CalGyroY;
     float_t MPU6050_CalGyroZ;

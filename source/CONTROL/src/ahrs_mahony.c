@@ -26,12 +26,12 @@ volatile float integralFBx = 0.0f,  integralFBy = 0.0f, integralFBz = 0.0f;	// i
 
 /**
  * @brief   Mahony互补滤波算法计算无人机姿态
- * @param   MPU6050_FloatDataStruct: 提供加速度和角速度参数
- * @param   AK8975_FloatDataStruct: 校正偏航值
+ * @param   MPU6050_CalDataStruct: 提供加速度和角速度参数
+ * @param   AK8975_CalDataStruct: 校正偏航值
  * @param   ATT_AngleDataStruct: 输出无人机姿态角，角度制
  **/
-void AHRS_MahonyUpdate(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
-                       AK8975_FloatDataTypeDef* AK8975_FloatDataStruct,
+void AHRS_MahonyUpdate(MPU6050_CalDataTypeDef* MPU6050_CalDataStruct,
+                       AK8975_CalDataTypeDef* AK8975_CalDataStruct,
                        ATT_AngleDataTypeDef* ATT_AngleDataStruct)
 {
     float_t norm;//归一化参数
@@ -46,17 +46,17 @@ void AHRS_MahonyUpdate(MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct,
     float_t gx, gy, gz;//测量得到的角速度各轴分量,弧度制
     float_t mx, my, mz;//测量得到的磁力计各轴分量
 
-    ax=MPU6050_FloatDataStruct->MPU6050_FloatAccelX;
-    ay=MPU6050_FloatDataStruct->MPU6050_FloatAccelY;
-    az=MPU6050_FloatDataStruct->MPU6050_FloatAccelZ;
+    ax=MPU6050_CalDataStruct->MPU6050_CalAccelX;
+    ay=MPU6050_CalDataStruct->MPU6050_CalAccelY;
+    az=MPU6050_CalDataStruct->MPU6050_CalAccelZ;
 
-    gx=MPU6050_FloatDataStruct->MPU6050_FloatGyroX*0.01745;
-    gy=MPU6050_FloatDataStruct->MPU6050_FloatGyroY*0.01745;
-    gz=MPU6050_FloatDataStruct->MPU6050_FloatGyroZ*0.01745;
+    gx=MPU6050_CalDataStruct->MPU6050_CalGyroX*0.01745;
+    gy=MPU6050_CalDataStruct->MPU6050_CalGyroY*0.01745;
+    gz=MPU6050_CalDataStruct->MPU6050_CalGyroZ*0.01745;
 
-    mx=AK8975_FloatDataStruct->AK8975_FloatMagX;
-    my=AK8975_FloatDataStruct->AK8975_FloatMagY;
-    mz=AK8975_FloatDataStruct->AK8975_FloatMagZ;
+    mx=AK8975_CalDataStruct->AK8975_CalMagX;
+    my=AK8975_CalDataStruct->AK8975_CalMagY;
+    mz=AK8975_CalDataStruct->AK8975_CalMagZ;
 
     //只有所有值非零的时候才进行计算，防止归一化的时候值变成NaN
     if(!((ax == 0.0f) && (ay == 0.0f) && (az == 0.0f)))

@@ -453,7 +453,7 @@ void ANO_DT_SendSenser2(USART_TypeDef* USARTx,ANO_DT_SendSenser2TypeDef* ANO_DT_
     *(databuf)=0xAA;                //帧头固定
     *(++databuf)=S_ADDR;            //在定义里面改
     *(++databuf)=D_ADDR;            //在定义里面改
-    *(++databuf)=ANO_DT_Moto;       //功能字
+    *(++databuf)=ANO_DT_Senser2;    //功能字
     *(++databuf)=lenth;             //有效数据长度
     //数据填充
     databuf=ANO_DT_SplitMember(sizeof(ANO_DT_SendSenser2Struct->ANO_DT_ALT_BAR),
