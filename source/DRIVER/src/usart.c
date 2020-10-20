@@ -60,6 +60,45 @@ void USART1_Init(void)
     USART_Cmd(USART1,ENABLE);
 }
 
+/**
+ * @brief   UART4初始化，用于GPS
+ **/
+void UART4_Init(void)
+{
+    //开GPIOA时钟
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA,ENABLE);
+    //GPIO初始化结构体定义
+    GPIO_InitTypeDef GPIO_InitStructure;
+    //UART4_TX
+    GPIO_InitStructure.GPIO_Pin=GPIO_Pin_0;
+    GPIO_InitStructure.GPIO_Mode=GPIO_Mode_AF;
+    GPIO_PinAFConfig(GPIOA,GPIO_PinSource0,GPIO_AF_UART4);
+    GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_OType=GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_PuPd=GPIO_PuPd_UP;
+    GPIO_Init(GPIOA,&GPIO_InitStructure);
+    //UART4_RX
+    GPIO_InitStructure.GPIO_Pin=GPIO_Pin_1;
+    GPIO_InitStructure.GPIO_Mode=GPIO_Mode_AF;
+    GPIO_PinAFConfig(GPIOA,GPIO_PinSource1,GPIO_AF_UART4);
+    GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_OType=GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_PuPd=GPIO_PuPd_UP;
+    GPIO_Init(GPIOA,&GPIO_InitStructure);
+
+    //开USART1时钟
+    RCC_APB2PeriphClockCmd(RCC_APB1Periph_UART4,ENABLE);
+    USART_InitTypeDef USART_InitStructure;
+    USART_InitStructure.USART_BaudRate=9600;//9600
+    USART_InitStructure.USART_WordLength=USART_WordLength_8b;
+    USART_InitStructure.USART_StopBits=USART_StopBits_1;
+    USART_InitStructure.USART_Parity=USART_Parity_No;
+    USART_InitStructure.USART_Mode=USART_Mode_Rx_Tx;
+    USART_InitStructure.USART_HardwareFlowControl=USART_HardwareFlowControl_None;
+    USART_Init(USART1,&USART_InitStructure);
+    //USART初始化结构体定义
+}
+
 void USART1_IRQHandler(void)
 {
 

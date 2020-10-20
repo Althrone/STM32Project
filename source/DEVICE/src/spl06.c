@@ -43,12 +43,13 @@ void SPL06_Init(void)
     SPL06_PRMStruct.c20=((int16_t)temp[12]<<8)|temp[13];
     SPL06_PRMStruct.c21=((int16_t)temp[14]<<8)|temp[15];
     SPL06_PRMStruct.c30=((int16_t)temp[16]<<8)|temp[17];
-    //设置为运动模式
+    //压力计每秒128次，过采样32次
     IIC_WriteByteToSlave(SPL06_AD0_HIGH,SPL06_PRS_CFG,SPL06_PRS_CFG_PM_RATE_128|
                                                       SPL06_PRS_CFG_PM_PRC_32);//0x26
+    //温度计每秒32次，过采样8次，外部mems
     IIC_WriteByteToSlave(SPL06_AD0_HIGH,SPL06_TMP_CFG,SPL06_TMP_CFG_TMP_EX|
-                                                      SPL06_TMP_CFG_TMP_RATE_32|
-                                                      SPL06_TMP_CFG_TMP_PRC_8);//0xA0
+                                                      SPL06_TMP_CFG_TMP_RATE_128|
+                                                      SPL06_TMP_CFG_TMP_PRC_16);//0xA0
     IIC_WriteByteToSlave(SPL06_AD0_HIGH,SPL06_CFG_REG,SPL06_CFG_REG_P_SHIFT|
                                                       SPL06_CFG_REG_T_SHIFT);
     //对气压和温度进行连续测量
@@ -92,7 +93,7 @@ void SPL06_RawData2FloatData(SPL06_RawDataTypeDef* SPL06_RawDataStruct,
     float_t Praw_sc,Traw_sc;
     uint32_t kP,kT;
     kP=SPL06_32Times;
-    kT=SPL06_8Times;
+    kT=SPL06_16Times;
     Praw_sc=(float_t)SPL06_RawDataStruct->SPL06_RawPres/kP;
     Traw_sc=(float_t)SPL06_RawDataStruct->SPL06_RawTemp/kT;
     // Traw_sc=0.025f;
