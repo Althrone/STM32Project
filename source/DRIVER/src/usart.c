@@ -86,8 +86,9 @@ void UART4_Init(void)
     GPIO_InitStructure.GPIO_PuPd=GPIO_PuPd_UP;
     GPIO_Init(GPIOA,&GPIO_InitStructure);
 
-    //开USART1时钟
+    //开UART4时钟
     RCC_APB2PeriphClockCmd(RCC_APB1Periph_UART4,ENABLE);
+    //USART初始化结构体定义
     USART_InitTypeDef USART_InitStructure;
     USART_InitStructure.USART_BaudRate=9600;//9600
     USART_InitStructure.USART_WordLength=USART_WordLength_8b;
@@ -95,8 +96,19 @@ void UART4_Init(void)
     USART_InitStructure.USART_Parity=USART_Parity_No;
     USART_InitStructure.USART_Mode=USART_Mode_Rx_Tx;
     USART_InitStructure.USART_HardwareFlowControl=USART_HardwareFlowControl_None;
-    USART_Init(USART1,&USART_InitStructure);
-    //USART初始化结构体定义
+    USART_Init(UART4,&USART_InitStructure);
+
+    //NVI初始化结构体定义
+    NVIC_InitTypeDef NVIC_InitStructure;
+    NVIC_InitStructure.NVIC_IRQChannel=UART4_IRQn; //USART6中断
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=0x02; //抢占优先级1
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority=0x03; //子优先级3
+    NVIC_InitStructure.NVIC_IRQChannelCmd=ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+
+    //开USART1中断
+    USART_ITConfig(UART4,USART_IT_RXNE,ENABLE);
+    USART_Cmd(UART4,ENABLE);//使能UART4
 }
 
 void USART1_IRQHandler(void)
