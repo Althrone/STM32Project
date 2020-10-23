@@ -30,6 +30,8 @@
 #include "spl06.h"
 #include "ak8975.h"
 
+#include "gps.h"
+
 #include "steer.h"
 
 #include "at24c02.h"

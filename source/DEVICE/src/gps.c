@@ -4,6 +4,11 @@
 // #define M8N         //pixhawk GPS+罗盘模块
 // #define ATGM336H    //中科微电子 GPS
 
+void GPS_Test(int* a)
+{
+    *a=GPS_ContZDA;
+}
+
 /**
  * @brief   GPS初始化，走USART4
  **/
@@ -60,11 +65,11 @@ void GPS_GetComma(void)
  * @param   str: 字符串的指针
  * @return  float: 浮点数
  **/
-float_t GPS_ASCII2Float(uint8_t* str)
+void GPS_ASCII2Float(uint8_t* str,float_t* value)
 {
     uint8_t tmp,flag=0;
     float_t value,decimal;
-    value=0;
+    *value=0;
     decimal=0;
     while(((*str>='0')&&(*str<='9'))||(*str=='.')) //数字或者是符号
     {
@@ -75,14 +80,13 @@ float_t GPS_ASCII2Float(uint8_t* str)
             tmp=*str++;
         }
         if(flag==0)//整数部分
-            value=value*10+(float_t)tmp;
+            *value=*value*10.0f+(float_t)tmp;
         else if(flag==1)//小数部分
-            decimal=decimal*10+(float_t)tmp;
+            decimal=decimal*10.0f+(float_t)tmp;
     }
     while (decimal>1)
-        decimal=decimal/10;
-    value+=decimal;
-    return value;
+        decimal=decimal/10.0f;
+    *value+=decimal;
 }
 
 /**
@@ -91,7 +95,7 @@ float_t GPS_ASCII2Float(uint8_t* str)
  * @param   GPS_TimeStruct: GPS获取时间结构体
  * @return  位移后的指针地址
  **/
-uint8_t* GPS_ASCII2Time(uint8_t* str,GPS_TimeTypeDef* GPS_TimeStruct)
+void GPS_ASCII2Time(uint8_t* str,GPS_TimeTypeDef* GPS_TimeStruct)
 {
     //将字符串的数据转到
     GPS_TimeStruct->GPS_Hour=*(str+0)*10+*(str+1);
@@ -99,7 +103,7 @@ uint8_t* GPS_ASCII2Time(uint8_t* str,GPS_TimeTypeDef* GPS_TimeStruct)
     GPS_TimeStruct->GPS_Second=*(str+4)*10+*(str+5);
     // *(str+6)='.'忽略
     GPS_TimeStruct->GPS_Millisecond=*(str+7)*100+*(str+8)*10+*(str+9);
-    return str+10;
+    str+=10;
 }
 
 /**
@@ -108,13 +112,13 @@ uint8_t* GPS_ASCII2Time(uint8_t* str,GPS_TimeTypeDef* GPS_TimeStruct)
  * @param   GPS_TimeStruct: GPS获取时间结构体
  * @return  位移后的指针地址
  **/
-uint8_t* GPS_ASCII2Date(uint8_t* str,GPS_TimeTypeDef* GPS_TimeStruct)
+void GPS_ASCII2Date(uint8_t* str,GPS_TimeTypeDef* GPS_TimeStruct)
 {
     //将字符串的数据转到
-    // GPS_TimeStruct->GPS_Day=*(str++)*10+*(str++);
-    // GPS_TimeStruct->GPS_Month=*(str++)*10+*(str++);
-    // GPS_TimeStruct->GPS_Year=*(str++)*10+*(str++);
-    return str;
+    GPS_TimeStruct->GPS_Day=*(str+0)*10+*(str+1);
+    GPS_TimeStruct->GPS_Month=*(str+2)*10+*(str+3);
+    GPS_TimeStruct->GPS_Year=*(str+4)*10+*(str+5);
+    str+=6;
 }
 
 static uint8_t gpsState;//参考GPS_StateTypeDef
