@@ -19,7 +19,7 @@
 /* Exported functions --------------------------------------------------------*/ 
 void FLY_DroneCtrl(ANO_DT_SendRCDataTypeDef* ANO_DT_SendRCDataStruct,
                    ATT_AngleDataTypeDef* ATT_AngleDataStruct,
-                   MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct);
+                   MPU6050_CalDataTypeDef* MPU6050_CalDataStruct);
 
 #ifdef __cplusplus
 }

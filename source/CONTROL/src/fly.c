@@ -22,7 +22,7 @@ extern PID_ParamTypeDef PID_YawRateParam;
  **/
 void FLY_DroneCtrl(ANO_DT_SendRCDataTypeDef* ANO_DT_SendRCDataStruct,
                    ATT_AngleDataTypeDef* ATT_AngleDataStruct,
-                   MPU6050_FloatDataTypeDef* MPU6050_FloatDataStruct)
+                   MPU6050_CalDataTypeDef* MPU6050_CalDataStruct)
 {
     //俯仰，横滚转化成角度值
     //偏航转化成角速度值
@@ -44,15 +44,15 @@ void FLY_DroneCtrl(ANO_DT_SendRCDataTypeDef* ANO_DT_SendRCDataStruct,
     PID_IncCtrl(&PID_RollRateInfo,
                 &PID_RollRateParam,
                 PID_RollAngleInfo.Output,
-                MPU6050_FloatDataStruct->MPU6050_FloatGyroX);
+                MPU6050_CalDataStruct->MPU6050_CalGyroX);
     PID_IncCtrl(&PID_PitchRateInfo,
                 &PID_PitchRateParam,
                 PID_PitchAngleInfo.Output,
-                MPU6050_FloatDataStruct->MPU6050_FloatGyroY);
+                MPU6050_CalDataStruct->MPU6050_CalGyroY);
     PID_IncCtrl(&PID_YawRateInfo,
                 &PID_YawRateParam,
                 YawTargeRate,
-                MPU6050_FloatDataStruct->MPU6050_FloatGyroZ);
+                MPU6050_CalDataStruct->MPU6050_CalGyroZ);
     //混控矩阵
     float32_t MixerData[16]=
     {
@@ -85,9 +85,11 @@ void FLY_DroneCtrl(ANO_DT_SendRCDataTypeDef* ANO_DT_SendRCDataStruct,
     for(uint8_t i=0;i<4;i++)
     {
         if(MotoData[i]>2000)
-        MotoData[i]=2000;
+            MotoData[i]=2000;
         if(MotoData[i]<1000)
-        MotoData[i]=1000;
+            MotoData[i]=1000;
+        if(ANO_DT_SendRCDataStruct->ANO_DT_RCThrottle<1200)
+            MotoData[i]=1000;
     }
     OutputPWM1=(uint32_t)MotoData[0]*2;
     OutputPWM2=(uint32_t)MotoData[1]*2;

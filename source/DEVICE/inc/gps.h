@@ -73,11 +73,23 @@ typedef struct
     uint16_t GPS_Millisecond;
 }GPS_TimeTypeDef;
 
+typedef struct
+{
+    float_t GPS_Longitude;  //经度
+    float_t GPS_Latitude;   //纬度
+    float_t GPS_Altitude;   //海拔高度
+    //真北方位角
+    //地磁南极方位角
+    float_t GPS_GroundSpeed;//对地速度，m/s
+}GPS_LocationTypeDef;//GPS定位信息
+
+
 
 
 
 /* Exported functions --------------------------------------------------------*/
 void GPS_Test(int* a);
+void GPS_ASCII2Float(uint8_t* str,float_t* value);
 
 #ifdef __cplusplus
 }

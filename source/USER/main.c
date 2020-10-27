@@ -87,10 +87,10 @@ int main(void)
             // ATT_AngleDataStruct.ATT_AngleTheta+=3.8;
             CalFlag=0;
         }
-        if(LEDFlag==1)
-        {
-            RGBLED_StateSet(RGBLED_White,RGBLED_1sMode);
-        }
+        // if(LEDFlag==1)
+        // {
+        //     RGBLED_StateSet(RGBLED_White,RGBLED_1sMode);
+        // }
 
         ANO_DT_SendSenserStruct.ANO_DT_AccX=MPU6050_RawDataStruct.MPU6050_RawAccelX;
         ANO_DT_SendSenserStruct.ANO_DT_AccY=MPU6050_RawDataStruct.MPU6050_RawAccelY;
@@ -119,6 +119,15 @@ int main(void)
         ANO_DT_SendSenser2Struct.ANO_DT_SEN_TMP=10.0f*SPL06_FloatDataStruct.SPL06_FloatTemp;
         ANO_DT_SendSenser2(USART1,&ANO_DT_SendSenser2Struct);
 
-        // FLY_DroneCtrl(&ANO_DT_SendRCDataStruct,&ATT_AngleDataStruct,&MPU6050_FloatDataStruct);
+        if(ANO_DT_SendRCDataStruct.ANO_DT_RCAUX4<1200)
+        {
+            Motor_SetSpeed();
+            RGBLED_StateSet(RGBLED_Red,RGBLED_1sMode);
+        }
+        else
+        {
+            FLY_DroneCtrl(&ANO_DT_SendRCDataStruct,&ATT_AngleDataStruct,&MPU6050_CalDataStruct);
+            RGBLED_StateSet(RGBLED_Green,RGBLED_1sMode);
+        }
     }
 }

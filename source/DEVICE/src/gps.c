@@ -4,6 +4,11 @@
 // #define M8N         //pixhawk GPS+罗盘模块
 // #define ATGM336H    //中科微电子 GPS
 
+//只获取RMC
+
+#define Km_per_h2m_per_h    (1000.f/3600.f)
+#define m_per_h2Km_per_h    (3600.f/1000.f)
+
 void GPS_Test(int* a)
 {
     *a=GPS_ContZDA;
@@ -37,27 +42,42 @@ void GPS_Decode(void)
 }
 
 /**
- * @brief   获取字符串头部
- **/
-void GPS_GetHead(void)
-{
-
-}
-
-/**
- * @brief   获取字符串结尾
- **/
-void GPS_GetEnd(void)
-{
-
-}
-
-/**
  * @brief   获取字符串分隔符，也就是逗号
  **/
 void GPS_GetComma(void)
 {
+    //
+}
 
+/**
+ * @brief   信号和校验，采用异或计算，计算范围为$~*之间
+ * @param   str: 字符串指针，相对地址，同时也作为返回值
+ * @return  和校验的值sum
+ **/
+uint16_t GPS_CheckSum(uint8_t* str)
+{
+    //异或校验
+    uint16_t sum=0;
+    while(*str!='*')
+    {
+        str++;//
+        sum^=*str;
+    }
+    return sum;
+}
+
+/**
+ * @brief   ASCII转度，用于经纬度转换
+ **/
+void GPS_ASCII2Angel(uint8_t* str,float_t* value)
+{
+    float_t tmp1,tmp2;
+    GPS_ASCII2Float(str,value);
+    //求整
+    tmp1=(int16_t)*value/100;
+    //求余
+    tmp2=fmodf(*value,100)/60;
+    *value=tmp1+tmp2;
 }
 
 /**
@@ -68,7 +88,7 @@ void GPS_GetComma(void)
 void GPS_ASCII2Float(uint8_t* str,float_t* value)
 {
     uint8_t tmp,flag=0;
-    float_t value,decimal;
+    float_t decimal;
     *value=0;
     decimal=0;
     while(((*str>='0')&&(*str<='9'))||(*str=='.')) //数字或者是符号

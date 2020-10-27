@@ -25,10 +25,19 @@ void PID_IncCtrl(PID_InfoTypeDef* PID_InfoStruct,
     PID_InfoStruct->PrevPrevError=PID_InfoStruct->PrevError;
     PID_InfoStruct->PrevError=PID_InfoStruct->Error;
     PID_InfoStruct->Error=target-measure;
+
+    float_t I;
+    I=PID_ParamStruct->I*PID_InfoStruct->Error;
+    if(I>20)
+        I=20;
+    if (I<-20)
+    {
+        I=-20;
+    }
     
     PID_InfoStruct->Output=PID_InfoStruct->PrevOutput+
                           PID_ParamStruct->P*(PID_InfoStruct->Error-PID_InfoStruct->PrevError)+
-                          PID_ParamStruct->I*PID_InfoStruct->Error+
+                          I+
                           PID_ParamStruct->D*(PID_InfoStruct->Error-2*PID_InfoStruct->PrevError+PID_InfoStruct->PrevPrevError);
 }
 
@@ -50,20 +59,20 @@ void PID_ParamInit(void)
     PID_RollAngleParam.I=0;
     PID_RollAngleParam.D=0;
     //俯仰角度环
-    PID_PitchAngleParam.P=1;
+    PID_PitchAngleParam.P=0;
     PID_PitchAngleParam.I=0;
     PID_PitchAngleParam.D=0;
 
     //横滚角速度环
-    PID_RollRateParam.P=200;
-    PID_RollRateParam.I=0;
+    PID_RollRateParam.P=0.9;
+    PID_RollRateParam.I=0.1;
     PID_RollRateParam.D=0;
     //俯仰角速度环
-    PID_PitchRateParam.P=200;
+    PID_PitchRateParam.P=0;
     PID_PitchRateParam.I=0;
     PID_PitchRateParam.D=0;
     //偏航角速度环
-    PID_YawRateParam.P=200;
+    PID_YawRateParam.P=0;
     PID_YawRateParam.I=0;
     PID_YawRateParam.D=0;
 }
