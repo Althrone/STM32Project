@@ -15,9 +15,11 @@ USER_C_SOURCES = $(wildcard source/USER/*.c)
 
 MATH_C_SOURCES = $(wildcard source/MATH/src/*.c)
 CONTROL_C_SOURCES = $(wildcard source/CONTROL/src/*.c)
+STRUCTURE_C_SOURCES = $(wildcard source/STRUCTURE/src/*.c)
 
-C_SOURCES = $(STDPERIPH_C_SOURCES) $(DEVICE_C_SOURCES) $(DRIVER_C_SOURCES) $(USER_C_SOURCES) \
-$(MATH_C_SOURCES) $(CONTROL_C_SOURCES)
+C_SOURCES = \
+$(STDPERIPH_C_SOURCES) $(DEVICE_C_SOURCES) $(DRIVER_C_SOURCES) $(USER_C_SOURCES) \
+$(MATH_C_SOURCES) $(CONTROL_C_SOURCES) $(STRUCTURE_C_SOURCES)
 
 
 # ASM sources
@@ -83,7 +85,8 @@ C_INCLUDES = \
 -Isource/DEVICE/inc \
 -Isource/CONTROL/inc \
 -Isource/MATH/inc \
--Isource/DSPLIB
+-Isource/DSPLIB\
+-Isource/STRUCTURE/inc
 
 
 # compile gcc flags
@@ -132,18 +135,21 @@ USER_OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(USER_C_SOURCES:.c=.o)))
 
 MATH_OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(MATH_C_SOURCES:.c=.o)))
 CONTROL_OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(CONTROL_C_SOURCES:.c=.o)))
+STRUCTURE_OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(STRUCTURE_C_SOURCES:.c=.o)))
 
-OBJECTS = $(ASM_OBJECTS) $(STDPERIPH_OBJECTS) $(DEVICE_OBJECTS) $(DRIVER_OBJECTS) $(USER_OBJECTS) \
-$(MATH_OBJECTS) $(CONTROL_OBJECTS)
+OBJECTS = \
+$(ASM_OBJECTS) $(STDPERIPH_OBJECTS) $(DEVICE_OBJECTS) $(DRIVER_OBJECTS) $(USER_OBJECTS) \
+$(MATH_OBJECTS) $(CONTROL_OBJECTS) $(STRUCTURE_OBJECTS)
 
 .PHONY: \
 all \
 startup stdperiph device driver user \
+math control structure \
 burn link reset \
 clean cleano \
 macro pwd
 
-all: startup stdperiph device driver user math control \
+all: startup stdperiph device driver user math control structure\
 $(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).elf $(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).bin
 
 $(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).bin: $(BUILD_DIR)/$(NAME)_$(COMPILE_TIME).elf
@@ -213,6 +219,11 @@ math: $(MATH_OBJECTS)
 vpath %.c $(sort $(dir $(CONTROL_C_SOURCES)))
 
 control: $(CONTROL_OBJECTS)
+	@echo \<\<\<\<\<Control File Compile Completely\>\>\>\>\>
+
+vpath %.c $(sort $(dir $(STRUCTURE_C_SOURCES)))
+
+structure: $(STRUCTURE_OBJECTS)
 	@echo \<\<\<\<\<Control File Compile Completely\>\>\>\>\>
 
 burn:

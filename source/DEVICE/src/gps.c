@@ -1,5 +1,7 @@
 #include "gps.h"
 
+List_NodeTypeDef* List_HeadPointer=NULL;
+
 #define BN_880      //北天通讯 GNSS+罗盘模块
 // #define M8N         //pixhawk GPS+罗盘模块
 // #define ATGM336H    //中科微电子 GPS
@@ -157,6 +159,8 @@ void UART4_IRQHandler(void)
         case '$'://起始序列符号
             if(gpsState==GPS_StateFinish)//前一次的数据流解码已经完成
                 gpsState=GPS_StateStart;
+                //创建链表
+            List_CreatHead(List_HeadPointer);
             break;
         case 0x0D://可能是回车或者校验位
             gpsState=GPS_StatePrepEnd;
@@ -166,6 +170,7 @@ void UART4_IRQHandler(void)
             {
             case GPS_StateStart:
                 //写入链表
+                List_AddNode(List_HeadPointer,tmp);
                 break;
             case GPS_StatePrepEnd://前一个值是0x0D
                 gpsState=GPS_StateEnd;
@@ -179,16 +184,30 @@ void UART4_IRQHandler(void)
             {
             case GPS_StateStart:
                 //写入链表
+                List_AddNode(List_HeadPointer,tmp);
                 break;
             case GPS_StatePrepEnd://前一个值是0x0D
                 //0x0D写入链表
+                List_AddNode(List_HeadPointer,0x0D);
                 //这次获取的值也写入链表
+                List_AddNode(List_HeadPointer,tmp);
                 gpsState=GPS_StateStart;
+                break;
             default:
                 break;
             }
             break;
         }
+    //清除标志位
+    USART_ClearFlag(UART4,USART_FLAG_RXNE);
     }
     
+}
+
+/**
+ * @brief   外部中断0进行GPS链表解码
+ **/
+void EXTI0_IRQHandler(void)
+{
+    //先进行和校验
 }

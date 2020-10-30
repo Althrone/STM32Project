@@ -41,6 +41,8 @@
 #include "fly.h"
 #include "calibrate.h"
 
+#include "list.h"
+
 /* Extern variates -----------------------------------------------------------*/
 extern uint8_t CalFlag;
 extern uint8_t LEDFlag;

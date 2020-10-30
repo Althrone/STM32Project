@@ -2,6 +2,20 @@
 
 int main(void)
 {
+
+    //链表测试：通过
+    // List_NodeTypeDef* List_HeadPointer=NULL;
+    // if(List_CreatHead(&List_HeadPointer))
+    // {
+    //     if(List_AddNode(List_HeadPointer,11))
+    //     {
+    //         List_AddNode(List_HeadPointer,33);
+    //         uint8_t tmp;
+    //         tmp=List_Length(List_HeadPointer);
+    //         tmp=List_DeleteList(&List_HeadPointer);
+    //     }
+    // }
+
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//设置系统中断优先级分组2
 
     RGBLED_Init();
@@ -40,29 +54,29 @@ int main(void)
 
     ATT_AngleDataTypeDef ATT_AngleDataStruct;
     
-    float_t testx,testy,testz,bx,bz;
-    float_t x0,y0,z0,rx,ry,rz;
-    float_t mx,my,mz,rmx,rmy,rmz;
+    // float_t testx,testy,testz,bx,bz;
+    // float_t x0,y0,z0,rx,ry,rz;
+    // float_t mx,my,mz,rmx,rmy,rmz;
 
-    AT24C02_SequentialRead(0x04,4,(uint8_t*)&testx);
-    AT24C02_SequentialRead(0x08,4,(uint8_t*)&testy);
-    AT24C02_SequentialRead(0x0C,4,(uint8_t*)&testz);
-    AT24C02_SequentialRead(0x40,4,(uint8_t*)&bx);
-    AT24C02_SequentialRead(0x44,4,(uint8_t*)&bz);
+    // AT24C02_SequentialRead(0x04,4,(uint8_t*)&testx);
+    // AT24C02_SequentialRead(0x08,4,(uint8_t*)&testy);
+    // AT24C02_SequentialRead(0x0C,4,(uint8_t*)&testz);
+    // AT24C02_SequentialRead(0x40,4,(uint8_t*)&bx);
+    // AT24C02_SequentialRead(0x44,4,(uint8_t*)&bz);
 
-    AT24C02_SequentialRead(0x10,4,(uint8_t*)&rx);
-    AT24C02_SequentialRead(0x18,4,(uint8_t*)&ry);
-    AT24C02_SequentialRead(0x20,4,(uint8_t*)&rz);
-    AT24C02_SequentialRead(0x14,4,(uint8_t*)&x0);
-    AT24C02_SequentialRead(0x1C,4,(uint8_t*)&y0);
-    AT24C02_SequentialRead(0x24,4,(uint8_t*)&z0);
+    // AT24C02_SequentialRead(0x10,4,(uint8_t*)&rx);
+    // AT24C02_SequentialRead(0x18,4,(uint8_t*)&ry);
+    // AT24C02_SequentialRead(0x20,4,(uint8_t*)&rz);
+    // AT24C02_SequentialRead(0x14,4,(uint8_t*)&x0);
+    // AT24C02_SequentialRead(0x1C,4,(uint8_t*)&y0);
+    // AT24C02_SequentialRead(0x24,4,(uint8_t*)&z0);
 
-    AT24C02_SequentialRead(0x28,4,(uint8_t*)&rmx);
-    AT24C02_SequentialRead(0x30,4,(uint8_t*)&rmy);
-    AT24C02_SequentialRead(0x38,4,(uint8_t*)&rmz);
-    AT24C02_SequentialRead(0x2C,4,(uint8_t*)&mx);
-    AT24C02_SequentialRead(0x34,4,(uint8_t*)&my);
-    AT24C02_SequentialRead(0x3C,4,(uint8_t*)&mz);
+    // AT24C02_SequentialRead(0x28,4,(uint8_t*)&rmx);
+    // AT24C02_SequentialRead(0x30,4,(uint8_t*)&rmy);
+    // AT24C02_SequentialRead(0x38,4,(uint8_t*)&rmz);
+    // AT24C02_SequentialRead(0x2C,4,(uint8_t*)&mx);
+    // AT24C02_SequentialRead(0x34,4,(uint8_t*)&my);
+    // AT24C02_SequentialRead(0x3C,4,(uint8_t*)&mz);
 
     float_t alt=0;
 

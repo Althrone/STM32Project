@@ -28,11 +28,11 @@ void PID_IncCtrl(PID_InfoTypeDef* PID_InfoStruct,
 
     float_t I;
     I=PID_ParamStruct->I*PID_InfoStruct->Error;
-    if(I>20)
-        I=20;
-    if (I<-20)
+    if(I>150)
+        I=150;
+    if (I<-150)
     {
-        I=-20;
+        I=-150;
     }
     
     PID_InfoStruct->Output=PID_InfoStruct->PrevOutput+
@@ -55,7 +55,7 @@ void PID_ParamSet(void)
 void PID_ParamInit(void)
 {
     //横滚角度环
-    PID_RollAngleParam.P=1;
+    PID_RollAngleParam.P=1.9;
     PID_RollAngleParam.I=0;
     PID_RollAngleParam.D=0;
     //俯仰角度环
@@ -64,9 +64,9 @@ void PID_ParamInit(void)
     PID_PitchAngleParam.D=0;
 
     //横滚角速度环
-    PID_RollRateParam.P=0.9;
+    PID_RollRateParam.P=1.2;//2~2.5等幅振荡，加I之后乘0.6
     PID_RollRateParam.I=0.1;
-    PID_RollRateParam.D=0;
+    PID_RollRateParam.D=0.5;
     //俯仰角速度环
     PID_PitchRateParam.P=0;
     PID_PitchRateParam.I=0;
