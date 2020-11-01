@@ -85,13 +85,24 @@ typedef struct
     float_t GPS_GroundSpeed;//对地速度，m/s
 }GPS_LocationTypeDef;//GPS定位信息
 
-
-
+typedef struct
+{
+    GPS_TimeTypeDef GPS_TimeStruct;
+}GPS_DataTypeDef;//GPS所有信息
 
 
 /* Exported functions --------------------------------------------------------*/
-void GPS_Test(int* a);
-void GPS_ASCII2Float(uint8_t* str,float_t* value);
+void GPS_Decode(void);
+bool GPS_CheckSum(void);
+
+void GPS_DecodeZDA(List_NodeTypeDef* NodePointer);
+void GPS_DecodeRMC(List_NodeTypeDef* NodePointer);
+
+void GPS_ASCII2Time(List_NodeTypeDef** NodePointer,GPS_TimeTypeDef* GPS_TimeStruct);
+void GPS_ASCII2Date(List_NodeTypeDef** NodePointer,GPS_TimeTypeDef* GPS_TimeStruct);
+float_t GPS_ASCII2Float(List_NodeTypeDef** NodePointer);
+float_t GPS_ASCII2Angel(List_NodeTypeDef** NodePointer);
+uint8_t GPS_ASCII2Hex(uint8_t input);
 
 #ifdef __cplusplus
 }
