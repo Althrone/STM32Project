@@ -37,7 +37,7 @@ void PPM_Init(void)
     //定义NVIC初始化结构体
     NVIC_InitTypeDef NVIC_InitStruct;
     NVIC_InitStruct.NVIC_IRQChannel=EXTI15_10_IRQn;
-    NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority=2;
+    NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority=0;
     NVIC_InitStruct.NVIC_IRQChannelSubPriority=1;
     NVIC_InitStruct.NVIC_IRQChannelCmd=ENABLE;
     NVIC_Init(&NVIC_InitStruct);

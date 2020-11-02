@@ -113,8 +113,8 @@ void TIM6_Init(void)
     //NVIC初始化结构体定义
     NVIC_InitTypeDef NVIC_InitStructure;
     NVIC_InitStructure.NVIC_IRQChannel=TIM6_DAC_IRQn ; //定时器6中断
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=0x04; //抢占优先级4
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority=0x04; //子优先级4
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=3; //抢占优先级0
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority=0; //子优先级0
     NVIC_InitStructure.NVIC_IRQChannelCmd=ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 
@@ -141,8 +141,8 @@ void TIM7_Init(void)
     //定义NVIC初始化结构体
     NVIC_InitTypeDef NVIC_InitStructure;
     NVIC_InitStructure.NVIC_IRQChannel=TIM7_IRQn; //定时器5中断
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=1; //抢占优先级1
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority=1; //子优先级1
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=0; //抢占优先级1
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority=0; //子优先级1
 	NVIC_InitStructure.NVIC_IRQChannelCmd=ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 

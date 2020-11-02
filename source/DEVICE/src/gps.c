@@ -1,7 +1,7 @@
 #include "gps.h"
 
 List_NodeTypeDef* List_HeadPointer=NULL;
-static GPS_StateTypeDef gpsState;//参考GPS_StateTypeDef
+static GPS_StateTypeDef gpsState=GPS_StateFinish;//参考GPS_StateTypeDef
 GPS_DataTypeDef GPS_DataStruct;//GPS获取到的所有数据
 
 
@@ -25,9 +25,25 @@ void GPS_Init(void)
 #elif defined(ATGM336H)//中科微电子芯片
 
 /* ATGM336H */
-#endif 
+#endif
 
-//初始化EXTI
+    //初始化中断线0，用于接受完GPS数据序列之后进行解码
+    EXTI_InitTypeDef EXTI_InitStruct;
+    EXTI_InitStruct.EXTI_Line=EXTI_Line0;
+    EXTI_InitStruct.EXTI_Mode=EXTI_Mode_Interrupt;
+    // EXTI_InitStruct.EXTI_Trigger=//软件中断，不需要外部输入线
+    EXTI_InitStruct.EXTI_LineCmd=ENABLE;
+    EXTI_Init(&EXTI_InitStruct);
+
+    // //初始化中断线0的NVIC
+    NVIC_InitTypeDef NVIC_InitStruct;
+    NVIC_InitStruct.NVIC_IRQChannel=EXTI0_IRQn;
+    NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority=3;
+    NVIC_InitStruct.NVIC_IRQChannelSubPriority=2;
+    NVIC_InitStruct.NVIC_IRQChannelCmd=ENABLE;
+    NVIC_Init(&NVIC_InitStruct);
+
+    UART4_Init();
 }
 
 /**
@@ -140,6 +156,8 @@ void GPS_DecodeRMC(List_NodeTypeDef* NodePointer)
 {
     NodePointer=NodePointer->List_NextNode;//跳过','
     GPS_ASCII2Date(&NodePointer,&GPS_DataStruct.GPS_TimeStruct);
+    NodePointer=NodePointer->List_NextNode;//跳过','
+
 }
 
 /**
@@ -161,13 +179,13 @@ uint8_t GPS_ASCII2Hex(uint8_t input)
  **/
 float_t GPS_ASCII2Angel(List_NodeTypeDef** NodePointer)
 {
-    float_t tmp1,tmp2;
-    GPS_ASCII2Float(str,value);
-    //求整
-    tmp1=(int16_t)*value/100;
-    //求余
-    tmp2=fmodf(*value,100)/60;
-    *value=tmp1+tmp2;
+    // float_t tmp1,tmp2;
+    // GPS_ASCII2Float(str,value);
+    // //求整
+    // tmp1=(int16_t)*value/100;
+    // //求余
+    // tmp2=fmodf(*value,100)/60;
+    // *value=tmp1+tmp2;
 }
 
 /**
@@ -177,26 +195,26 @@ float_t GPS_ASCII2Angel(List_NodeTypeDef** NodePointer)
  **/
 float_t GPS_ASCII2Float(List_NodeTypeDef** NodePointer)
 {
-    uint8_t tmp,flag=0;
-    float_t decimal;
-    *value=0;
-    decimal=0;
-    while(((*str>='0')&&(*str<='9'))||(*str=='.')) //数字或者是符号
-    {
-        tmp=*str++;//先取值，然后地址自加
-        if(*str=='.')
-        {
-            flag=1;
-            tmp=*str++;
-        }
-        if(flag==0)//整数部分
-            *value=*value*10.0f+(float_t)tmp;
-        else if(flag==1)//小数部分
-            decimal=decimal*10.0f+(float_t)tmp;
-    }
-    while (decimal>1)
-        decimal=decimal/10.0f;
-    *value+=decimal;
+    // uint8_t tmp,flag=0;
+    // float_t decimal;
+    // *value=0;
+    // decimal=0;
+    // while(((*str>='0')&&(*str<='9'))||(*str=='.')) //数字或者是符号
+    // {
+    //     tmp=*str++;//先取值，然后地址自加
+    //     if(*str=='.')
+    //     {
+    //         flag=1;
+    //         tmp=*str++;
+    //     }
+    //     if(flag==0)//整数部分
+    //         *value=*value*10.0f+(float_t)tmp;
+    //     else if(flag==1)//小数部分
+    //         decimal=decimal*10.0f+(float_t)tmp;
+    // }
+    // while (decimal>1)
+    //     decimal=decimal/10.0f;
+    // *value+=decimal;
 }
 
 /**
@@ -207,15 +225,26 @@ float_t GPS_ASCII2Float(List_NodeTypeDef** NodePointer)
  **/
 void GPS_ASCII2Time(List_NodeTypeDef** NodePointer,GPS_TimeTypeDef* GPS_TimeStruct)
 {
-    
-    // GPS_TimeStruct->GPS_Hour=*NodePointer
-    //将字符串的数据转到
-    // GPS_TimeStruct->GPS_Hour=*(str+0)*10+*(str+1);
-    // GPS_TimeStruct->GPS_Minute=*(str+2)*10+*(str+3);
-    // GPS_TimeStruct->GPS_Second=*(str+4)*10+*(str+5);
-    // // *(str+6)='.'忽略
-    // GPS_TimeStruct->GPS_Millisecond=*(str+7)*100+*(str+8)*10+*(str+9);
-    // str+=10;
+    // //hh
+    // GPS_TimeStruct->GPS_Hour=GPS_ASCII2Hex((*NodePointer)->List_NodeData)<<4||
+    //                          GPS_ASCII2Hex((*NodePointer)->List_NextNode->List_NodeData);
+    // (*NodePointer)=(*NodePointer)->List_NextNode->List_NextNode;
+    // //mm
+    // GPS_TimeStruct->GPS_Minute=GPS_ASCII2Hex((*NodePointer)->List_NodeData)<<4||
+    //                            GPS_ASCII2Hex((*NodePointer)->List_NextNode->List_NodeData);
+    // (*NodePointer)=(*NodePointer)->List_NextNode->List_NextNode;
+    // //ss
+    // GPS_TimeStruct->GPS_Second=GPS_ASCII2Hex((*NodePointer)->List_NodeData)<<4||
+    //                            GPS_ASCII2Hex((*NodePointer)->List_NextNode->List_NodeData);
+    // (*NodePointer)=(*NodePointer)->List_NextNode->List_NextNode;
+    // //跳过'.'
+    // (*NodePointer)=(*NodePointer)->List_NextNode;
+    // //msmsms
+    // GPS_TimeStruct->GPS_Millisecond=(uint16_t)
+    //                                 GPS_ASCII2Hex((*NodePointer)->List_NodeData)<<8||
+    //                                 GPS_ASCII2Hex((*NodePointer)->List_NextNode->List_NodeData)<<4||
+    //                                 GPS_ASCII2Hex((*NodePointer)->List_NextNode->List_NextNode->List_NodeData);
+    // (*NodePointer)=(*NodePointer)->List_NextNode->List_NextNode->List_NextNode;
 }
 
 /**
@@ -253,7 +282,8 @@ void UART4_IRQHandler(void)
             }
             break;
         case 0x0D://可能是回车或者校验位
-            gpsState=GPS_StatePrepEnd;
+            if(gpsState==GPS_StateStart)
+                gpsState=GPS_StatePrepEnd;
             break;
         case 0x0A://可能是换行或者校验位
             switch (gpsState)
@@ -265,6 +295,12 @@ void UART4_IRQHandler(void)
             case GPS_StatePrepEnd://前一个值是0x0D
                 gpsState=GPS_StateEnd;
                 //触发中断
+                //这两行是测试用的
+                // List_DeleteList(&List_HeadPointer);
+                // gpsState=GPS_StateFinish;
+
+                EXTI_GenerateSWInterrupt(EXTI_Line0);
+                break;
             default:
                 break;
             }
@@ -288,10 +324,13 @@ void UART4_IRQHandler(void)
             }
             break;
         }
-    //清除标志位
-    USART_ClearFlag(UART4,USART_FLAG_RXNE);
+        //清除标志位
+        USART_ClearFlag(UART4,USART_FLAG_RXNE);
     }
-    
+    if(USART_GetFlagStatus(UART4,USART_FLAG_ORE)!=RESET)
+    {
+        USART_ClearFlag(UART4,USART_FLAG_ORE);
+    }
 }
 
 /**
@@ -299,5 +338,10 @@ void UART4_IRQHandler(void)
  **/
 void EXTI0_IRQHandler(void)
 {
-    //先进行和校验
+    if(EXTI_GetFlagStatus(EXTI_Line0)!=RESET)//PWM输入发生触发
+    {
+        // gpsState=GPS_StateDecode;
+        // GPS_Decode();
+        EXTI_ClearFlag(EXTI_Line0);
+    }
 }

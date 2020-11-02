@@ -11,6 +11,8 @@
 
 #include "math.h"
 
+#include "usart.h"
+
 #include "list.h"
 
 /**
@@ -92,6 +94,7 @@ typedef struct
 
 
 /* Exported functions --------------------------------------------------------*/
+void GPS_Init(void);
 void GPS_Decode(void);
 bool GPS_CheckSum(void);
 

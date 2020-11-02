@@ -35,6 +35,8 @@ int main(void)
 
     PID_ParamInit();
 
+    GPS_Init();
+
     //校准代码区
     CAL_Senser();
     //获取遥控器数值
@@ -82,6 +84,8 @@ int main(void)
 
     while (1)
     {
+        if(USART_GetFlagStatus(UART4,USART_FLAG_RXNE)!=RESET)
+            USART_ClearFlag(UART4,USART_FLAG_RXNE);
         if(CalFlag==1)
         {
             MPU6050_RawData2CalData(&MPU6050_RawDataStruct,&MPU6050_CalDataStruct);
