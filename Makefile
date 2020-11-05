@@ -224,7 +224,7 @@ control: $(CONTROL_OBJECTS)
 vpath %.c $(sort $(dir $(STRUCTURE_C_SOURCES)))
 
 structure: $(STRUCTURE_OBJECTS)
-	@echo \<\<\<\<\<Control File Compile Completely\>\>\>\>\>
+	@echo \<\<\<\<\<Structure File Compile Completely\>\>\>\>\>
 
 burn:
 	openocd \

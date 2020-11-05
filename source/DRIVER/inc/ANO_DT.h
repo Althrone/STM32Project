@@ -18,12 +18,6 @@
 
 /* Exported types ------------------------------------------------------------*/
 
-//数据拆分宏定义，在发送大于1字节的数据类型时，比如int16、float等，需要把数据拆分成单独字节进行发送
-#define BYTE0(dwTemp)       ( *( (uint8_t *)(&dwTemp)    ) )
-#define BYTE1(dwTemp)       ( *( (uint8_t *)(&dwTemp) + 1) )
-#define BYTE2(dwTemp)       ( *( (uint8_t *)(&dwTemp) + 2) )
-#define BYTE3(dwTemp)       ( *( (uint8_t *)(&dwTemp) + 3) )
-
 typedef enum
 {
     ANO_DT_Ver         =0x00,//版本信息
@@ -136,21 +130,16 @@ typedef struct
 
 /* Exported functions --------------------------------------------------------*/ 
 
-uint8_t* ANO_DT_SplitMember(uint8_t memberlenth,uint8_t* memberhead,uint8_t* databuf);
+void ANO_DT_SplitMember(uint8_t memberlenth,uint8_t* memberhead,uint8_t* databuf);
 
-void ANO_DT_SendVer(USART_TypeDef* USARTx,ANO_DT_SendVerTypeDef* ANO_DT_SendVerStruct);
-void ANO_DT_SendStatus(USART_TypeDef* USARTx,ANO_DT_SendStatusTypeDef* ANO_DT_SendStatusStruct);
+// void ANO_DT_SendVer(USART_TypeDef* USARTx,ANO_DT_SendVerTypeDef* ANO_DT_SendVerStruct);
+// void ANO_DT_SendStatus(USART_TypeDef* USARTx,ANO_DT_SendStatusTypeDef* ANO_DT_SendStatusStruct);
 void ANO_DT_SendSenser(USART_TypeDef* USARTx,ANO_DT_SendSenserTypeDef* ANO_DT_SendSenserStruct);
-void ANO_DT_SendRCData(USART_TypeDef* USARTx,ANO_DT_SendRCDataTypeDef* ANO_DT_SendRCDataStruct);
-void ANO_DT_SendGPSData(USART_TypeDef* USARTx,ANO_DT_SendGPSDataTypeDef* ANO_DT_SendGPSDataStruct);
-void ANO_DT_SendPower(USART_TypeDef* USARTx,ANO_DT_SendPowerTypeDef* ANO_DT_SendPowerStruct);
-void ANO_DT_SendMoto(USART_TypeDef* USARTx,ANO_DT_SendMotoTypeDef* ANO_DT_SendMotoStruct);
-void ANO_DT_SendSenser2(USART_TypeDef* USARTx,ANO_DT_SendSenser2TypeDef* ANO_DT_SendSenser2Struct);
-
-void USART1_Send(const unsigned char *data,unsigned char len);
-
-
-
+// void ANO_DT_SendRCData(USART_TypeDef* USARTx,ANO_DT_SendRCDataTypeDef* ANO_DT_SendRCDataStruct);
+// void ANO_DT_SendGPSData(USART_TypeDef* USARTx,ANO_DT_SendGPSDataTypeDef* ANO_DT_SendGPSDataStruct);
+// void ANO_DT_SendPower(USART_TypeDef* USARTx,ANO_DT_SendPowerTypeDef* ANO_DT_SendPowerStruct);
+// void ANO_DT_SendMoto(USART_TypeDef* USARTx,ANO_DT_SendMotoTypeDef* ANO_DT_SendMotoStruct);
+// void ANO_DT_SendSenser2(USART_TypeDef* USARTx,ANO_DT_SendSenser2TypeDef* ANO_DT_SendSenser2Struct);
 
 #ifdef __cplusplus
 }

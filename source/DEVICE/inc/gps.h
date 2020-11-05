@@ -15,6 +15,8 @@
 
 #include "list.h"
 
+#include "rgbled.h"
+
 /**
  * GPS_(UBLOX/中科微)_功能_功能描述
  **/

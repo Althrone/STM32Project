@@ -27,21 +27,21 @@ void GPS_Init(void)
 /* ATGM336H */
 #endif
 
-    //初始化中断线0，用于接受完GPS数据序列之后进行解码
-    EXTI_InitTypeDef EXTI_InitStruct;
-    EXTI_InitStruct.EXTI_Line=EXTI_Line0;
-    EXTI_InitStruct.EXTI_Mode=EXTI_Mode_Interrupt;
-    // EXTI_InitStruct.EXTI_Trigger=//软件中断，不需要外部输入线
-    EXTI_InitStruct.EXTI_LineCmd=ENABLE;
-    EXTI_Init(&EXTI_InitStruct);
+    // // //初始化中断线0，用于接受完GPS数据序列之后进行解码
+    // EXTI_InitTypeDef EXTI_InitStruct;
+    // EXTI_InitStruct.EXTI_Line=EXTI_Line0;
+    // EXTI_InitStruct.EXTI_Mode=EXTI_Mode_Interrupt;
+    // // EXTI_InitStruct.EXTI_Trigger=//软件中断，不需要外部输入线
+    // EXTI_InitStruct.EXTI_LineCmd=ENABLE;
+    // EXTI_Init(&EXTI_InitStruct);
 
-    // //初始化中断线0的NVIC
-    NVIC_InitTypeDef NVIC_InitStruct;
-    NVIC_InitStruct.NVIC_IRQChannel=EXTI0_IRQn;
-    NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority=3;
-    NVIC_InitStruct.NVIC_IRQChannelSubPriority=2;
-    NVIC_InitStruct.NVIC_IRQChannelCmd=ENABLE;
-    NVIC_Init(&NVIC_InitStruct);
+    // // //初始化中断线0的NVIC
+    // NVIC_InitTypeDef NVIC_InitStruct;
+    // NVIC_InitStruct.NVIC_IRQChannel=EXTI0_IRQn;
+    // NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority=3;
+    // NVIC_InitStruct.NVIC_IRQChannelSubPriority=2;
+    // NVIC_InitStruct.NVIC_IRQChannelCmd=ENABLE;
+    // NVIC_Init(&NVIC_InitStruct);
 
     UART4_Init();
 }
@@ -62,8 +62,8 @@ void GPS_Decode(void)
         uint32_t tmpVal=0;
         while(tmpPointer->List_NodeData!=',')
         {
-            tmpVal<<8;
-            tmpVal+=tmpPointer->List_NodeData;
+            tmpVal=tmpVal<<8;
+            tmpVal|=tmpPointer->List_NodeData;
             tmpPointer=tmpPointer->List_NextNode;
         }
         //跳出循环的时候指向','
@@ -71,31 +71,33 @@ void GPS_Decode(void)
         switch (tmpVal)
         {
         case GPS_ContZDA:
-            GPS_DecodeZDA(tmpPointer);
+            // GPS_DecodeZDA(tmpPointer);
+            RGBLED_StateSet(RGBLED_White,RGBLED_1sMode);
             break;
         case GPS_ContGGA:
-            /* code */
+            RGBLED_StateSet(RGBLED_Yellow,RGBLED_1sMode);
             break;
         case GPS_ContGLL:
-            /* code */
+            RGBLED_StateSet(RGBLED_Purple,RGBLED_1sMode);
             break;
         case GPS_ContVTG:
-            /* code */
+            RGBLED_StateSet(RGBLED_Red,RGBLED_1sMode);
             break;
         case GPS_ContGSA:
-            /* code */
+            RGBLED_StateSet(RGBLED_Cyan,RGBLED_1sMode);
             break;
         case GPS_ContGSV:
-            /* code */
+            RGBLED_StateSet(RGBLED_Green,RGBLED_1sMode);
             break;
         case GPS_ContRMC:
-            GPS_DecodeRMC(tmpPointer);
-            /* code */
+            // GPS_DecodeRMC(tmpPointer);
+            RGBLED_StateSet(RGBLED_Blue,RGBLED_1sMode);
             break;
         case GPS_ContANT:
-            /* code */
+            RGBLED_StateSet(RGBLED_White,RGBLED_1sMode);
             break;
         default:
+            RGBLED_StateSet(RGBLED_Black,RGBLED_1sMode);
             break;
         }
         //串口接收到的内容应该动态销毁
@@ -103,9 +105,12 @@ void GPS_Decode(void)
         List_DeleteList(&List_HeadPointer);
         gpsState=GPS_StateFinish;
     }
-    //和校验出错，销毁链表，GPS重新接收数据
-    List_DeleteList(&List_HeadPointer);
-    gpsState=GPS_StateFinish;
+    else
+    {
+        //和校验出错，销毁链表，GPS重新接收数据
+        List_DeleteList(&List_HeadPointer);
+        gpsState=GPS_StateFinish;
+    }
 }
 
 /**
@@ -158,6 +163,10 @@ void GPS_DecodeRMC(List_NodeTypeDef* NodePointer)
     GPS_ASCII2Date(&NodePointer,&GPS_DataStruct.GPS_TimeStruct);
     NodePointer=NodePointer->List_NextNode;//跳过','
 
+    RGBLED_StateSet(RGBLED_Green,RGBLED_1sMode);
+    //
+    List_DeleteList(&List_HeadPointer);
+    gpsState=GPS_StateFinish;
 }
 
 /**
@@ -296,10 +305,16 @@ void UART4_IRQHandler(void)
                 gpsState=GPS_StateEnd;
                 //触发中断
                 //这两行是测试用的
+                
+                GPS_Decode();
+                // EXTI_GenerateSWInterrupt(EXTI_Line0);
+                //关闭串口
+                // USART_Cmd(UART4,DISABLE);
                 // List_DeleteList(&List_HeadPointer);
-                // gpsState=GPS_StateFinish;
-
-                EXTI_GenerateSWInterrupt(EXTI_Line0);
+                // RGBLED_StateSet(RGBLED_Cyan,RGBLED_1sMode);
+                gpsState=GPS_StateFinish;
+                //开串口
+                
                 break;
             default:
                 break;
@@ -333,15 +348,15 @@ void UART4_IRQHandler(void)
     }
 }
 
-/**
- * @brief   外部中断0进行GPS链表解码
- **/
-void EXTI0_IRQHandler(void)
-{
-    if(EXTI_GetFlagStatus(EXTI_Line0)!=RESET)//PWM输入发生触发
-    {
-        // gpsState=GPS_StateDecode;
-        // GPS_Decode();
-        EXTI_ClearFlag(EXTI_Line0);
-    }
-}
+// /**
+//  * @brief   外部中断0进行GPS链表解码
+//  **/
+// void EXTI0_IRQHandler(void)
+// {
+//     if(EXTI_GetFlagStatus(EXTI_Line0)!=RESET)//PWM输入发生触发
+//     {
+//         // gpsState=GPS_StateDecode;
+//         // GPS_Decode();
+//         EXTI_ClearFlag(EXTI_Line0);
+//     }
+// }

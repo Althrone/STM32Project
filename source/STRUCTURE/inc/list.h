@@ -13,11 +13,13 @@
 #include <stdlib.h>
 
 /* Exported types ------------------------------------------------------------*/
-typedef struct List_Node
-{
-    uint8_t List_NodeData;              //一字节数据
-    struct List_Node* List_NextNode;    //指向下一节点
-}List_NodeTypeDef;
+// #pragma pack(4)//强制四字节对齐，不知道是编译器的原因还是哪儿的原因，指针占了8字节，导致这个结构体大小直接翻了一倍
+    typedef struct List_Node
+    {
+        uint8_t List_NodeData;              //一字节数据
+        struct List_Node* List_NextNode;    //指向下一节点
+    }List_NodeTypeDef;
+// #pragma pack()
 
 
 /* Exported functions --------------------------------------------------------*/

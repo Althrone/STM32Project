@@ -14,7 +14,7 @@
                 "__VFP_FP__",
                 "ARM_MATH_CM4"
             ],
-            "intelliSenseMode": "gcc-x64"
+            "intelliSenseMode": "gcc-arm"
         }
     ],
     "version": 4
