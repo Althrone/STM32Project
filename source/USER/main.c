@@ -125,18 +125,18 @@ int main(void)
         ANO_DT_SendSenser(USART1,&ANO_DT_SendSenserStruct);
         // 发送遥控器参数到上位机
         PPM_GetRCData(&ANO_DT_SendRCDataStruct);
-        // ANO_DT_SendRCData(USART1,&ANO_DT_SendRCDataStruct);
+        ANO_DT_SendRCData(USART1,&ANO_DT_SendRCDataStruct);
 
         ANO_DT_SendStatusStruct.ANO_DT_Roll=ATT_AngleDataStruct.ATT_AnglePhi*100;
         ANO_DT_SendStatusStruct.ANO_DT_Pitch=ATT_AngleDataStruct.ATT_AngleTheta*100;
         ANO_DT_SendStatusStruct.ANO_DT_Yaw=ATT_AngleDataStruct.ATT_AnglePsi*100;
-        // ANO_DT_SendStatus(USART1,&ANO_DT_SendStatusStruct);
+        ANO_DT_SendStatus(USART1,&ANO_DT_SendStatusStruct);
 
         SPL06_RawData2FloatData(&SPL06_RawDataStruct,&SPL06_FloatDataStruct);
         SPL06_RawData2Altitude(&SPL06_RawDataStruct,&alt);
         ANO_DT_SendSenser2Struct.ANO_DT_ALT_BAR=alt*100;
         ANO_DT_SendSenser2Struct.ANO_DT_SEN_TMP=10.0f*SPL06_FloatDataStruct.SPL06_FloatTemp;
-        // ANO_DT_SendSenser2(USART1,&ANO_DT_SendSenser2Struct);
+        ANO_DT_SendSenser2(USART1,&ANO_DT_SendSenser2Struct);
 
         if(ANO_DT_SendRCDataStruct.ANO_DT_RCAUX4<1200)
         {
