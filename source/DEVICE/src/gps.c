@@ -90,7 +90,7 @@ void GPS_Decode(void)
             RGBLED_StateSet(RGBLED_Green,RGBLED_1sMode);
             break;
         case GPS_ContRMC:
-            // GPS_DecodeRMC(tmpPointer);
+            GPS_DecodeRMC(tmpPointer);
             RGBLED_StateSet(RGBLED_Blue,RGBLED_1sMode);
             break;
         case GPS_ContANT:
@@ -159,14 +159,86 @@ void GPS_DecodeZDA(List_NodeTypeDef* NodePointer)
  **/
 void GPS_DecodeRMC(List_NodeTypeDef* NodePointer)
 {
-    NodePointer=NodePointer->List_NextNode;//跳过','
-    GPS_ASCII2Date(&NodePointer,&GPS_DataStruct.GPS_TimeStruct);
-    NodePointer=NodePointer->List_NextNode;//跳过','
-
-    RGBLED_StateSet(RGBLED_Green,RGBLED_1sMode);
-    //
-    List_DeleteList(&List_HeadPointer);
-    gpsState=GPS_StateFinish;
+    NodePointer=NodePointer->List_NextNode;
+    if(NodePointer->List_NodeData!=',')//UTC时间
+    {
+        //解码
+        GPS_ASCII2Time(NodePointer,&GPS_DataStruct.GPS_TimeStruct);
+        //指针走
+        while(NodePointer->List_NodeData!=',')
+        {
+            NodePointer=NodePointer->List_NextNode;
+        }
+    }
+    NodePointer=NodePointer->List_NextNode;
+    if(NodePointer->List_NodeData!=',')//数据是否有效
+    {
+        if(NodePointer->List_NodeData=='V')
+            return;
+        while(NodePointer->List_NodeData!=',')
+        {
+            NodePointer=NodePointer->List_NextNode;
+        }
+    }
+    NodePointer=NodePointer->List_NextNode;
+    if(NodePointer->List_NodeData!=',')//纬度
+    {
+        //解码
+        float_t latitude;
+        latitude=GPS_ASCII2Angel(NodePointer);
+        while(NodePointer->List_NodeData!=',')
+        {
+            NodePointer=NodePointer->List_NextNode;
+        }
+        NodePointer=NodePointer->List_NextNode;
+        if(NodePointer->List_NodeData!=',')//南北纬
+        {
+            if(NodePointer->List_NodeData=='S')
+                GPS_DataStruct.GPS_LocationStruct.GPS_Latitude=-latitude;
+            else if(NodePointer->List_NodeData=='N')
+                GPS_DataStruct.GPS_LocationStruct.GPS_Latitude=latitude;
+        }
+        while(NodePointer->List_NodeData!=',')
+        {
+            NodePointer=NodePointer->List_NextNode;
+        }
+    }
+    NodePointer=NodePointer->List_NextNode;
+    if(NodePointer->List_NodeData!=',')//经度
+    {
+        //解码
+        float_t longitude;
+        longitude=GPS_ASCII2Angel(NodePointer);
+        while(NodePointer->List_NodeData!=',')
+        {
+            NodePointer=NodePointer->List_NextNode;
+        }
+        NodePointer=NodePointer->List_NextNode;
+        if(NodePointer->List_NodeData!=',')//东西经
+        {
+            if(NodePointer->List_NodeData=='W')
+                GPS_DataStruct.GPS_LocationStruct.GPS_Longitude=-longitude;
+            else if(NodePointer->List_NodeData=='E')
+                GPS_DataStruct.GPS_LocationStruct.GPS_Longitude=longitude;
+        }
+        while(NodePointer->List_NodeData!=',')
+        {
+            NodePointer=NodePointer->List_NextNode;
+        }
+    }
+    NodePointer=NodePointer->List_NextNode;
+    if(NodePointer->List_NodeData!=',')//对地速度
+    {
+        float_t speed;
+        //解码
+        speed=GPS_ASCII2Float(NodePointer);
+        speed*=1852.f/3600.f;
+        GPS_DataStruct.GPS_LocationStruct.GPS_GroundSpeed=speed;
+    }
+    while(NodePointer->List_NodeData!=',')
+    {
+        NodePointer=NodePointer->List_NextNode;
+    }
 }
 
 /**
@@ -176,9 +248,9 @@ uint8_t GPS_ASCII2Hex(uint8_t input)
 {
     if((input>='0')&&(input<='9'))//数字字符
         input-=0x30;
-    if((input>='A')&&(input<='Z'))//大写字母字符
+    else if((input>='A')&&(input<='Z'))//大写字母字符
         input-=0x37;
-    if((input>='a')&&(input<='z'))//小写字母字符
+    else if((input>='a')&&(input<='z'))//小写字母字符
         input-=0x57;
     return input;
 }
@@ -186,15 +258,35 @@ uint8_t GPS_ASCII2Hex(uint8_t input)
 /**
  * @brief   ASCII转度，用于经纬度转换
  **/
-float_t GPS_ASCII2Angel(List_NodeTypeDef** NodePointer)
+float_t GPS_ASCII2Angel(List_NodeTypeDef* NodePointer)
 {
-    // float_t tmp1,tmp2;
-    // GPS_ASCII2Float(str,value);
-    // //求整
-    // tmp1=(int16_t)*value/100;
-    // //求余
-    // tmp2=fmodf(*value,100)/60;
-    // *value=tmp1+tmp2;
+    uint16_t tmp1=0;
+    float_t tmp2=0;
+    uint8_t cnt=0;
+    while(NodePointer->List_NodeData!='.')
+    {
+        tmp1*=10;
+        tmp1+=GPS_ASCII2Hex(NodePointer->List_NodeData);
+        NodePointer=NodePointer->List_NextNode;
+    }
+    tmp2=tmp1%100;
+    tmp1/=100;
+    NodePointer=NodePointer->List_NextNode;//跳过'.'
+    while(NodePointer->List_NodeData!=',')
+    {
+        tmp2*=10;
+        tmp2+=GPS_ASCII2Hex(NodePointer->List_NodeData);
+        NodePointer=NodePointer->List_NextNode;
+        cnt++;
+    }
+    while(cnt!=0)
+    {
+        tmp2/=10;
+        cnt--;
+    }
+    tmp2/=60;
+    tmp2+=tmp1;
+    return tmp2;
 }
 
 /**
@@ -202,28 +294,29 @@ float_t GPS_ASCII2Angel(List_NodeTypeDef** NodePointer)
  * @param   str: 字符串的指针
  * @return  float: 浮点数
  **/
-float_t GPS_ASCII2Float(List_NodeTypeDef** NodePointer)
+float_t GPS_ASCII2Float(List_NodeTypeDef* NodePointer)
 {
-    // uint8_t tmp,flag=0;
-    // float_t decimal;
-    // *value=0;
-    // decimal=0;
-    // while(((*str>='0')&&(*str<='9'))||(*str=='.')) //数字或者是符号
-    // {
-    //     tmp=*str++;//先取值，然后地址自加
-    //     if(*str=='.')
-    //     {
-    //         flag=1;
-    //         tmp=*str++;
-    //     }
-    //     if(flag==0)//整数部分
-    //         *value=*value*10.0f+(float_t)tmp;
-    //     else if(flag==1)//小数部分
-    //         decimal=decimal*10.0f+(float_t)tmp;
-    // }
-    // while (decimal>1)
-    //     decimal=decimal/10.0f;
-    // *value+=decimal;
+    float_t tmp1=0;
+    float_t tmp2=0;
+    while(NodePointer->List_NodeData!='.')
+    {
+        tmp1*=10;
+        tmp1+=GPS_ASCII2Hex(NodePointer->List_NodeData);
+        NodePointer=NodePointer->List_NextNode;
+    }
+    NodePointer=NodePointer->List_NextNode;//跳过'.'
+    while(NodePointer->List_NodeData!=',')
+    {
+        tmp2*=10;
+        tmp2+=GPS_ASCII2Hex(NodePointer->List_NodeData);
+        NodePointer=NodePointer->List_NextNode;
+    }
+    while(tmp2>1)
+    {
+        tmp2/=10;
+    }
+    tmp1+=tmp2;
+    return tmp1;
 }
 
 /**
@@ -232,28 +325,26 @@ float_t GPS_ASCII2Float(List_NodeTypeDef** NodePointer)
  * @param   GPS_TimeStruct: GPS获取时间结构体
  * @return  位移后的指针地址
  **/
-void GPS_ASCII2Time(List_NodeTypeDef** NodePointer,GPS_TimeTypeDef* GPS_TimeStruct)
+void GPS_ASCII2Time(List_NodeTypeDef* NodePointer,GPS_TimeTypeDef* GPS_TimeStruct)
 {
-    // //hh
-    // GPS_TimeStruct->GPS_Hour=GPS_ASCII2Hex((*NodePointer)->List_NodeData)<<4||
-    //                          GPS_ASCII2Hex((*NodePointer)->List_NextNode->List_NodeData);
-    // (*NodePointer)=(*NodePointer)->List_NextNode->List_NextNode;
-    // //mm
-    // GPS_TimeStruct->GPS_Minute=GPS_ASCII2Hex((*NodePointer)->List_NodeData)<<4||
-    //                            GPS_ASCII2Hex((*NodePointer)->List_NextNode->List_NodeData);
-    // (*NodePointer)=(*NodePointer)->List_NextNode->List_NextNode;
-    // //ss
-    // GPS_TimeStruct->GPS_Second=GPS_ASCII2Hex((*NodePointer)->List_NodeData)<<4||
-    //                            GPS_ASCII2Hex((*NodePointer)->List_NextNode->List_NodeData);
-    // (*NodePointer)=(*NodePointer)->List_NextNode->List_NextNode;
-    // //跳过'.'
-    // (*NodePointer)=(*NodePointer)->List_NextNode;
-    // //msmsms
-    // GPS_TimeStruct->GPS_Millisecond=(uint16_t)
-    //                                 GPS_ASCII2Hex((*NodePointer)->List_NodeData)<<8||
-    //                                 GPS_ASCII2Hex((*NodePointer)->List_NextNode->List_NodeData)<<4||
-    //                                 GPS_ASCII2Hex((*NodePointer)->List_NextNode->List_NextNode->List_NodeData);
-    // (*NodePointer)=(*NodePointer)->List_NextNode->List_NextNode->List_NextNode;
+    //hh
+    GPS_TimeStruct->GPS_Hour=GPS_ASCII2Hex(NodePointer->List_NodeData)*10+
+                             GPS_ASCII2Hex(NodePointer->List_NextNode->List_NodeData);
+    NodePointer=NodePointer->List_NextNode->List_NextNode;
+    //mm
+    GPS_TimeStruct->GPS_Minute=GPS_ASCII2Hex(NodePointer->List_NodeData)*10+
+                               GPS_ASCII2Hex(NodePointer->List_NextNode->List_NodeData);
+    NodePointer=NodePointer->List_NextNode->List_NextNode;
+    //ss
+    GPS_TimeStruct->GPS_Second=GPS_ASCII2Hex(NodePointer->List_NodeData)*10+
+                               GPS_ASCII2Hex(NodePointer->List_NextNode->List_NodeData);
+    NodePointer=NodePointer->List_NextNode->List_NextNode;
+    //跳过'.'
+    NodePointer=NodePointer->List_NextNode;
+    //msmsms
+    GPS_TimeStruct->GPS_Millisecond=(uint16_t)
+                                    GPS_ASCII2Hex(NodePointer->List_NodeData)*10+
+                                    GPS_ASCII2Hex(NodePointer->List_NextNode->List_NodeData);
 }
 
 /**
@@ -269,6 +360,23 @@ void GPS_ASCII2Date(List_NodeTypeDef** NodePointer,GPS_TimeTypeDef* GPS_TimeStru
     // GPS_TimeStruct->GPS_Month=*(str+2)*10+*(str+3);
     // GPS_TimeStruct->GPS_Year=*(str+4)*10+*(str+5);
     // str+=6;
+}
+
+/**
+ * @brief   检测是否为有效参数
+ * @param   NodePointer: 链表指针
+ * @return  长度，0长度代表无效
+ **/
+uint8_t GPS_IsValidData(List_NodeTypeDef* NodePointer)
+{
+    uint8_t length=0;
+    NodePointer=NodePointer->List_NextNode;//跳过上一个检测的','
+    while (NodePointer->List_NodeData!=',')
+    {
+        NodePointer=NodePointer->List_NextNode;
+        length++;
+    }
+    return length;
 }
 
 /**

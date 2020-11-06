@@ -17,16 +17,6 @@
 
 #include "rgbled.h"
 
-/**
- * GPS_(UBLOX/中科微)_功能_功能描述
- **/
-
-#define GPS_UBLOX_SAVE_SEG1 0xB56206090D000000
-#define GPS_UBLOX_SAVE_SEG2 0x0000FFFF00000000 
-#define GPS_UBLOX_SAVE_SEG3 0x00001731BF
-
-#define GPS_UBLOX_OUT_PUT_RATE_1HZ_SEG1 0xB56206080600E803
-#define GPS_UBLOX_OUT_PUT_RATE_1HZ_SEG2 0x010001000139
 /* Exported types ------------------------------------------------------------*/
 
 typedef enum//不超过4个字符 没所谓
@@ -92,6 +82,7 @@ typedef struct
 typedef struct
 {
     GPS_TimeTypeDef GPS_TimeStruct;
+    GPS_LocationTypeDef GPS_LocationStruct;
 }GPS_DataTypeDef;//GPS所有信息
 
 
@@ -103,11 +94,12 @@ bool GPS_CheckSum(void);
 void GPS_DecodeZDA(List_NodeTypeDef* NodePointer);
 void GPS_DecodeRMC(List_NodeTypeDef* NodePointer);
 
-void GPS_ASCII2Time(List_NodeTypeDef** NodePointer,GPS_TimeTypeDef* GPS_TimeStruct);
+void GPS_ASCII2Time(List_NodeTypeDef* NodePointer,GPS_TimeTypeDef* GPS_TimeStruct);
 void GPS_ASCII2Date(List_NodeTypeDef** NodePointer,GPS_TimeTypeDef* GPS_TimeStruct);
-float_t GPS_ASCII2Float(List_NodeTypeDef** NodePointer);
-float_t GPS_ASCII2Angel(List_NodeTypeDef** NodePointer);
+float_t GPS_ASCII2Float(List_NodeTypeDef* NodePointer);
+float_t GPS_ASCII2Angel(List_NodeTypeDef* NodePointer);
 uint8_t GPS_ASCII2Hex(uint8_t input);
+uint8_t GPS_IsValidData(List_NodeTypeDef* NodePointer);
 
 #ifdef __cplusplus
 }
