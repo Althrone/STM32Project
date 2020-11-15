@@ -26,6 +26,9 @@ void AK8975_Init(void)
     AT24C02_SequentialRead(0x2C,4,(uint8_t*)&AK8975_CalParamStruct.AK8975_BiasMagX);
     AT24C02_SequentialRead(0x34,4,(uint8_t*)&AK8975_CalParamStruct.AK8975_BiasMagY);
     AT24C02_SequentialRead(0x3C,4,(uint8_t*)&AK8975_CalParamStruct.AK8975_BiasMagZ);
+
+    //这个sb传感器每一次获取完数据就关闭，每次都要开
+    IIC_WriteByteToSlave(AK8975_CAD1_LOW_CAD0_LOW,AK8975_CNTL,AK8975_CNTL_MODE_MEAS);
 }
 
 /**
@@ -36,8 +39,8 @@ void AK8975_AllRawDataRead(AK8975_RawDataTypeDef* AK8975_RawDataStruct)
 {
     //暂存数据
     uint8_t temp[6];
-    //这个sb传感器每一次获取完数据就关闭，每次都要开
-    IIC_WriteByteToSlave(AK8975_CAD1_LOW_CAD0_LOW,AK8975_CNTL,AK8975_CNTL_MODE_MEAS);
+    // //这个sb传感器每一次获取完数据就关闭，每次都要开
+    // IIC_WriteByteToSlave(AK8975_CAD1_LOW_CAD0_LOW,AK8975_CNTL,AK8975_CNTL_MODE_MEAS);
     //等待数据处理好
     uint8_t flag=0;
     while(flag!=AK8975_ST1_DRDY)
@@ -50,6 +53,8 @@ void AK8975_AllRawDataRead(AK8975_RawDataTypeDef* AK8975_RawDataStruct)
     AK8975_RawDataStruct->AK8975_RawMagX=-(((int16_t)temp[3]<<8)|temp[2]);
     AK8975_RawDataStruct->AK8975_RawMagY=((int16_t)temp[1]<<8)|temp[0];
     AK8975_RawDataStruct->AK8975_RawMagZ=((int16_t)temp[5]<<8)|temp[4];
+    //这个sb传感器每一次获取完数据就关闭，每次都要开
+    IIC_WriteByteToSlave(AK8975_CAD1_LOW_CAD0_LOW,AK8975_CNTL,AK8975_CNTL_MODE_MEAS);
 }
 
 /**

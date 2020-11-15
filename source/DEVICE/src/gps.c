@@ -239,6 +239,26 @@ void GPS_DecodeRMC(List_NodeTypeDef* NodePointer)
     {
         NodePointer=NodePointer->List_NextNode;
     }
+    NodePointer=NodePointer->List_NextNode;
+    if(NodePointer->List_NodeData!=',')//方位角
+    {
+        //解码
+        GPS_DataStruct.GPS_LocationStruct.GPS_Azimuth=GPS_ASCII2Float(NodePointer);
+    }
+    while(NodePointer->List_NodeData!=',')
+    {
+        NodePointer=NodePointer->List_NextNode;
+    }
+    NodePointer=NodePointer->List_NextNode;
+    if(NodePointer->List_NodeData!=',')//日期
+    {
+        //解码
+        GPS_ASCII2Date(NodePointer,&GPS_DataStruct.GPS_TimeStruct);
+    }
+    while(NodePointer->List_NodeData!=',')
+    {
+        NodePointer=NodePointer->List_NextNode;
+    }
 }
 
 /**
@@ -353,13 +373,20 @@ void GPS_ASCII2Time(List_NodeTypeDef* NodePointer,GPS_TimeTypeDef* GPS_TimeStruc
  * @param   GPS_TimeStruct: GPS获取时间结构体
  * @return  位移后的指针地址
  **/
-void GPS_ASCII2Date(List_NodeTypeDef** NodePointer,GPS_TimeTypeDef* GPS_TimeStruct)
+void GPS_ASCII2Date(List_NodeTypeDef* NodePointer,GPS_TimeTypeDef* GPS_TimeStruct)
 {
-    //将字符串的数据转到
-    // GPS_TimeStruct->GPS_Day=*(str+0)*10+*(str+1);
-    // GPS_TimeStruct->GPS_Month=*(str+2)*10+*(str+3);
-    // GPS_TimeStruct->GPS_Year=*(str+4)*10+*(str+5);
-    // str+=6;
+    //dd
+    GPS_TimeStruct->GPS_Day=GPS_ASCII2Hex(NodePointer->List_NodeData)*10+
+                            GPS_ASCII2Hex(NodePointer->List_NextNode->List_NodeData);
+    NodePointer=NodePointer->List_NextNode->List_NextNode;
+    //mm
+    GPS_TimeStruct->GPS_Minute=GPS_ASCII2Hex(NodePointer->List_NodeData)*10+
+                               GPS_ASCII2Hex(NodePointer->List_NextNode->List_NodeData);
+    NodePointer=NodePointer->List_NextNode->List_NextNode;
+    //yy
+    GPS_TimeStruct->GPS_Year=GPS_ASCII2Hex(NodePointer->List_NodeData)*10+
+                             GPS_ASCII2Hex(NodePointer->List_NextNode->List_NodeData);
+    NodePointer=NodePointer->List_NextNode->List_NextNode;
 }
 
 /**
