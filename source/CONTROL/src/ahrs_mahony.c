@@ -174,5 +174,26 @@ void AHRS_MahonyUpdate(MPU6050_CalDataTypeDef* MPU6050_CalDataStruct,
         ATT_QuatDataStruct.ATT_Quat2=q2;
         ATT_QuatDataStruct.ATT_Quat3=q3;
         ATT_Quat2Angle(&ATT_QuatDataStruct,ATT_AngleDataStruct);
+
+        // ATT_AngleDataStruct->ATT_AnglePsi=0;
+
+        // //单独结算偏航
+        // hx=mx*arm_cos_f32(ATT_AngleDataStruct->ATT_AngleTheta*0.01745)+
+        //    my*arm_sin_f32(ATT_AngleDataStruct->ATT_AngleTheta*0.01745)*
+        //       arm_sin_f32(ATT_AngleDataStruct->ATT_AnglePhi*0.01745)+
+        //    mz*arm_sin_f32(ATT_AngleDataStruct->ATT_AngleTheta*0.01745)*
+        //       arm_cos_f32(ATT_AngleDataStruct->ATT_AnglePhi*0.01745);
+
+        // hy=my*arm_cos_f32(ATT_AngleDataStruct->ATT_AnglePhi*0.01745)-
+        //    mz*arm_sin_f32(ATT_AngleDataStruct->ATT_AnglePhi*0.01745);
+
+        // if((hy==0)&&(hx>0))
+        // ATT_AngleDataStruct->ATT_AnglePsi=0;
+        // if(hy<0)
+        // ATT_AngleDataStruct->ATT_AnglePsi=90+atan(hx/hy)*53.7;
+        // if((hy==0)&&(hx<0))
+        // ATT_AngleDataStruct->ATT_AnglePsi=180;
+        // if(hy>0)
+        // ATT_AngleDataStruct->ATT_AnglePsi=270+atan(hx/hy)*53.7;
     }
 }

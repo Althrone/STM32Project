@@ -34,23 +34,28 @@ void FLY_DroneCtrl(ANO_DT_SendRCDataTypeDef* ANO_DT_SendRCDataStruct,
     //角度环
     PID_IncCtrl(&PID_RollAngleInfo,
                 &PID_RollAngleParam,
+                ANO_DT_SendRCDataStruct,
                 RollTargetAngle,
                 ATT_AngleDataStruct->ATT_AnglePhi);
     PID_IncCtrl(&PID_PitchAngleInfo,
                 &PID_PitchAngleParam,
+                ANO_DT_SendRCDataStruct,
                 PitchTargetAngle,
                 ATT_AngleDataStruct->ATT_AngleTheta);
     //角速度环
     PID_IncCtrl(&PID_RollRateInfo,
                 &PID_RollRateParam,
+                ANO_DT_SendRCDataStruct,
                 PID_RollAngleInfo.Output,
                 MPU6050_CalDataStruct->MPU6050_CalGyroX);
     PID_IncCtrl(&PID_PitchRateInfo,
                 &PID_PitchRateParam,
+                ANO_DT_SendRCDataStruct,
                 PID_PitchAngleInfo.Output,
                 MPU6050_CalDataStruct->MPU6050_CalGyroY);
     PID_IncCtrl(&PID_YawRateInfo,
                 &PID_YawRateParam,
+                ANO_DT_SendRCDataStruct,
                 YawTargeRate,
                 MPU6050_CalDataStruct->MPU6050_CalGyroZ);
     //混控矩阵

@@ -45,13 +45,12 @@ void SPL06_Init(void)
     SPL06_PRMStruct.c30=((int16_t)temp[16]<<8)|temp[17];
     //压力计每秒128次，过采样32次
     IIC_WriteByteToSlave(SPL06_AD0_HIGH,SPL06_PRS_CFG,SPL06_PRS_CFG_PM_RATE_128|
-                                                      SPL06_PRS_CFG_PM_PRC_32);//0x26
+                                                      SPL06_PRS_CFG_PM_PRC_2);//0x26
     //温度计每秒32次，过采样8次，外部mems
     IIC_WriteByteToSlave(SPL06_AD0_HIGH,SPL06_TMP_CFG,SPL06_TMP_CFG_TMP_EX|
                                                       SPL06_TMP_CFG_TMP_RATE_128|
-                                                      SPL06_TMP_CFG_TMP_PRC_16);//0xA0
-    IIC_WriteByteToSlave(SPL06_AD0_HIGH,SPL06_CFG_REG,SPL06_CFG_REG_P_SHIFT|
-                                                      SPL06_CFG_REG_T_SHIFT);
+                                                      SPL06_TMP_CFG_TMP_PRC_1);//0xA0
+    // IIC_WriteByteToSlave(SPL06_AD0_HIGH,SPL06_CFG_REG,SPL06_CFG_REG_T_SHIFT);
     //对气压和温度进行连续测量
     IIC_WriteByteToSlave(SPL06_AD0_HIGH,SPL06_MEAS_CFG,SPL06_MEAS_CFG_MEAS_CTRL_BGPRSTMP);
 }
@@ -67,11 +66,11 @@ void SPL06_AllRawDataRead(SPL06_RawDataTypeDef* SPL06_RawDataStruct)
     //抽取数据
     uint8_t flag;
     //判断压力和温度更新了没有
-    // while (flag!=(SPL06_MEAS_CFG_PRS_RDY|SPL06_MEAS_CFG_TMP_RDY))
-    // {
-    //     IIC_ReadByteFromSlave(SPL06_AD0_HIGH,SPL06_MEAS_CFG,&flag);
-    //     flag=flag&(SPL06_MEAS_CFG_PRS_RDY|SPL06_MEAS_CFG_TMP_RDY);
-    // }
+    while (flag!=(SPL06_MEAS_CFG_PRS_RDY|SPL06_MEAS_CFG_TMP_RDY))
+    {
+        IIC_ReadByteFromSlave(SPL06_AD0_HIGH,SPL06_MEAS_CFG,&flag);
+        flag=flag&(SPL06_MEAS_CFG_PRS_RDY|SPL06_MEAS_CFG_TMP_RDY);
+    }
     IIC_ReadMultByteFromSlave(SPL06_AD0_HIGH,SPL06_PSR_B2,6,temp);
     SPL06_RawDataStruct->SPL06_RawPres=((int32_t)temp[0]<<16)+((int32_t)temp[1]<<8)+temp[2];
     if((SPL06_RawDataStruct->SPL06_RawPres&0x00800000)==0x00800000)
@@ -91,9 +90,9 @@ void SPL06_RawData2FloatData(SPL06_RawDataTypeDef* SPL06_RawDataStruct,
 {
     SPL06_AllRawDataRead(SPL06_RawDataStruct);
     float_t Praw_sc,Traw_sc;
-    uint32_t kP,kT;
-    kP=SPL06_32Times;
-    kT=SPL06_16Times;
+    float_t kP,kT;
+    kP=SPL06_2Times;
+    kT=SPL06_Single;
     Praw_sc=(float_t)SPL06_RawDataStruct->SPL06_RawPres/kP;
     Traw_sc=(float_t)SPL06_RawDataStruct->SPL06_RawTemp/kT;
     // Traw_sc=0.025f;
@@ -101,18 +100,32 @@ void SPL06_RawData2FloatData(SPL06_RawDataTypeDef* SPL06_RawDataStruct,
     SPL06_FloatDataStruct->SPL06_FloatPres=
                        SPL06_PRMStruct.c00+
                        Praw_sc*(SPL06_PRMStruct.c10+Praw_sc*(SPL06_PRMStruct.c20+Praw_sc*SPL06_PRMStruct.c30))+
-                       Traw_sc*SPL06_PRMStruct.c10+
+                       Traw_sc*SPL06_PRMStruct.c01+
                        Traw_sc*Praw_sc*(SPL06_PRMStruct.c11+Praw_sc*SPL06_PRMStruct.c21);
     SPL06_FloatDataStruct->SPL06_FloatTemp=SPL06_PRMStruct.c0*0.5+SPL06_PRMStruct.c1*Traw_sc;
     //
+
+    SPL06_FloatDataStruct->SPL06_FloatAlt=44330*(1-pow((SPL06_FloatDataStruct->SPL06_FloatPres/101325.f),(1.f/5.256f)));
 }
 
-void SPL06_RawData2Altitude(SPL06_RawDataTypeDef* SPL06_RawDataStruct,float_t* alt)
-{
-    SPL06_FloatDataTypeDef SPL06_FloatDataStruct;
-    SPL06_RawData2FloatData(SPL06_RawDataStruct,&SPL06_FloatDataStruct);
-    *alt=44300*(1-pow((SPL06_FloatDataStruct.SPL06_FloatPres/101325),(1/5.256)));
-}
+// void SPL06_RawData2Altitude(SPL06_RawDataTypeDef* SPL06_RawDataStruct)
+// {
+//     SPL06_FloatDataTypeDef SPL06_FloatDataStruct;
+//     SPL06_RawData2FloatData(SPL06_RawDataStruct,&SPL06_FloatDataStruct);
+//     *alt=44330*(1-pow((SPL06_FloatDataStruct.SPL06_FloatPres/101325.f),(1.f/5.256f)));
+
+// }
+
+// /**
+//  * @brief   通过气压计求飞机垂直方向的速度
+//  * @param   SPL06_RawDataStruct: 气压计原始数据
+//  * @param   speed: 测得的速度
+//  **/
+// void SPL06_RawData2Speed(SPL06_RawDataTypeDef* SPL06_RawDataStruct,float_t* speed)
+// {
+//     float_t alt;
+//     SPL06_RawData2Altitude(SPL06_RawDataStruct,&alt);
+// }
 
 /**
  * @brief   读取气压计的ID，看看芯片是否正常

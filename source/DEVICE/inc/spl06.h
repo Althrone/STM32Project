@@ -121,17 +121,26 @@
   * @brief  I2C Init structure definition  
   */
 
-typedef enum
-{
-    SPL06_Single    =524288,
-    SPL06_2Times    =1572864,
-    SPL06_4Times    =3670016,
-    SPL06_8Times    =7864320,
-    SPL06_16Times   =253952,
-    SPL06_32Times   =516096,
-    SPL06_64Times   =1040384,
-    SPL06_128Times  =2088960,
-}SPL06_CompScaleFactorsTypeDef;
+// typedef enum
+// {
+//     SPL06_Single    =524288.f,
+//     SPL06_2Times    =1572864,
+//     SPL06_4Times    =3670016,
+//     SPL06_8Times    =7864320,
+//     SPL06_16Times   =253952,
+//     SPL06_32Times   =516096,
+//     SPL06_64Times   =1040384,
+//     SPL06_128Times  =2088960,
+// }SPL06_CompScaleFactorsTypeDef;
+
+#define SPL06_Single    524288.f
+#define SPL06_2Times    1572864.f
+#define SPL06_4Times    3670016.f
+#define SPL06_8Times    7864320.f
+#define SPL06_16Times   253952.f
+#define SPL06_32Times   516096.f
+#define SPL06_64Times   1040384.f
+#define SPL06_128Times  2088960.f
 
 typedef struct
 {
@@ -143,6 +152,7 @@ typedef struct
 {
     float_t SPL06_FloatPres;
     float_t SPL06_FloatTemp;
+    float_t SPL06_FloatAlt;
 }SPL06_FloatDataTypeDef;
 
 
@@ -165,7 +175,7 @@ void SPL06_Init(void);
 void SPL06_AllRawDataRead(SPL06_RawDataTypeDef* SPL06_RawDataStruct);
 void SPL06_RawData2FloatData(SPL06_RawDataTypeDef* SPL06_RawDataStruct,
                              SPL06_FloatDataTypeDef* SPL06_FloatDataStruct);
-void SPL06_RawData2Altitude(SPL06_RawDataTypeDef* SPL06_RawDataStruct,float_t* alt);
+// void SPL06_RawData2Altitude(SPL06_RawDataTypeDef* SPL06_RawDataStruct,float_t* alt);
 void SPL06_IDRead(uint8_t* data);
 
 

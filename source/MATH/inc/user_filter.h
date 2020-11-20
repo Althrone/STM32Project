@@ -23,6 +23,7 @@ typedef struct
     float_t Output; //高阶输出
     float_t Input;  //低阶输入
     float_t Error;  //误差输入
+    float_t ErrorInt;//误差积分项
 }Filter_CompInfoTypeDef;;   //互补滤波器输入输出参数
 
 

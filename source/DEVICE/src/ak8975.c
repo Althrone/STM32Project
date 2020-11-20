@@ -85,16 +85,31 @@ void AK8975_RawData2CalData(AK8975_RawDataTypeDef* AK8975_RawDataStruct,
 {
     AK8975_FloatDataTypeDef AK8975_FloatDataStruct;
     AK8975_RawData2FloatData(AK8975_RawDataStruct,&AK8975_FloatDataStruct);
-    //先不写校正，直接上
+
+    // AK8975_CalDataStruct->AK8975_CalMagX=(AK8975_FloatDataStruct.AK8975_FloatMagX-
+    //                                       AK8975_CalParamStruct.AK8975_BiasMagX)*
+    //                                       AK8975_CalParamStruct.AK8975_ScaleMagX;
+    // AK8975_CalDataStruct->AK8975_CalMagY=(AK8975_FloatDataStruct.AK8975_FloatMagY-
+    //                                       AK8975_CalParamStruct.AK8975_BiasMagY)*
+    //                                       AK8975_CalParamStruct.AK8975_ScaleMagY;
+    // AK8975_CalDataStruct->AK8975_CalMagZ=(AK8975_FloatDataStruct.AK8975_FloatMagZ-
+    //                                       AK8975_CalParamStruct.AK8975_BiasMagZ)*
+    //                                       AK8975_CalParamStruct.AK8975_ScaleMagZ;
+
     AK8975_CalDataStruct->AK8975_CalMagX=(AK8975_FloatDataStruct.AK8975_FloatMagX-
                                           AK8975_CalParamStruct.AK8975_BiasMagX)*
                                           AK8975_CalParamStruct.AK8975_ScaleMagX;
     AK8975_CalDataStruct->AK8975_CalMagY=(AK8975_FloatDataStruct.AK8975_FloatMagY-
                                           AK8975_CalParamStruct.AK8975_BiasMagY)*
-                                          AK8975_CalParamStruct.AK8975_ScaleMagY;
+                                          35.243873627134640f;
     AK8975_CalDataStruct->AK8975_CalMagZ=(AK8975_FloatDataStruct.AK8975_FloatMagZ-
                                           AK8975_CalParamStruct.AK8975_BiasMagZ)*
-                                          AK8975_CalParamStruct.AK8975_ScaleMagZ;
+                                          32.795186848193765f;
+
+    //先不写校正，直接上
+    // AK8975_CalDataStruct->AK8975_CalMagX=AK8975_FloatDataStruct.AK8975_FloatMagX;
+    // AK8975_CalDataStruct->AK8975_CalMagY=AK8975_FloatDataStruct.AK8975_FloatMagY;
+    // AK8975_CalDataStruct->AK8975_CalMagZ=AK8975_FloatDataStruct.AK8975_FloatMagZ;
 }
 
 

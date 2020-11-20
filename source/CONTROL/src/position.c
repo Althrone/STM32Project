@@ -11,6 +11,12 @@ extern GPS_DataTypeDef GPS_DataStruct;//引入GPS数据的全局变量
 Filter_CompParamTypeDef POS_AccCompParamStruct;//加速度环互补滤波参数
 Filter_CompParamTypeDef POS_SpeedCompParamStruct;//速度环互补滤波参数
 
+Filter_CompInfoTypeDef POS_AccXCompInfoStruct;//加速度环X轴数据
+Filter_CompInfoTypeDef POS_SpeedXCompInfoStruct;//速度环X轴数据
+
+Filter_CompInfoTypeDef POS_AccYCompInfoStruct;//加速度环Y轴数据
+Filter_CompInfoTypeDef POS_SpeedYCompInfoStruct;//速度环Y轴数据
+
 // #define PI  3.14159265358979323846f//math里面定义了
 
 /**
@@ -37,12 +43,25 @@ void POS_3OrderCompUpdate(GPS_DataTypeDef* GPS_DataStruct,
 
     //x轴三阶互补
     //加速度环
-    Filter_CompInfoTypeDef POS_AccCompInfoStruct;
-    POS_AccCompInfoStruct.Error=POS_DistStruct.X;
-    POS_AccCompInfoStruct.Input=MPU6050_CalDataStruct->MPU6050_CalAccelX;
-    Filter_Comp(&POS_AccCompParamStruct,&POS_AccCompInfoStruct);
+    POS_AccXCompInfoStruct.Error=POS_DistStruct.X;
+    POS_AccXCompInfoStruct.Input=nAccDataStruct.Data1;
+    Filter_Comp(&POS_AccCompParamStruct,&POS_AccXCompInfoStruct);
+
+    //速度环
+    POS_SpeedXCompInfoStruct.Error=POS_DistStruct.X;
+    POS_SpeedXCompInfoStruct.Input=POS_AccXCompInfoStruct.Output;
+    Filter_Comp(&POS_SpeedCompParamStruct,&POS_SpeedXCompInfoStruct);
 
     //y轴三阶互补
+    //加速度环
+    POS_AccYCompInfoStruct.Error=POS_DistStruct.Y;
+    POS_AccYCompInfoStruct.Input=nAccDataStruct.Data2;
+    Filter_Comp(&POS_AccCompParamStruct,&POS_AccYCompInfoStruct);
+
+    //速度环
+    POS_SpeedYCompInfoStruct.Error=POS_DistStruct.Y;
+    POS_SpeedYCompInfoStruct.Input=POS_AccYCompInfoStruct.Output;
+    Filter_Comp(&POS_SpeedCompParamStruct,&POS_SpeedYCompInfoStruct);
 }
 
 /**

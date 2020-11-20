@@ -6,6 +6,7 @@
 void CAL_Senser(void)
 {
     //进来检查SWA的值是否是2000，不是就退出
+    SysTick_DelayMs(5);
     ANO_DT_SendRCDataTypeDef ANO_DT_SendRCDataStruct;
     PPM_GetRCData(&ANO_DT_SendRCDataStruct);
     if(ANO_DT_SendRCDataStruct.ANO_DT_RCAUX1<=1800)
