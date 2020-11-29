@@ -20,9 +20,30 @@ void Filter_Comp(Filter_CompParamTypeDef* Filter_CompParamStruct,
     {
         Filter_CompInfoStruct->ErrorInt=0;
     }
-    Filter_CompInfoStruct->Input+=Filter_CompInfoStruct->ErrorInt+
-                                  Filter_CompParamStruct->Kp*
-                                  Filter_CompInfoStruct->Error;
-    //积分
-    Filter_CompInfoStruct->Output=Filter_CompInfoStruct->ErrorInt+Filter_CompInfoStruct->Input*(1.0f / sampleFreq);
+    Filter_CompInfoStruct->Output+=(Filter_CompInfoStruct->Input+
+                                    Filter_CompInfoStruct->ErrorInt+
+                                    Filter_CompParamStruct->Kp*
+                                    Filter_CompInfoStruct->Error)*
+                                   (1.0f / sampleFreq);
+}
+
+/**
+ * @brief   滑动窗口滤波，使用的时候请在此函数前申请一个数组空间
+ * @param   bufAddr: 缓存空间首地址
+ * @param   length: 缓存空间长度
+ * @param   val: 最新的输入值
+ * @return  返回滤波后的值
+ **/
+float_t Filter_Avg(float_t* bufAddr,uint16_t length,float_t val)
+{
+    //数组位移
+    float_t tmp=0;
+    for(uint16_t i=length;i>1;i--)
+    {
+        *(bufAddr+i-1)=*(bufAddr+i-2);
+        tmp+=*(bufAddr+i-1);
+    }
+    *bufAddr=val;
+    tmp+=val;
+    return tmp/length;
 }

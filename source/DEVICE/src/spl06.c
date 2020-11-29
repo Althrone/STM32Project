@@ -95,17 +95,28 @@ void SPL06_RawData2FloatData(SPL06_RawDataTypeDef* SPL06_RawDataStruct,
     kT=SPL06_Single;
     Praw_sc=(float_t)SPL06_RawDataStruct->SPL06_RawPres/kP;
     Traw_sc=(float_t)SPL06_RawDataStruct->SPL06_RawTemp/kT;
-    // Traw_sc=0.025f;
-    //
+
+    static float_t prevAlt;
+
     SPL06_FloatDataStruct->SPL06_FloatPres=
                        SPL06_PRMStruct.c00+
                        Praw_sc*(SPL06_PRMStruct.c10+Praw_sc*(SPL06_PRMStruct.c20+Praw_sc*SPL06_PRMStruct.c30))+
                        Traw_sc*SPL06_PRMStruct.c01+
                        Traw_sc*Praw_sc*(SPL06_PRMStruct.c11+Praw_sc*SPL06_PRMStruct.c21);
     SPL06_FloatDataStruct->SPL06_FloatTemp=SPL06_PRMStruct.c0*0.5+SPL06_PRMStruct.c1*Traw_sc;
-    //
 
+    //求海拔高度
     SPL06_FloatDataStruct->SPL06_FloatAlt=44330*(1-pow((SPL06_FloatDataStruct->SPL06_FloatPres/101325.f),(1.f/5.256f)));
+
+    //滤波
+    static float_t buf[10];
+    SPL06_FloatDataStruct->SPL06_FloatAlt=
+    Filter_Avg(buf,10,SPL06_FloatDataStruct->SPL06_FloatAlt);
+
+    // 气压计微分求速率
+    SPL06_FloatDataStruct->SPL06_FloatSpeed=(SPL06_FloatDataStruct->SPL06_FloatAlt-prevAlt)*100;
+
+    prevAlt=SPL06_FloatDataStruct->SPL06_FloatAlt;
 }
 
 // void SPL06_RawData2Altitude(SPL06_RawDataTypeDef* SPL06_RawDataStruct)

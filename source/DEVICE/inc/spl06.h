@@ -11,6 +11,8 @@
 
 #include "iic_moni.h"
 
+#include "user_filter.h"
+
 /* Device Address ------------------------------------------------------------*/
 #define SPL06_AD0_LOW             0x76
 #define SPL06_AD0_HIGH            0x77
@@ -153,6 +155,7 @@ typedef struct
     float_t SPL06_FloatPres;
     float_t SPL06_FloatTemp;
     float_t SPL06_FloatAlt;
+    float_t SPL06_FloatSpeed;
 }SPL06_FloatDataTypeDef;
 
 

@@ -138,24 +138,24 @@ void Mat_TransRotQuat(Mat_RotQuatTypeDef* Mat_RotQuatStruct,
     };
     arm_mat_init_f32(&rotMat,3,3,rotMatData);
 
-    //初始化输出矩阵
-    arm_matrix_instance_f32 inputMat;
-    float_t inputMatData[3]={0};
-    arm_mat_init_f32(&inputMat,3,1,inputMatData);
-
     //初始化输入矩阵
-    arm_matrix_instance_f32 outputMat;
-    float_t outputMatData[3]=
+    arm_matrix_instance_f32 inputMat;
+    float_t inputMatData[3]=
     {
         Mat_RotDataStruct->Data1,
         Mat_RotDataStruct->Data2,
         Mat_RotDataStruct->Data3
     };
+    arm_mat_init_f32(&inputMat,3,1,inputMatData);
+
+    //初始化输入矩阵
+    arm_matrix_instance_f32 outputMat;
+    float_t outputMatData[3]={0};
     arm_mat_init_f32(&outputMat,3,1,outputMatData);
 
     arm_mat_mult_f32(&rotMat,&inputMat,&outputMat);
 
-    Mat_RotDataStruct->Data1=inputMatData[0];
-    Mat_RotDataStruct->Data2=inputMatData[1];
-    Mat_RotDataStruct->Data3=inputMatData[2];
+    Mat_RotDataStruct->Data1=outputMatData[0];
+    Mat_RotDataStruct->Data2=outputMatData[1];
+    Mat_RotDataStruct->Data3=outputMatData[2];
 }

@@ -33,7 +33,7 @@ typedef enum//不超过4个字符 没所谓
 typedef enum//不超过4个字符 没所谓
 {
     GPS_ContZDA     ='ZDA',//UTC时间和日期
-    GPS_ContGGA     ='GGZ',//时间，位置，定位数据
+    GPS_ContGGA     ='GGA',//时间，位置，定位数据
     GPS_ContGLL     ='GLL',//经纬度，UTC时间，定位状态
     GPS_ContVTG     ='VTG',//方位角，对地速度
     GPS_ContGSA     ='GSA',//精度因子，有效卫星，位置和水平/竖直稀释精度
@@ -58,6 +58,14 @@ typedef enum
     GPS_StateFinish,    //解码完成
 }GPS_StateTypeDef;
 
+typedef enum
+{
+    GPS_QltyFactorUnlocated,
+    GPS_QltyFactorRGPS,
+    GPS_QltyFactorDGPS,
+    GPS_QltyFactorPPS,
+}GPS_QltyFactorTypeDef;
+
 typedef struct
 {
     uint8_t GPS_Year;//Year month day hour minute second
@@ -74,6 +82,7 @@ typedef struct
     float_t GPS_Longitude;  //经度
     float_t GPS_Latitude;   //纬度
     float_t GPS_Altitude;   //海拔高度
+    float_t GPS_Elevation;  //高程
 
     float_t GPS_Azimuth;    //方位角
     float_t GPS_TrueBearing;//真北方位角
@@ -85,8 +94,17 @@ typedef struct
 
 typedef struct
 {
+    uint8_t GPS_QltyFactor;//质量因子
+    float_t GPS_HDOP;//水平精度因子
+    uint8_t GPS_SatNum;//卫星数量
+}GPS_AccuracyTypeDef;//GPS精度信息
+
+
+typedef struct
+{
     GPS_TimeTypeDef GPS_TimeStruct;
     GPS_LocationTypeDef GPS_LocationStruct;
+    GPS_AccuracyTypeDef GPS_AccuracyStruct;
 }GPS_DataTypeDef;//GPS所有信息
 
 
@@ -97,6 +115,7 @@ bool GPS_CheckSum(void);
 
 void GPS_DecodeZDA(List_NodeTypeDef* NodePointer);
 void GPS_DecodeRMC(List_NodeTypeDef* NodePointer);
+void GPS_DecodeGGA(List_NodeTypeDef* NodePointer);
 
 void GPS_ASCII2Time(List_NodeTypeDef* NodePointer,GPS_TimeTypeDef* GPS_TimeStruct);
 void GPS_ASCII2Date(List_NodeTypeDef* NodePointer,GPS_TimeTypeDef* GPS_TimeStruct);

@@ -32,7 +32,7 @@ volatile float integralFBx = 0.0f,  integralFBy = 0.0f, integralFBz = 0.0f;	// i
  **/
 void AHRS_MahonyUpdate(MPU6050_CalDataTypeDef* MPU6050_CalDataStruct,
                        AK8975_CalDataTypeDef* AK8975_CalDataStruct,
-                       ATT_AngleDataTypeDef* ATT_AngleDataStruct)
+                       ATT_QuatDataTypeDef* ATT_QuatDataStruct)
 {
     float_t norm;//归一化参数
     float_t q0q0, q0q1, q0q2, q0q3, q1q1, q1q2, q1q3, q2q2, q2q3, q3q3;
@@ -168,32 +168,9 @@ void AHRS_MahonyUpdate(MPU6050_CalDataTypeDef* MPU6050_CalDataStruct,
         q3=Xdata[3]*norm;
 
         //四元数转欧拉角
-        ATT_QuatDataTypeDef ATT_QuatDataStruct;
-        ATT_QuatDataStruct.ATT_Quat0=q0;
-        ATT_QuatDataStruct.ATT_Quat1=q1;
-        ATT_QuatDataStruct.ATT_Quat2=q2;
-        ATT_QuatDataStruct.ATT_Quat3=q3;
-        ATT_Quat2Angle(&ATT_QuatDataStruct,ATT_AngleDataStruct);
-
-        // ATT_AngleDataStruct->ATT_AnglePsi=0;
-
-        // //单独结算偏航
-        // hx=mx*arm_cos_f32(ATT_AngleDataStruct->ATT_AngleTheta*0.01745)+
-        //    my*arm_sin_f32(ATT_AngleDataStruct->ATT_AngleTheta*0.01745)*
-        //       arm_sin_f32(ATT_AngleDataStruct->ATT_AnglePhi*0.01745)+
-        //    mz*arm_sin_f32(ATT_AngleDataStruct->ATT_AngleTheta*0.01745)*
-        //       arm_cos_f32(ATT_AngleDataStruct->ATT_AnglePhi*0.01745);
-
-        // hy=my*arm_cos_f32(ATT_AngleDataStruct->ATT_AnglePhi*0.01745)-
-        //    mz*arm_sin_f32(ATT_AngleDataStruct->ATT_AnglePhi*0.01745);
-
-        // if((hy==0)&&(hx>0))
-        // ATT_AngleDataStruct->ATT_AnglePsi=0;
-        // if(hy<0)
-        // ATT_AngleDataStruct->ATT_AnglePsi=90+atan(hx/hy)*53.7;
-        // if((hy==0)&&(hx<0))
-        // ATT_AngleDataStruct->ATT_AnglePsi=180;
-        // if(hy>0)
-        // ATT_AngleDataStruct->ATT_AnglePsi=270+atan(hx/hy)*53.7;
+        ATT_QuatDataStruct->ATT_Quat0=q0;
+        ATT_QuatDataStruct->ATT_Quat1=q1;
+        ATT_QuatDataStruct->ATT_Quat2=q2;
+        ATT_QuatDataStruct->ATT_Quat3=q3;
     }
 }

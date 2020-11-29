@@ -26,7 +26,7 @@
 /* Exported functions --------------------------------------------------------*/
 void AHRS_MahonyUpdate(MPU6050_CalDataTypeDef* MPU6050_CalDataStruct,
                        AK8975_CalDataTypeDef* AK8975_CalDataStruct,
-                       ATT_AngleDataTypeDef* ATT_AngleDataStruct);
+                       ATT_QuatDataTypeDef* ATT_QuatDataStruct);
 
 #ifdef __cplusplus
 }

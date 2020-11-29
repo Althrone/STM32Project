@@ -75,6 +75,7 @@ void GPS_Decode(void)
             RGBLED_StateSet(RGBLED_White,RGBLED_1sMode);
             break;
         case GPS_ContGGA:
+            // GPS_DecodeGGA(tmpPointer);
             RGBLED_StateSet(RGBLED_Yellow,RGBLED_1sMode);
             break;
         case GPS_ContGLL:
@@ -262,6 +263,133 @@ void GPS_DecodeRMC(List_NodeTypeDef* NodePointer)
 }
 
 /**
+ * @brief   解码GGA序列，时间，位置，定位数据
+ **/
+void GPS_DecodeGGA(List_NodeTypeDef* NodePointer)
+{
+    NodePointer=NodePointer->List_NextNode;
+    if(NodePointer->List_NodeData!=',')//UTC时间
+    {
+        //解码
+        GPS_ASCII2Time(NodePointer,&GPS_DataStruct.GPS_TimeStruct);
+        //指针走
+        while(NodePointer->List_NodeData!=',')
+        {
+            NodePointer=NodePointer->List_NextNode;
+        }
+    }
+    NodePointer=NodePointer->List_NextNode;
+    if(NodePointer->List_NodeData!=',')//纬度
+    {
+        //解码
+        float_t latitude;
+        latitude=GPS_ASCII2Angel(NodePointer);
+        while(NodePointer->List_NodeData!=',')
+        {
+            NodePointer=NodePointer->List_NextNode;
+        }
+        NodePointer=NodePointer->List_NextNode;
+        if(NodePointer->List_NodeData!=',')//南北纬
+        {
+            if(NodePointer->List_NodeData=='S')
+                GPS_DataStruct.GPS_LocationStruct.GPS_Latitude=-latitude;
+            else if(NodePointer->List_NodeData=='N')
+                GPS_DataStruct.GPS_LocationStruct.GPS_Latitude=latitude;
+        }
+        while(NodePointer->List_NodeData!=',')
+        {
+            NodePointer=NodePointer->List_NextNode;
+        }
+    }
+    NodePointer=NodePointer->List_NextNode;
+    if(NodePointer->List_NodeData!=',')//经度
+    {
+        //解码
+        float_t longitude;
+        longitude=GPS_ASCII2Angel(NodePointer);
+        while(NodePointer->List_NodeData!=',')
+        {
+            NodePointer=NodePointer->List_NextNode;
+        }
+        NodePointer=NodePointer->List_NextNode;
+        if(NodePointer->List_NodeData!=',')//东西经
+        {
+            if(NodePointer->List_NodeData=='W')
+                GPS_DataStruct.GPS_LocationStruct.GPS_Longitude=-longitude;
+            else if(NodePointer->List_NodeData=='E')
+                GPS_DataStruct.GPS_LocationStruct.GPS_Longitude=longitude;
+        }
+        while(NodePointer->List_NodeData!=',')
+        {
+            NodePointer=NodePointer->List_NextNode;
+        }
+    }
+    NodePointer=NodePointer->List_NextNode;
+    if(NodePointer->List_NodeData!=',')//定位模式
+    {
+        if(NodePointer->List_NodeData=='0')
+        {
+            GPS_DataStruct.GPS_AccuracyStruct.GPS_QltyFactor=GPS_QltyFactorUnlocated;
+            return;
+        }
+        else if(NodePointer->List_NodeData=='1')
+            GPS_DataStruct.GPS_AccuracyStruct.GPS_QltyFactor=GPS_QltyFactorRGPS;
+        else if(NodePointer->List_NodeData=='2')
+            GPS_DataStruct.GPS_AccuracyStruct.GPS_QltyFactor=GPS_QltyFactorDGPS;
+        else if(NodePointer->List_NodeData=='3')
+            GPS_DataStruct.GPS_AccuracyStruct.GPS_QltyFactor=GPS_QltyFactorPPS;
+        while(NodePointer->List_NodeData!=',')
+        {
+            NodePointer=NodePointer->List_NextNode;
+        }
+    }
+    NodePointer=NodePointer->List_NextNode;
+    if(NodePointer->List_NodeData!=',')//卫星数量
+    {
+        uint8_t tmp;
+        tmp=GPS_ASCII2Hex(NodePointer->List_NodeData)*10;
+        NodePointer=NodePointer->List_NextNode;
+        tmp+=GPS_ASCII2Hex(NodePointer->List_NodeData);
+        GPS_DataStruct.GPS_AccuracyStruct.GPS_SatNum=tmp;
+        while(NodePointer->List_NodeData!=',')
+        {
+            NodePointer=NodePointer->List_NextNode;
+        }
+    }
+    NodePointer=NodePointer->List_NextNode;
+    if(NodePointer->List_NodeData!=',')//HDOP水平精度因子
+    {
+        GPS_DataStruct.GPS_AccuracyStruct.GPS_HDOP=GPS_ASCII2Float(NodePointer);
+        while(NodePointer->List_NodeData!=',')
+        {
+            NodePointer=NodePointer->List_NextNode;
+        }
+    }
+    NodePointer=NodePointer->List_NextNode;
+    if(NodePointer->List_NodeData!=',')//海拔高度
+    {
+        GPS_DataStruct.GPS_LocationStruct.GPS_Altitude=GPS_ASCII2Float(NodePointer);
+        while(NodePointer->List_NodeData!=',')
+        {
+            NodePointer=NodePointer->List_NextNode;
+        }
+        NodePointer=NodePointer->List_NextNode;//跳过','
+        NodePointer=NodePointer->List_NextNode;//跳过'M'
+    }
+    NodePointer=NodePointer->List_NextNode;
+    if(NodePointer->List_NodeData!=',')//高程
+    {
+        GPS_DataStruct.GPS_LocationStruct.GPS_Elevation=GPS_ASCII2Float(NodePointer);
+        while(NodePointer->List_NodeData!=',')
+        {
+            NodePointer=NodePointer->List_NextNode;
+        }
+        NodePointer=NodePointer->List_NextNode;//跳过','
+        NodePointer=NodePointer->List_NextNode;//跳过'M'
+    }
+}
+
+/**
  * @brief   字符串转十六进制
  **/
 uint8_t GPS_ASCII2Hex(uint8_t input)
@@ -318,6 +446,12 @@ float_t GPS_ASCII2Float(List_NodeTypeDef* NodePointer)
 {
     float_t tmp1=0;
     float_t tmp2=0;
+    uint8_t flag=0;
+    if(NodePointer->List_NodeData=='-')
+    {
+        NodePointer=NodePointer->List_NextNode;
+        flag=1;
+    }
     while(NodePointer->List_NodeData!='.')
     {
         tmp1*=10;
@@ -331,11 +465,13 @@ float_t GPS_ASCII2Float(List_NodeTypeDef* NodePointer)
         tmp2+=GPS_ASCII2Hex(NodePointer->List_NodeData);
         NodePointer=NodePointer->List_NextNode;
     }
-    while(tmp2>1)
+    while(tmp2>=1)
     {
         tmp2/=10;
     }
     tmp1+=tmp2;
+    if(flag)
+        tmp1*=-1;
     return tmp1;
 }
 
@@ -440,8 +576,9 @@ void UART4_IRQHandler(void)
                 gpsState=GPS_StateEnd;
                 //触发中断
                 //这两行是测试用的
-                
+                USART_Cmd(UART4,DISABLE);//解码前关掉串口
                 GPS_Decode();
+                USART_Cmd(UART4,ENABLE);//开串口
                 // EXTI_GenerateSWInterrupt(EXTI_Line0);
                 //关闭串口
                 // USART_Cmd(UART4,DISABLE);

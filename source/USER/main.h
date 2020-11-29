@@ -22,6 +22,7 @@
 // #include "ahrs.h"
 #include "ahrs_mahony.h"
 #include "attitude.h"
+#include "altitude.h"
 
 #include "rgbled.h"
 #include "motor.h"

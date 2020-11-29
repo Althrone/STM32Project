@@ -32,6 +32,7 @@ typedef struct
 /* Exported functions --------------------------------------------------------*/ 
 void Filter_Comp(Filter_CompParamTypeDef* Filter_CompParamStruct,
                  Filter_CompInfoTypeDef* Filter_CompInfoStruct);
+float_t Filter_Avg(float_t* bufAddr,uint16_t length,float_t val);
 
 #ifdef __cplusplus
 }
