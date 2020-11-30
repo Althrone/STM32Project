@@ -9,6 +9,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "iic_moni.h"
 
+#include "i2c.h"
+
 /* Device Address ------------------------------------------------------------*/
 #define AT24C02_A2_LOW_A1_LOW_A0_LOW    0x50
 #define AT24C02_A2_LOW_A1_LOW_A0_HIGH   0x51

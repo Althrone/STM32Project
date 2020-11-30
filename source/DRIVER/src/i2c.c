@@ -1,8 +1,8 @@
 #include "i2c.h"
 
 static I2C_MessageTypeDef I2C1_MessageStruct;//此变量只允许在本文件内使用
-static I2C_MessageTypeDef I2C2_MessageStruct;//此变量只允许在本文件内使用
-static I2C_MessageTypeDef I2C3_MessageStruct;//此变量只允许在本文件内使用
+// static I2C_MessageTypeDef I2C2_MessageStruct;//此变量只允许在本文件内使用
+// static I2C_MessageTypeDef I2C3_MessageStruct;//此变量只允许在本文件内使用
 
 /* I2C public functions ------------------------------------------------------*/ 
 
@@ -16,11 +16,11 @@ void I2C_HangSlove(GPIO_TypeDef* GPIOx,I2C_TypeDef* I2Cx)
 {
     //关闭I2C使能
     I2C_Cmd(I2Cx,DISABLE);
-    GPIO_InitTypeDef GPIO_InitStructure;
+    GPIO_InitTypeDef GPIO_InitStruct;
 	//SCL切回GPIO通用输出，因为复用输出的时候输出模式已经是开漏，所以刚好可以用
-    GPIO_InitStructure.GPIO_Pin=GPIO_Pin_6;
-    GPIO_InitStructure.GPIO_Mode=GPIO_Mode_OUT;
-    GPIO_Init(GPIOx,&GPIO_InitStructure);
+    GPIO_InitStruct.GPIO_Pin=GPIO_Pin_6;
+    GPIO_InitStruct.GPIO_Mode=GPIO_Mode_OUT;
+    GPIO_Init(GPIOx,&GPIO_InitStruct);
 	//SDA切回GPIO通用输入，用于检查SDA是否释放，这时候输出模式寄存器的开漏不用管，不会影响输入检测
 	//检查SDA是否变回高了，不行就再来一次
 	//SDA变通用输出
@@ -31,6 +31,7 @@ void I2C_HangSlove(GPIO_TypeDef* GPIOx,I2C_TypeDef* I2Cx)
 /* I2C1 private functions ----------------------------------------------------*/ 
 
 /**
+ * 下面的解释全错！重要！看根目录的modify.c
  * 修改记录：
  * 位置：source\FWLIB\src\stm32f4xx_i2c.c 204行
  * 原内容：freqrange = (uint16_t)(pclk1 / 1000000);
@@ -51,36 +52,54 @@ void I2C_HangSlove(GPIO_TypeDef* GPIOx,I2C_TypeDef* I2Cx)
  * 吐槽：然后source\FWLIB\src\stm32f4xx_i2c.c 259行的最大上升时间
  * 设置又正确了，莫名奇妙。
  **/
+
 void I2C1_Init(void)
 {
     //开GPIOB时钟
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB,ENABLE);
     //GPIO初始化结构体定义
-    GPIO_InitTypeDef GPIO_InitStructure;
+    GPIO_InitTypeDef GPIO_InitStruct;
     //I2C1_SCL
-    GPIO_InitStructure.GPIO_Pin=GPIO_Pin_6;
-    GPIO_InitStructure.GPIO_Mode=GPIO_Mode_AF;
+    GPIO_InitStruct.GPIO_Pin=GPIO_Pin_6;
+    GPIO_InitStruct.GPIO_Mode=GPIO_Mode_AF;
     GPIO_PinAFConfig(GPIOB,GPIO_PinSource6,GPIO_AF_I2C1);
-    GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_OType=GPIO_OType_OD;
-    GPIO_Init(GPIOB,&GPIO_InitStructure);
+    GPIO_InitStruct.GPIO_Speed=GPIO_Speed_50MHz;
+    GPIO_InitStruct.GPIO_OType=GPIO_OType_OD;
+    GPIO_Init(GPIOB,&GPIO_InitStruct);
     //I2C1_SDA
-    GPIO_InitStructure.GPIO_Pin=GPIO_Pin_7;
-    GPIO_InitStructure.GPIO_Mode=GPIO_Mode_AF;
+    GPIO_InitStruct.GPIO_Pin=GPIO_Pin_7;
+    GPIO_InitStruct.GPIO_Mode=GPIO_Mode_AF;
     GPIO_PinAFConfig(GPIOB,GPIO_PinSource7,GPIO_AF_I2C1);
-    GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_OType=GPIO_OType_OD;
-    GPIO_Init(GPIOB,&GPIO_InitStructure);
+    GPIO_InitStruct.GPIO_Speed=GPIO_Speed_50MHz;
+    GPIO_InitStruct.GPIO_OType=GPIO_OType_OD;
+    GPIO_Init(GPIOB,&GPIO_InitStruct);
 
     //开I2C1时钟
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1,ENABLE);
     //I2C初始化结构体定义
     I2C_InitTypeDef I2C_InitStructure;
-    I2C_InitStructure.I2C_ClockSpeed=400000;
+    I2C_InitStructure.I2C_ClockSpeed=400000;//400000=400KHz
     I2C_InitStructure.I2C_Mode=I2C_Mode_I2C;
-    I2C_InitStructure.I2C_DutyCycle=I2C_DutyCycle_16_9;
-    I2C_InitStructure.I2C_AcknowledgedAddress=I2C_AcknowledgedAddress_7bit;
+    I2C_InitStructure.I2C_DutyCycle=I2C_DutyCycle_2;
+    // I2C_InitStructure.I2C_OwnAddress1=;//主模式用不上
+    // I2C_InitStructure.I2C_Ack=I2C_Ack_Enable;//本外设的响应位由发送/接收程序决定
+    // I2C_InitStructure.I2C_AcknowledgedAddress=I2C_AcknowledgedAddress_7bit;//主模式用不上
     I2C_Init(I2C1,&I2C_InitStructure);
+
+    //定义NVIC初始化结构体
+    NVIC_InitTypeDef NVIC_InitStructure;
+    
+    NVIC_InitStructure.NVIC_IRQChannel=I2C1_EV_IRQn; //I2C1事件中断
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=0; //抢占优先级0
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority=3; //子优先级3
+	NVIC_InitStructure.NVIC_IRQChannelCmd=ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+
+    NVIC_InitStructure.NVIC_IRQChannel=I2C1_ER_IRQn; //I2C1错误处理中断
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=0; //抢占优先级0
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority=3; //子优先级2
+	NVIC_InitStructure.NVIC_IRQChannelCmd=ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
 
     // 开I2C1中断
     I2C_ITConfig(I2C1,I2C_IT_BUF,ENABLE);
@@ -95,7 +114,7 @@ void I2C1_Init(void)
  * @param   BufAddr: 需要发送的数据缓存区首地址
  * @param   BufLen: 需要发送的数据缓存区长度
  * @param   SlaAddr: 从设备地址
- * @param   I2C_AcknowledgedAddress: 从设备地址模式
+ * @param   I2C_AcknowledgedAddress: 从设备地址模式，借用库函数参数，下同
  *           This parameter can be one of the following values:
  *             @arg I2C_AcknowledgedAddress_7bit: 七位寻址模式，不包含读写位，支持0x08（包含）到0x77（包含）
  *             @arg I2C_AcknowledgedAddress_10bit: 十位寻址模式
@@ -105,8 +124,8 @@ void I2C1_Init(void)
  *             @arg I2C_Direction_Transmitter: Transmitter mode
  *             @arg I2C_Direction_Receiver: Receiver mode
  **/
-void I2C_Master(I2C_TypeDef* I2Cx,uint8_t* BufAddr,uint8_t BufLen,
-                uint16_t SlaAddr,uint16_t I2C_AcknowledgedAddress,uint8_t I2C_Direction)
+void I2C_Master(I2C_TypeDef* I2Cx,uint8_t* BufAddr,uint8_t BufLen,uint16_t SlaAddr,
+                uint16_t I2C_AcknowledgedAddress,uint8_t I2C_Direction)
 {
     //值初始化到本文件的全局变量，由I2Cx决定信息写入到哪个I2C的静态全局变量
     if(I2Cx==I2C1)
@@ -271,16 +290,16 @@ void I2C1_EV_IRQHandler(void)
            (I2C1_MessageStruct.I2C_BufLen==1))
         {
             I2C_GenerateSTOP(I2C1,ENABLE);
-            I2C1_MessageStruct.I2CStat_Enum==I2C_Stat_Working;
+            I2C1_MessageStruct.I2CStat_Enum=I2C_Stat_Working;
         }
         else
-            I2C1_MessageStruct.I2CStat_Enum==I2C_Stat_Working;
+            I2C1_MessageStruct.I2CStat_Enum=I2C_Stat_Working;
         break;
     case I2C_EVENT_MASTER_BYTE_RECEIVED://EV7，主模式接受完第一字节数据了
         if(I2C1_MessageStruct.I2C_BufLen==1)
         {
             I2C1_MessageStruct.I2C_BufAddr[0]=I2C_ReceiveData(I2C1);
-            I2C1_MessageStruct.I2CStat_Enum==I2C_Stat_Finish;
+            I2C1_MessageStruct.I2CStat_Enum=I2C_Stat_Finish;
         }
         else if(I2C1_MessageStruct.I2C_BufLen==2)
         {
@@ -290,12 +309,12 @@ void I2C1_EV_IRQHandler(void)
                 I2C_GenerateSTOP(I2C1,ENABLE);
                 I2C1_MessageStruct.I2C_BufAddr[0]=I2C_ReceiveData(I2C1);
                 ++I2C1_MessageStruct.I2C_DataNum;
-                I2C1_MessageStruct.I2CStat_Enum==I2C_Stat_Working;
+                I2C1_MessageStruct.I2CStat_Enum=I2C_Stat_Working;
             }
             else if(I2C1_MessageStruct.I2C_DataNum==1)
             {
                 I2C1_MessageStruct.I2C_BufAddr[1]=I2C_ReceiveData(I2C1);
-                I2C1_MessageStruct.I2CStat_Enum==I2C_Stat_Finish;
+                I2C1_MessageStruct.I2CStat_Enum=I2C_Stat_Finish;
             }
         }
         else if(I2C1_MessageStruct.I2C_BufLen>2)
@@ -304,7 +323,7 @@ void I2C1_EV_IRQHandler(void)
             {
                 I2C1_MessageStruct.I2C_BufAddr[I2C1_MessageStruct.I2C_DataNum]=I2C_ReceiveData(I2C1);
                 ++I2C1_MessageStruct.I2C_DataNum;
-                I2C1_MessageStruct.I2CStat_Enum==I2C_Stat_Working;
+                I2C1_MessageStruct.I2CStat_Enum=I2C_Stat_Working;
             }
             else if(I2C1_MessageStruct.I2C_DataNum==I2C1_MessageStruct.I2C_BufLen-3)
             {
@@ -323,7 +342,7 @@ void I2C1_EV_IRQHandler(void)
             else if (I2C1_MessageStruct.I2C_DataNum==I2C1_MessageStruct.I2C_BufLen-1)
             {
                 I2C1_MessageStruct.I2C_BufAddr[I2C1_MessageStruct.I2C_DataNum]=I2C_ReceiveData(I2C1);
-                I2C1_MessageStruct.I2CStat_Enum==I2C_Stat_Finish;
+                I2C1_MessageStruct.I2CStat_Enum=I2C_Stat_Finish;
             }
         }
         break;

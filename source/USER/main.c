@@ -22,6 +22,8 @@ int main(void)
     TIM6_Init();
 
     IIC_Init();
+    // I2C1_Init();
+
     USART1_Init();//上位机串口
 
     PPM_Init();
@@ -58,29 +60,29 @@ int main(void)
     ATT_AngleDataTypeDef ATT_AngleDataStruct;
     ATT_QuatDataTypeDef ATT_QuatDataStruct;
     
-    // float_t testx,testy,testz,bx,bz;
-    // float_t x0,y0,z0,rx,ry,rz;
-    // float_t mx,my,mz,rmx,rmy,rmz;
+    float_t testx,testy,testz,bx,bz;
+    float_t x0,y0,z0,rx,ry,rz;
+    float_t mx,my,mz,rmx,rmy,rmz;
 
-    // AT24C02_SequentialRead(0x04,4,(uint8_t*)&testx);
-    // AT24C02_SequentialRead(0x08,4,(uint8_t*)&testy);
-    // AT24C02_SequentialRead(0x0C,4,(uint8_t*)&testz);
-    // AT24C02_SequentialRead(0x40,4,(uint8_t*)&bx);
-    // AT24C02_SequentialRead(0x44,4,(uint8_t*)&bz);
+    AT24C02_SequentialRead(0x04,4,(uint8_t*)&testx);
+    AT24C02_SequentialRead(0x08,4,(uint8_t*)&testy);
+    AT24C02_SequentialRead(0x0C,4,(uint8_t*)&testz);
+    AT24C02_SequentialRead(0x40,4,(uint8_t*)&bx);
+    AT24C02_SequentialRead(0x44,4,(uint8_t*)&bz);
 
-    // AT24C02_SequentialRead(0x10,4,(uint8_t*)&rx);
-    // AT24C02_SequentialRead(0x18,4,(uint8_t*)&ry);
-    // AT24C02_SequentialRead(0x20,4,(uint8_t*)&rz);
-    // AT24C02_SequentialRead(0x14,4,(uint8_t*)&x0);
-    // AT24C02_SequentialRead(0x1C,4,(uint8_t*)&y0);
-    // AT24C02_SequentialRead(0x24,4,(uint8_t*)&z0);
+    AT24C02_SequentialRead(0x10,4,(uint8_t*)&rx);
+    AT24C02_SequentialRead(0x18,4,(uint8_t*)&ry);
+    AT24C02_SequentialRead(0x20,4,(uint8_t*)&rz);
+    AT24C02_SequentialRead(0x14,4,(uint8_t*)&x0);
+    AT24C02_SequentialRead(0x1C,4,(uint8_t*)&y0);
+    AT24C02_SequentialRead(0x24,4,(uint8_t*)&z0);
 
-    // AT24C02_SequentialRead(0x28,4,(uint8_t*)&rmx);
-    // AT24C02_SequentialRead(0x30,4,(uint8_t*)&rmy);
-    // AT24C02_SequentialRead(0x38,4,(uint8_t*)&rmz);
-    // AT24C02_SequentialRead(0x2C,4,(uint8_t*)&mx);
-    // AT24C02_SequentialRead(0x34,4,(uint8_t*)&my);
-    // AT24C02_SequentialRead(0x3C,4,(uint8_t*)&mz);
+    AT24C02_SequentialRead(0x28,4,(uint8_t*)&rmx);
+    AT24C02_SequentialRead(0x30,4,(uint8_t*)&rmy);
+    AT24C02_SequentialRead(0x38,4,(uint8_t*)&rmz);
+    AT24C02_SequentialRead(0x2C,4,(uint8_t*)&mx);
+    AT24C02_SequentialRead(0x34,4,(uint8_t*)&my);
+    AT24C02_SequentialRead(0x3C,4,(uint8_t*)&mz);
 
     // MPU6050_FloatDataTypeDef MPU6050_FloatDataStruct;
     // AK8975_FloatDataTypeDef AK8975_FloatDataStruct;
@@ -90,8 +92,6 @@ int main(void)
     float_t vol;
 
     extern Filter_CompInfoTypeDef ALT_AccZCompInfoStruct;
-
-    extern GPS_DataTypeDef GPS_DataStruct;
 
     while (1)
     {
@@ -106,12 +106,6 @@ int main(void)
             // MPU6050_RawData2FloatData(&MPU6050_RawDataStruct,&MPU6050_FloatDataStruct);
             // AK8975_RawData2FloatData(&AK8975_RawDataStruct,&AK8975_FloatDataStruct);
 
-            //姿态解算
-            // AHRS_EKF(&MPU6050_FloatDataStruct,&ATT_AngleDataStruct);
-            // ATT_RawData(&MPU6050_FloatDataStruct,
-            //             &AK8975_FloatDataStruct,
-            //             &ATT_AngleDataStruct);
-
             AHRS_MahonyUpdate(&MPU6050_CalDataStruct,
                               &AK8975_CalDataStruct,
                               &ATT_QuatDataStruct);
@@ -124,117 +118,84 @@ int main(void)
             
             vol+=accZ*0.01;//加速度计积分
 
-            uint32_t tmp;
-            uint8_t buf[14]={0};
-
-            buf[0]=0xCC;
-            // tmp=*((uint32_t*)&(GPS_DataStruct.GPS_LocationStruct.GPS_Longitude));//经度
-            tmp=*((uint32_t*)&(GPS_DataStruct.GPS_LocationStruct.GPS_Longitude));//经度
-            buf[1]=tmp>>24;
-            buf[2]=tmp>>16;
-            buf[3]=tmp>>8;
-            buf[4]=tmp;
-            tmp=*((uint32_t*)&(GPS_DataStruct.GPS_LocationStruct.GPS_Latitude));//纬度
-            // tmp=*((uint32_t*)&(ATT_AngleDataStruct.ATT_AnglePsi));//纬度
-            buf[5]=tmp>>24;
-            buf[6]=tmp>>16;
-            buf[7]=tmp>>8;
-            buf[8]=tmp;
-            tmp=*((uint32_t*)&(SPL06_FloatDataStruct.SPL06_FloatAlt));//高度
-            buf[9]=tmp>>24;
-            buf[10]=tmp>>16;
-            buf[11]=tmp>>8;
-            buf[12]=tmp;
-            for(uint8_t i=0;i<13;i++)
-            {
-                buf[13]+=buf[i];
-            }
-            for(uint8_t i=0;i<14;i++)
-            {
-                USART_SendData(USART1,buf[i]);
-                while(USART_GetFlagStatus(USART1,USART_FLAG_TXE) == RESET);
-            }
-
             CalFlag=0;
         }
 
-        
+        /*********各原始数据**********/
 
-        // /*********各原始数据**********/
+        // ANO_DT_SendSenserStruct.ANO_DT_AccX=MPU6050_RawDataStruct.MPU6050_RawAccelX;
+        // ANO_DT_SendSenserStruct.ANO_DT_AccY=MPU6050_RawDataStruct.MPU6050_RawAccelY;
+        // ANO_DT_SendSenserStruct.ANO_DT_AccZ=MPU6050_RawDataStruct.MPU6050_RawAccelZ;
+        // ANO_DT_SendSenserStruct.ANO_DT_GyroX=MPU6050_RawDataStruct.MPU6050_RawGyroX;
+        // ANO_DT_SendSenserStruct.ANO_DT_GyroY=MPU6050_RawDataStruct.MPU6050_RawGyroY;
+        // ANO_DT_SendSenserStruct.ANO_DT_GyroZ=MPU6050_RawDataStruct.MPU6050_RawGyroZ;
 
-        // // ANO_DT_SendSenserStruct.ANO_DT_AccX=MPU6050_RawDataStruct.MPU6050_RawAccelX;
-        // // ANO_DT_SendSenserStruct.ANO_DT_AccY=MPU6050_RawDataStruct.MPU6050_RawAccelY;
-        // // ANO_DT_SendSenserStruct.ANO_DT_AccZ=MPU6050_RawDataStruct.MPU6050_RawAccelZ;
-        // // ANO_DT_SendSenserStruct.ANO_DT_GyroX=MPU6050_RawDataStruct.MPU6050_RawGyroX;
-        // // ANO_DT_SendSenserStruct.ANO_DT_GyroY=MPU6050_RawDataStruct.MPU6050_RawGyroY;
-        // // ANO_DT_SendSenserStruct.ANO_DT_GyroZ=MPU6050_RawDataStruct.MPU6050_RawGyroZ;
+        // ANO_DT_SendSenserStruct.ANO_DT_MagX=AK8975_RawDataStruct.AK8975_RawMagX;
+        // ANO_DT_SendSenserStruct.ANO_DT_MagY=AK8975_RawDataStruct.AK8975_RawMagY;
+        // ANO_DT_SendSenserStruct.ANO_DT_MagZ=AK8975_RawDataStruct.AK8975_RawMagZ;
 
-        // // ANO_DT_SendSenserStruct.ANO_DT_MagX=AK8975_RawDataStruct.AK8975_RawMagX;
-        // // ANO_DT_SendSenserStruct.ANO_DT_MagY=AK8975_RawDataStruct.AK8975_RawMagY;
-        // // ANO_DT_SendSenserStruct.ANO_DT_MagZ=AK8975_RawDataStruct.AK8975_RawMagZ;
+        /*********加速度计原始数据与矫正数据对比**********/
 
-        // /*********加速度计原始数据与矫正数据对比**********/
+        ANO_DT_SendSenserStruct.ANO_DT_AccX=MPU6050_CalDataStruct.MPU6050_CalAccelX*1000;
+        ANO_DT_SendSenserStruct.ANO_DT_AccY=MPU6050_CalDataStruct.MPU6050_CalAccelY*1000;
+        ANO_DT_SendSenserStruct.ANO_DT_AccZ=MPU6050_CalDataStruct.MPU6050_CalAccelZ*1000;
 
-        // ANO_DT_SendSenserStruct.ANO_DT_AccX=MPU6050_CalDataStruct.MPU6050_CalAccelX*1000;
-        // ANO_DT_SendSenserStruct.ANO_DT_AccY=MPU6050_CalDataStruct.MPU6050_CalAccelY*1000;
-        // ANO_DT_SendSenserStruct.ANO_DT_AccZ=MPU6050_CalDataStruct.MPU6050_CalAccelZ*1000;
+        // ANO_DT_SendSenserStruct.ANO_DT_GyroX=MPU6050_FloatDataStruct.MPU6050_FloatGyroX*1000;
+        // ANO_DT_SendSenserStruct.ANO_DT_GyroY=MPU6050_FloatDataStruct.MPU6050_FloatGyroY*1000;
+        // ANO_DT_SendSenserStruct.ANO_DT_GyroZ=MPU6050_FloatDataStruct.MPU6050_FloatGyroZ*1000;
 
-        // // ANO_DT_SendSenserStruct.ANO_DT_GyroX=MPU6050_FloatDataStruct.MPU6050_FloatGyroX*1000;
-        // // ANO_DT_SendSenserStruct.ANO_DT_GyroY=MPU6050_FloatDataStruct.MPU6050_FloatGyroY*1000;
-        // // ANO_DT_SendSenserStruct.ANO_DT_GyroZ=MPU6050_FloatDataStruct.MPU6050_FloatGyroZ*1000;
+        /*********陀螺仪原始数据与矫正数据对比**********/
 
-        // /*********陀螺仪原始数据与矫正数据对比**********/
+        // ANO_DT_SendSenserStruct.ANO_DT_AccX=MPU6050_FloatDataStruct.MPU6050_FloatGyroX;
+        // ANO_DT_SendSenserStruct.ANO_DT_AccY=MPU6050_FloatDataStruct.MPU6050_FloatGyroY;
+        // ANO_DT_SendSenserStruct.ANO_DT_AccZ=MPU6050_FloatDataStruct.MPU6050_FloatGyroZ;
 
-        // // ANO_DT_SendSenserStruct.ANO_DT_AccX=MPU6050_FloatDataStruct.MPU6050_FloatGyroX;
-        // // ANO_DT_SendSenserStruct.ANO_DT_AccY=MPU6050_FloatDataStruct.MPU6050_FloatGyroY;
-        // // ANO_DT_SendSenserStruct.ANO_DT_AccZ=MPU6050_FloatDataStruct.MPU6050_FloatGyroZ;
+        ANO_DT_SendSenserStruct.ANO_DT_GyroX=MPU6050_CalDataStruct.MPU6050_CalGyroX;
+        ANO_DT_SendSenserStruct.ANO_DT_GyroY=MPU6050_CalDataStruct.MPU6050_CalGyroY;
+        ANO_DT_SendSenserStruct.ANO_DT_GyroZ=MPU6050_CalDataStruct.MPU6050_CalGyroZ;
 
-        // ANO_DT_SendSenserStruct.ANO_DT_GyroX=MPU6050_CalDataStruct.MPU6050_CalGyroX;
-        // ANO_DT_SendSenserStruct.ANO_DT_GyroY=MPU6050_CalDataStruct.MPU6050_CalGyroY;
-        // ANO_DT_SendSenserStruct.ANO_DT_GyroZ=MPU6050_CalDataStruct.MPU6050_CalGyroZ;
+        /*********磁力计原始数据与矫正数据对比**********/
 
-        // /*********磁力计原始数据与矫正数据对比**********/
+        // ANO_DT_SendSenserStruct.ANO_DT_AccX=AK8975_FloatDataStruct.AK8975_FloatMagX;
+        // ANO_DT_SendSenserStruct.ANO_DT_AccY=AK8975_FloatDataStruct.AK8975_FloatMagY;
+        // ANO_DT_SendSenserStruct.ANO_DT_AccZ=AK8975_FloatDataStruct.AK8975_FloatMagZ;
 
-        // // ANO_DT_SendSenserStruct.ANO_DT_AccX=AK8975_FloatDataStruct.AK8975_FloatMagX;
-        // // ANO_DT_SendSenserStruct.ANO_DT_AccY=AK8975_FloatDataStruct.AK8975_FloatMagY;
-        // // ANO_DT_SendSenserStruct.ANO_DT_AccZ=AK8975_FloatDataStruct.AK8975_FloatMagZ;
+        ANO_DT_SendSenserStruct.ANO_DT_MagX=AK8975_CalDataStruct.AK8975_CalMagX;
+        ANO_DT_SendSenserStruct.ANO_DT_MagY=AK8975_CalDataStruct.AK8975_CalMagY;
+        ANO_DT_SendSenserStruct.ANO_DT_MagZ=AK8975_CalDataStruct.AK8975_CalMagZ;
 
-        // ANO_DT_SendSenserStruct.ANO_DT_MagX=AK8975_CalDataStruct.AK8975_CalMagX;
-        // ANO_DT_SendSenserStruct.ANO_DT_MagY=AK8975_CalDataStruct.AK8975_CalMagY;
-        // ANO_DT_SendSenserStruct.ANO_DT_MagZ=AK8975_CalDataStruct.AK8975_CalMagZ;
+        ANO_DT_SendSenser(USART1,&ANO_DT_SendSenserStruct);
 
-        // ANO_DT_SendSenser(USART1,&ANO_DT_SendSenserStruct);
+        ANO_DT_SendSenser2Struct.ANO_DT_ALT_BAR=(SPL06_FloatDataStruct.SPL06_FloatAlt+38)*100;//海拔高度，有滤波
+        // ANO_DT_SendSenser2Struct.ANO_DT_ALT_ADD=SPL06_FloatDataStruct.SPL06_FloatSpeed*100;//气压计微分速度
+        ANO_DT_SendSenser2Struct.ANO_DT_SEN_TMP=SPL06_FloatDataStruct.SPL06_FloatTemp*10;
 
-        // ANO_DT_SendSenser2Struct.ANO_DT_ALT_BAR=(SPL06_FloatDataStruct.SPL06_FloatAlt+38)*100;//海拔高度，有滤波
-        // // ANO_DT_SendSenser2Struct.ANO_DT_ALT_ADD=SPL06_FloatDataStruct.SPL06_FloatSpeed*100;//气压计微分速度
-        // ANO_DT_SendSenser2Struct.ANO_DT_SEN_TMP=SPL06_FloatDataStruct.SPL06_FloatTemp*10;
+        // ANO_DT_SendSenser2Struct.ANO_DT_ALT_BAR=vol*100;//加速度计积分的速度
+        // ANO_DT_SendSenser2Struct.ANO_DT_ALT_ADD=SPL06_FloatDataStruct.SPL06_FloatSpeed*100;//气压计微分的速度
 
-        // // ANO_DT_SendSenser2Struct.ANO_DT_ALT_BAR=vol*100;//加速度计积分的速度
-        // // ANO_DT_SendSenser2Struct.ANO_DT_ALT_ADD=SPL06_FloatDataStruct.SPL06_FloatSpeed*100;//气压计微分的速度
+        // ANO_DT_SendSenser2Struct.ANO_DT_ALT_BAR=SPL06_FloatDataStruct.SPL06_FloatSpeed*100;//气压计微分的速度
+        ANO_DT_SendSenser2Struct.ANO_DT_ALT_ADD=ALT_AccZCompInfoStruct.Output*100;//互补滤波的速度
 
-        // // ANO_DT_SendSenser2Struct.ANO_DT_ALT_BAR=SPL06_FloatDataStruct.SPL06_FloatSpeed*100;//气压计微分的速度
-        // ANO_DT_SendSenser2Struct.ANO_DT_ALT_ADD=ALT_AccZCompInfoStruct.Output*100;//互补滤波的速度
+        ANO_DT_SendSenser2(USART1,&ANO_DT_SendSenser2Struct);
 
-        // ANO_DT_SendSenser2(USART1,&ANO_DT_SendSenser2Struct);
+        // 发送遥控器参数到上位机
+        PPM_GetRCData(&ANO_DT_SendRCDataStruct);
+        ANO_DT_SendRCData(USART1,&ANO_DT_SendRCDataStruct);
 
-        // // 发送遥控器参数到上位机
-        // PPM_GetRCData(&ANO_DT_SendRCDataStruct);
-        // ANO_DT_SendRCData(USART1,&ANO_DT_SendRCDataStruct);
+        ANO_DT_SendStatusStruct.ANO_DT_Roll=ATT_AngleDataStruct.ATT_AnglePhi*100;
+        ANO_DT_SendStatusStruct.ANO_DT_Pitch=ATT_AngleDataStruct.ATT_AngleTheta*100;
+        ANO_DT_SendStatusStruct.ANO_DT_Yaw=ATT_AngleDataStruct.ATT_AnglePsi*100;
+        ANO_DT_SendStatus(USART1,&ANO_DT_SendStatusStruct);
 
-        // ANO_DT_SendStatusStruct.ANO_DT_Roll=ATT_AngleDataStruct.ATT_AnglePhi*100;
-        // ANO_DT_SendStatusStruct.ANO_DT_Pitch=ATT_AngleDataStruct.ATT_AngleTheta*100;
-        // ANO_DT_SendStatusStruct.ANO_DT_Yaw=ATT_AngleDataStruct.ATT_AnglePsi*100;
-        // ANO_DT_SendStatus(USART1,&ANO_DT_SendStatusStruct);
-
-        // if(ANO_DT_SendRCDataStruct.ANO_DT_RCAUX4<1200)
-        // {
-        //     Motor_SetSpeed();
-        //     // RGBLED_StateSet(RGBLED_Red,RGBLED_1sMode);
-        // }
-        // else
-        // {
-        //     FLY_DroneCtrl(&ANO_DT_SendRCDataStruct,&ATT_AngleDataStruct,&MPU6050_CalDataStruct);
-        //     // RGBLED_StateSet(RGBLED_Green,RGBLED_1sMode);
-        // }
+        if(ANO_DT_SendRCDataStruct.ANO_DT_RCAUX4<1200)
+        {
+            Motor_SetSpeed();
+            // RGBLED_StateSet(RGBLED_Red,RGBLED_1sMode);
+        }
+        else
+        {
+            FLY_DroneCtrl(&ANO_DT_SendRCDataStruct,&ATT_AngleDataStruct,&MPU6050_CalDataStruct);
+            // RGBLED_StateSet(RGBLED_Green,RGBLED_1sMode);
+        }
     }
 }

@@ -40,11 +40,14 @@ void AT24C02_RandomRead(uint8_t* buf)
 {}
 
 /**
- * @brief   顺序读取n个字节
- * @param   I2C_Addr: 设备的iic地址
- * 
+ * @brief   顺序读取n个字节，最多8个字节，不允许跨页读取
+ * @param   addr: 读取的首个寄存器的地址
+ * @param   length: 顺序读取的长度
+ * @param   data: 读取到的数据缓存的地方
  **/
 void AT24C02_SequentialRead(uint8_t addr,uint8_t length,uint8_t* data)
 {
     IIC_ReadMultByteFromSlave(AT24C02_A2_LOW_A1_LOW_A0_LOW,addr,length,data);
+    // I2C_Master(I2C1,&addr,1,AT24C02_A2_LOW_A1_LOW_A0_LOW,I2C_AcknowledgedAddress_7bit,I2C_Direction_Transmitter);
+    // I2C_Master(I2C1,data,length,AT24C02_A2_LOW_A1_LOW_A0_LOW,I2C_AcknowledgedAddress_7bit,I2C_Direction_Receiver);
 }

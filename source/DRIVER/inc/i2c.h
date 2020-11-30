@@ -19,11 +19,11 @@
 
 typedef enum
 {
-    I2C_Stat_Busy=0,      //总线忙，有可能别的玩意正在传输
+    I2C_Stat_Finish=0,  //传输完成
+    I2C_Stat_Busy,      //总线忙，有可能别的玩意正在传输
     I2C_Stat_Start,     //传输开始
     I2C_Stat_RptStart,  //重复起始位
     I2C_Stat_Working,   //正在传输，本机工作中
-    I2C_Stat_Finish,    //传输完成
     I2C_Stat_Err,       //传输出错
 }I2CStat_TypeDef;
 
@@ -49,7 +49,8 @@ typedef struct
 /* Exported functions --------------------------------------------------------*/ 
 void I2C_HangSlove(GPIO_TypeDef* GPIOx,I2C_TypeDef* I2Cx);
 void I2C1_Init(void);
-
+void I2C_Master(I2C_TypeDef* I2Cx,uint8_t* BufAddr,uint8_t BufLen,uint16_t SlaAddr,
+                uint16_t I2C_AcknowledgedAddress,uint8_t I2C_Direction);
 #ifdef __cplusplus
 }
 #endif
