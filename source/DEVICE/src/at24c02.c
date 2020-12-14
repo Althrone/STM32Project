@@ -48,6 +48,7 @@ void AT24C02_RandomRead(uint8_t* buf)
 void AT24C02_SequentialRead(uint8_t addr,uint8_t length,uint8_t* data)
 {
     IIC_ReadMultByteFromSlave(AT24C02_A2_LOW_A1_LOW_A0_LOW,addr,length,data);
-    // I2C_Master(I2C1,&addr,1,AT24C02_A2_LOW_A1_LOW_A0_LOW,I2C_AcknowledgedAddress_7bit,I2C_Direction_Transmitter);
-    // I2C_Master(I2C1,data,length,AT24C02_A2_LOW_A1_LOW_A0_LOW,I2C_AcknowledgedAddress_7bit,I2C_Direction_Receiver);
+    // I2C_Master(I2C1,I2C_Direction_Receiver,
+    //            AT24C02_A2_LOW_A1_LOW_A0_LOW,I2C_AcknowledgedAddress_7bit,
+    //            addr,data,length);
 }

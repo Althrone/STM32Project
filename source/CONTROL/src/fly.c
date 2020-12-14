@@ -43,12 +43,12 @@ void FLY_DroneCtrl(ANO_DT_SendRCDataTypeDef* ANO_DT_SendRCDataStruct,
                 PitchTargetAngle,
                 ATT_AngleDataStruct->ATT_AngleTheta);
     //角速度环
-    PID_IncCtrl(&PID_RollRateInfo,
+    PID_IncCtrlAngle(&PID_RollRateInfo,
                 &PID_RollRateParam,
                 ANO_DT_SendRCDataStruct,
                 PID_RollAngleInfo.Output,
                 MPU6050_CalDataStruct->MPU6050_CalGyroX);
-    PID_IncCtrl(&PID_PitchRateInfo,
+    PID_IncCtrlAngle(&PID_PitchRateInfo,
                 &PID_PitchRateParam,
                 ANO_DT_SendRCDataStruct,
                 PID_PitchAngleInfo.Output,
@@ -61,11 +61,18 @@ void FLY_DroneCtrl(ANO_DT_SendRCDataTypeDef* ANO_DT_SendRCDataStruct,
     //混控矩阵
     float32_t MixerData[16]=
     {
-       -0.70710678f,   -0.70710678f,    1.0f,   1.0f,
-        0.70710678f,    0.70710678f,    1.0f,   1.0f,
-        0.70710678f,   -0.70710678f,    1.0f,  -1.0f,
-       -0.70710678f,    0.70710678f,    1.0f,  -1.0f
+       -0.70710678f,   -0.70710678f,    1.0f,  -1.0f,
+        0.70710678f,    0.70710678f,    1.0f,  -1.0f,
+        0.70710678f,   -0.70710678f,    1.0f,   1.0f,
+       -0.70710678f,    0.70710678f,    1.0f,   1.0f
     };
+    // float32_t MixerData[16]=
+    // {
+    //    -1.0f,   -1.0f,    1.0f,   1.0f,
+    //     1.0f,    1.0f,    1.0f,   1.0f,
+    //     1.0f,   -1.0f,    1.0f,  -1.0f,
+    //    -1.0f,    1.0f,    1.0f,  -1.0f
+    // };
     arm_matrix_instance_f32 MixerMatrix;
     arm_mat_init_f32(&MixerMatrix,4,4,MixerData);
     //遥控参数矩阵
@@ -111,5 +118,9 @@ void FLY_DroneCtrl(ANO_DT_SendRCDataTypeDef* ANO_DT_SendRCDataStruct,
     ANO_DT_SendMotoStruct.ANO_DT_Moto2=OutputPWM2;
     ANO_DT_SendMotoStruct.ANO_DT_Moto3=OutputPWM3;
     ANO_DT_SendMotoStruct.ANO_DT_Moto4=OutputPWM4;
+    // ANO_DT_SendMotoStruct.ANO_DT_Moto1=PID_RollAngleInfo.Error;
+    // ANO_DT_SendMotoStruct.ANO_DT_Moto2=PID_RollAngleInfo.PrevError;
+    // ANO_DT_SendMotoStruct.ANO_DT_Moto3=PID_RollAngleInfo.PrevPrevError;
+    // ANO_DT_SendMotoStruct.ANO_DT_Moto4=OutputPWM4;
     ANO_DT_SendMoto(USART1,&ANO_DT_SendMotoStruct);
 }

@@ -39,6 +39,10 @@ void PID_IncCtrl(PID_InfoTypeDef* PID_InfoStruct,
                  PID_ParamTypeDef* PID_ParamStruct,
                  ANO_DT_SendRCDataTypeDef* ANO_DT_SendRCDataStruct,
                  float_t target,float_t measure);
+void PID_IncCtrlAngle(PID_InfoTypeDef* PID_InfoStruct,
+                 PID_ParamTypeDef* PID_ParamStruct,
+                 ANO_DT_SendRCDataTypeDef* ANO_DT_SendRCDataStruct,
+                 float_t target,float_t measure);
 void PID_ParamInit(void);
 
 

@@ -65,6 +65,7 @@ void I2C1_Init(void)
     GPIO_PinAFConfig(GPIOB,GPIO_PinSource6,GPIO_AF_I2C1);
     GPIO_InitStruct.GPIO_Speed=GPIO_Speed_50MHz;
     GPIO_InitStruct.GPIO_OType=GPIO_OType_OD;
+    GPIO_InitStruct.GPIO_PuPd=GPIO_PuPd_NOPULL;
     GPIO_Init(GPIOB,&GPIO_InitStruct);
     //I2C1_SDA
     GPIO_InitStruct.GPIO_Pin=GPIO_Pin_7;
@@ -72,6 +73,7 @@ void I2C1_Init(void)
     GPIO_PinAFConfig(GPIOB,GPIO_PinSource7,GPIO_AF_I2C1);
     GPIO_InitStruct.GPIO_Speed=GPIO_Speed_50MHz;
     GPIO_InitStruct.GPIO_OType=GPIO_OType_OD;
+    GPIO_InitStruct.GPIO_PuPd=GPIO_PuPd_NOPULL;
     GPIO_Init(GPIOB,&GPIO_InitStruct);
 
     //开I2C1时钟
@@ -80,7 +82,7 @@ void I2C1_Init(void)
     I2C_InitTypeDef I2C_InitStructure;
     I2C_InitStructure.I2C_ClockSpeed=400000;//400000=400KHz
     I2C_InitStructure.I2C_Mode=I2C_Mode_I2C;
-    I2C_InitStructure.I2C_DutyCycle=I2C_DutyCycle_2;
+    I2C_InitStructure.I2C_DutyCycle=I2C_DutyCycle_2;//I2C_DutyCycle_16_9 I2C_DutyCycle_2
     // I2C_InitStructure.I2C_OwnAddress1=;//主模式用不上
     // I2C_InitStructure.I2C_Ack=I2C_Ack_Enable;//本外设的响应位由发送/接收程序决定
     // I2C_InitStructure.I2C_AcknowledgedAddress=I2C_AcknowledgedAddress_7bit;//主模式用不上
@@ -88,7 +90,7 @@ void I2C1_Init(void)
 
     //定义NVIC初始化结构体
     NVIC_InitTypeDef NVIC_InitStructure;
-    
+
     NVIC_InitStructure.NVIC_IRQChannel=I2C1_EV_IRQn; //I2C1事件中断
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=0; //抢占优先级0
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority=3; //子优先级3
@@ -97,12 +99,14 @@ void I2C1_Init(void)
 
     NVIC_InitStructure.NVIC_IRQChannel=I2C1_ER_IRQn; //I2C1错误处理中断
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=0; //抢占优先级0
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority=3; //子优先级2
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority=2; //子优先级2
 	NVIC_InitStructure.NVIC_IRQChannelCmd=ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 
     // 开I2C1中断
+    uint32_t a;
     I2C_ITConfig(I2C1,I2C_IT_BUF,ENABLE);
+    a=I2C_GetLastEvent(I2C1);
     I2C_ITConfig(I2C1,I2C_IT_EVT,ENABLE);
     I2C_ITConfig(I2C1,I2C_IT_ERR,ENABLE);
     I2C_Cmd(I2C1,ENABLE);
@@ -111,25 +115,32 @@ void I2C1_Init(void)
 /**
  * @brief   I2C主模式，只写连续存储数据发送和接收，链表之类的暂时没必要（太慢了）
  * @param   I2Cx: where x can be 1, 2 or 3 to select the I2C peripheral.
- * @param   BufAddr: 需要发送的数据缓存区首地址
- * @param   BufLen: 需要发送的数据缓存区长度
- * @param   SlaAddr: 从设备地址
- * @param   I2C_AcknowledgedAddress: 从设备地址模式，借用库函数参数，下同
- *           This parameter can be one of the following values:
- *             @arg I2C_AcknowledgedAddress_7bit: 七位寻址模式，不包含读写位，支持0x08（包含）到0x77（包含）
- *             @arg I2C_AcknowledgedAddress_10bit: 十位寻址模式
  * @param   I2C_Direction: specifies whether the I2C device will be a Transmitter
  *          or a Receiver. 
  *           This parameter can be one of the following values
  *             @arg I2C_Direction_Transmitter: Transmitter mode
  *             @arg I2C_Direction_Receiver: Receiver mode
+ * @param   BufAddr: 需要发送/接收的数据缓存区首地址
+ * @param   BufLen: 需要发送/接收的数据缓存区长度
+ * @param   SlaAddr: 从设备地址
+ * @param   I2C_AcknowledgedAddress: 从设备地址模式，借用库函数参数
+ *           This parameter can be one of the following values:
+ *             @arg I2C_AcknowledgedAddress_7bit: 七位寻址模式，不包含读写位，支持0x08（包含）到0x77（包含）
+ *             @arg I2C_AcknowledgedAddress_10bit: 十位寻址模式
+ * @param   RegAddr: 从设备寄存器地址
  **/
-void I2C_Master(I2C_TypeDef* I2Cx,uint8_t* BufAddr,uint8_t BufLen,uint16_t SlaAddr,
-                uint16_t I2C_AcknowledgedAddress,uint8_t I2C_Direction)
+void I2C_Master(I2C_TypeDef* I2Cx,uint8_t I2C_Direction,
+                uint16_t SlaAddr,uint16_t I2C_AcknowledgedAddress,
+                uint8_t RegAddr,uint8_t* BufAddr,uint8_t BufLen)
 {
+    //等待总线空闲
+    while((I2C_GetFlagStatus(I2Cx,I2C_FLAG_BUSY)!=RESET)&&
+          (I2C1_MessageStruct.I2CStat_Enum!=I2C_Stat_Finish));
     //值初始化到本文件的全局变量，由I2Cx决定信息写入到哪个I2C的静态全局变量
     if(I2Cx==I2C1)
-    {   
+    {
+        
+
         if((I2C1_MessageStruct.I2CStat_Enum==I2C_Stat_Finish)&&
            (I2C_GetFlagStatus(I2Cx,I2C_FLAG_BUSY)==RESET))//需要在外设上一个任务已经完成，且检测busy位也为free才能初始化这些值
         {
@@ -138,6 +149,7 @@ void I2C_Master(I2C_TypeDef* I2Cx,uint8_t* BufAddr,uint8_t BufLen,uint16_t SlaAd
             I2C1_MessageStruct.I2C_DataNum=0;
             I2C1_MessageStruct.I2C_DevAddr=SlaAddr;
             I2C1_MessageStruct.I2C_AcknowledgedAddress=I2C_AcknowledgedAddress;
+            I2C1_MessageStruct.I2C_RegAddr=RegAddr;
             I2C1_MessageStruct.I2C_Direction=I2C_Direction;
             I2C1_MessageStruct.I2CStat_Enum=I2C_Stat_Start;
             if(I2C1_MessageStruct.I2C_Direction==I2C_Direction_Receiver)
@@ -158,6 +170,11 @@ void I2C_Master(I2C_TypeDef* I2Cx,uint8_t* BufAddr,uint8_t BufLen,uint16_t SlaAd
                     I2C_NACKPositionConfig(I2C1,DISABLE);
                 }
             }
+            //发送起始位
+            I2C_GenerateSTART(I2Cx,ENABLE);
+            //等待CR1_START清零
+            while(I2C_ReadRegister(I2Cx,I2C_Register_CR1)==I2C_CR1_START);
+            //进入EV5中断
         }
         // else
     }
@@ -178,15 +195,10 @@ void I2C_Master(I2C_TypeDef* I2Cx,uint8_t* BufAddr,uint8_t BufLen,uint16_t SlaAd
     else
         return;
 
-    //等待总线空闲
-    while(I2C_GetFlagStatus(I2Cx,I2C_FLAG_BUSY));
     //给一个超时，超时之后进入挂死解锁函数
-    //发送起始位
-    I2C_GenerateSTART(I2Cx,ENABLE);
-    //等待CR1_START清零
-    while(I2C_ReadRegister(I2Cx,I2C_Register_CR1)==I2C_CR1_START);
-    //进入EV5中断
-
+    
+    //等待总线空闲
+    while(I2C1_MessageStruct.I2CStat_Enum!=I2C_Stat_Finish);
 }
 
 void I2C1_EV_IRQHandler(void)
@@ -218,7 +230,15 @@ void I2C1_EV_IRQHandler(void)
         {
             if(I2C1_MessageStruct.I2CStat_Enum==I2C_Stat_Start)
             {
-                I2C_Send7bitAddress(I2C1,(uint8_t)I2C1_MessageStruct.I2C_DevAddr,
+                //注意，I2C_Send7bitAddress是没有位移的，要手动位移一下
+                I2C_Send7bitAddress(I2C1,(uint8_t)I2C1_MessageStruct.I2C_DevAddr<<1,
+                                    I2C_Direction_Transmitter);
+            }
+            else if((I2C1_MessageStruct.I2CStat_Enum==I2C_Stat_Working)||(I2C1_MessageStruct.I2CStat_Enum==I2C_Stat_RptStart))
+            // else if(I2C1_MessageStruct.I2CStat_Enum==I2C_Stat_RptStart)
+            {
+                I2C1_MessageStruct.I2C_DataNum=0;
+                I2C_Send7bitAddress(I2C1,(uint8_t)I2C1_MessageStruct.I2C_DevAddr<<1,
                                     I2C1_MessageStruct.I2C_Direction);
             }
         }
@@ -239,8 +259,13 @@ void I2C1_EV_IRQHandler(void)
                 I2C_SendData(I2C1,headAddr);
             }
         }
-        else//瞎几把写了个值，直接返回
-            return;
+        // else//瞎几把写了个值，直接返回
+        // {
+        //     I2C_SoftwareResetCmd(I2C1,ENABLE);
+        //     while(I2C_GetFlagStatus(I2C1,I2C_FLAG_BUSY)!=RESET);
+        //     I2C_SoftwareResetCmd(I2C1,DISABLE);
+        //     return;
+        // }
         break;
     case I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED://EV6，主模式发送器
         /**
@@ -286,8 +311,7 @@ void I2C1_EV_IRQHandler(void)
          * 一个停止位，停止位会在数据接受完之后生成。
          * 也有可能需要放在EV7
          **/
-        if((I2C1_MessageStruct.I2C_Direction==I2C_Direction_Receiver)&&
-           (I2C1_MessageStruct.I2C_BufLen==1))
+        if(I2C1_MessageStruct.I2C_BufLen==1)
         {
             I2C_GenerateSTOP(I2C1,ENABLE);
             I2C1_MessageStruct.I2CStat_Enum=I2C_Stat_Working;
@@ -303,19 +327,21 @@ void I2C1_EV_IRQHandler(void)
         }
         else if(I2C1_MessageStruct.I2C_BufLen==2)
         {
-            if(I2C1_MessageStruct.I2C_DataNum==0)
-            {
-                while(I2C_GetFlagStatus(I2C1,I2C_FLAG_BTF)!=SET);
-                I2C_GenerateSTOP(I2C1,ENABLE);
-                I2C1_MessageStruct.I2C_BufAddr[0]=I2C_ReceiveData(I2C1);
-                ++I2C1_MessageStruct.I2C_DataNum;
-                I2C1_MessageStruct.I2CStat_Enum=I2C_Stat_Working;
-            }
-            else if(I2C1_MessageStruct.I2C_DataNum==1)
-            {
-                I2C1_MessageStruct.I2C_BufAddr[1]=I2C_ReceiveData(I2C1);
-                I2C1_MessageStruct.I2CStat_Enum=I2C_Stat_Finish;
-            }
+            // if(I2C1_MessageStruct.I2C_DataNum==0)
+            // {
+            while(I2C_GetFlagStatus(I2C1,I2C_FLAG_BTF)!=SET);
+            I2C_GenerateSTOP(I2C1,ENABLE);
+            I2C1_MessageStruct.I2C_BufAddr[0]=I2C_ReceiveData(I2C1);
+            I2C1_MessageStruct.I2C_BufAddr[1]=I2C_ReceiveData(I2C1);
+            I2C1_MessageStruct.I2CStat_Enum=I2C_Stat_Finish;
+            // ++I2C1_MessageStruct.I2C_DataNum;
+            // I2C1_MessageStruct.I2CStat_Enum=I2C_Stat_Working;
+            // }
+            // else if(I2C1_MessageStruct.I2C_DataNum==1)
+            // {
+            //     I2C1_MessageStruct.I2C_BufAddr[1]=I2C_ReceiveData(I2C1);
+            //     I2C1_MessageStruct.I2CStat_Enum=I2C_Stat_Finish;
+            // }
         }
         else if(I2C1_MessageStruct.I2C_BufLen>2)
         {
@@ -346,6 +372,15 @@ void I2C1_EV_IRQHandler(void)
             }
         }
         break;
+    case 0x00030044://EV7_2，主模式接收了两个数据
+        /**
+         * 这个状态是库函数没有的，残生这个状态主要的原因是I2C被
+         * 别的玩意打断或者处于调试模式，我们没有及时读取DR寄存器
+         * 里面的值导致的，只要读取一个值之后就正常了。
+         **/
+        I2C1_MessageStruct.I2C_BufAddr[I2C1_MessageStruct.I2C_DataNum]=I2C_ReceiveData(I2C1);
+        ++I2C1_MessageStruct.I2C_DataNum;
+        break;
     case I2C_EVENT_MASTER_BYTE_TRANSMITTING://EV8&EV8_1，主模式正在发送数据
         /**
          * 手册有个EV8_1，当第一个数据都没法送的时候，数据寄存
@@ -358,7 +393,20 @@ void I2C1_EV_IRQHandler(void)
          * 断的时候位移寄存器还没发完，就会进入这个EV8。
          **/
         //所以说进EV8的话，发就完事了
-        if(I2C1_MessageStruct.I2C_DataNum<I2C1_MessageStruct.I2C_BufLen)
+        if(I2C1_MessageStruct.I2CStat_Enum==I2C_Stat_Start)
+        {
+            //先发一个寄存器地址
+            I2C_SendData(I2C1,I2C1_MessageStruct.I2C_RegAddr);
+            I2C1_MessageStruct.I2CStat_Enum=I2C_Stat_Working;
+        }
+        else if((I2C1_MessageStruct.I2CStat_Enum==I2C_Stat_Working)&&
+           (I2C1_MessageStruct.I2C_Direction==I2C_Direction_Receiver))
+        {
+            //发送重复起始位
+            I2C_GenerateSTART(I2C1,ENABLE);
+            I2C1_MessageStruct.I2CStat_Enum=I2C_Stat_RptStart;
+        }
+        else if(I2C1_MessageStruct.I2C_DataNum<I2C1_MessageStruct.I2C_BufLen)
         {
             I2C_SendData(I2C1,I2C1_MessageStruct.I2C_BufAddr[I2C1_MessageStruct.I2C_DataNum]);
             ++I2C1_MessageStruct.I2C_DataNum;
@@ -378,7 +426,14 @@ void I2C1_EV_IRQHandler(void)
          * 置位，告诉你所有东西都发完了，而且会延长SCL的低电平等
          * 你发后续的数据。
          **/
-        if(I2C1_MessageStruct.I2C_DataNum==I2C1_MessageStruct.I2C_BufLen)
+        if((I2C1_MessageStruct.I2CStat_Enum==I2C_Stat_Working)&&
+           (I2C1_MessageStruct.I2C_Direction==I2C_Direction_Receiver))
+        {
+            //发送重复起始位
+            I2C_GenerateSTART(I2C1,ENABLE);
+            I2C1_MessageStruct.I2CStat_Enum=I2C_Stat_RptStart;
+        }
+        else if(I2C1_MessageStruct.I2C_DataNum==I2C1_MessageStruct.I2C_BufLen)
         {
             //发送结束，来个停止位
             I2C_GenerateSTOP(I2C1,ENABLE);

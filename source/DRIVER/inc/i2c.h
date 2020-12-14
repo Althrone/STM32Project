@@ -22,6 +22,7 @@ typedef enum
     I2C_Stat_Finish=0,  //传输完成
     I2C_Stat_Busy,      //总线忙，有可能别的玩意正在传输
     I2C_Stat_Start,     //传输开始
+    I2C_Stat_RegAddr,   //发送需要访问的寄存器地址
     I2C_Stat_RptStart,  //重复起始位
     I2C_Stat_Working,   //正在传输，本机工作中
     I2C_Stat_Err,       //传输出错
@@ -41,6 +42,7 @@ typedef struct
     uint8_t         I2C_DataNum;                //当前发送/接收第几位数据，从零开始
     uint16_t        I2C_DevAddr;                //设备地址，不用SlaAddr是因为单片机不一定是主设备
     uint16_t        I2C_AcknowledgedAddress;    //设备地址模式
+    uint8_t         I2C_RegAddr;                //设备寄存器地址
     uint8_t         I2C_Direction;              //I2C通讯方向
     I2CStat_TypeDef I2CStat_Enum;               //I2C状态
 }I2C_MessageTypeDef;
@@ -49,8 +51,9 @@ typedef struct
 /* Exported functions --------------------------------------------------------*/ 
 void I2C_HangSlove(GPIO_TypeDef* GPIOx,I2C_TypeDef* I2Cx);
 void I2C1_Init(void);
-void I2C_Master(I2C_TypeDef* I2Cx,uint8_t* BufAddr,uint8_t BufLen,uint16_t SlaAddr,
-                uint16_t I2C_AcknowledgedAddress,uint8_t I2C_Direction);
+void I2C_Master(I2C_TypeDef* I2Cx,uint8_t I2C_Direction,
+                uint16_t SlaAddr,uint16_t I2C_AcknowledgedAddress,
+                uint8_t RegAddr,uint8_t* BufAddr,uint8_t BufLen);
 #ifdef __cplusplus
 }
 #endif

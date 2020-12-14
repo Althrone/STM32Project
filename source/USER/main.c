@@ -118,6 +118,17 @@ int main(void)
             
             vol+=accZ*0.01;//加速度计积分
 
+            if(ANO_DT_SendRCDataStruct.ANO_DT_RCAUX4<1200)
+            {
+                Motor_SetSpeed();
+                RGBLED_StateSet(RGBLED_Red,RGBLED_1sMode);
+            }
+            else
+            {
+                FLY_DroneCtrl(&ANO_DT_SendRCDataStruct,&ATT_AngleDataStruct,&MPU6050_CalDataStruct);
+                RGBLED_StateSet(RGBLED_Green,RGBLED_1sMode);
+            }
+
             CalFlag=0;
         }
 
@@ -187,15 +198,6 @@ int main(void)
         ANO_DT_SendStatusStruct.ANO_DT_Yaw=ATT_AngleDataStruct.ATT_AnglePsi*100;
         ANO_DT_SendStatus(USART1,&ANO_DT_SendStatusStruct);
 
-        if(ANO_DT_SendRCDataStruct.ANO_DT_RCAUX4<1200)
-        {
-            Motor_SetSpeed();
-            // RGBLED_StateSet(RGBLED_Red,RGBLED_1sMode);
-        }
-        else
-        {
-            FLY_DroneCtrl(&ANO_DT_SendRCDataStruct,&ATT_AngleDataStruct,&MPU6050_CalDataStruct);
-            // RGBLED_StateSet(RGBLED_Green,RGBLED_1sMode);
-        }
+        
     }
 }
