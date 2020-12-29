@@ -1,9 +1,17 @@
 #include "mpu6050.h"
 
-MPU6050_CalParamTypeDef MPU6050_CalParamStruct;//真值修正参数
+//硬件层数据，需要抽象为物理层数据
+//Pubilc
+// MPU6050_RawDataTypeDef MPU6050_RawDataStruct;//6050原始数据结构体
+// MPU6050_FloatDataTypeDef MPU6050_FloatDataStruct;//6050真值数据结构体
+// MPU6050_CalDataTypeDef MPU6050_CalDataStruct;//6050校正后数据结构体
+
+//Private
+static MPU6050_CalParamTypeDef MPU6050_CalParamStruct;//真值修正参数
 
 /**
- * @brief  初始化6050，并且从存储器读出参数修正值
+ * @brief   初始化6050，并且从存储器读出参数修正值
+ * @param   MPU6050_CalParamStruct: 6050修正参数，全局变量
  * @note  这个传感器也是sb，初始化之后MPU6050_PWR_MGMT_1
  * 的SLEEP位是1，然后这个状态下你修改其他寄存器是没鸟用的
  **/

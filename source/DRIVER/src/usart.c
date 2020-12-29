@@ -106,7 +106,7 @@ void UART4_Init(void)
     NVIC_InitStructure.NVIC_IRQChannelCmd=ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 
-    //开USART1中断
+    //开UART4中断
     USART_ITConfig(UART4,USART_IT_RXNE,ENABLE);
     USART_Cmd(UART4,ENABLE);//使能UART4
 }

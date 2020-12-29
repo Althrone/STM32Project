@@ -1,5 +1,18 @@
 #include "list.h"
 
+//链表测试：通过
+// List_NodeTypeDef* List_HeadPointer=NULL;
+// if(List_CreatHead(&List_HeadPointer))
+// {
+//     if(List_AddNode(List_HeadPointer,11))
+//     {
+//         List_AddNode(List_HeadPointer,33);
+//         uint8_t tmp;
+//         tmp=List_Length(List_HeadPointer);
+//         tmp=List_DeleteList(&List_HeadPointer);
+//     }
+// }
+
 //仅讨论非循环单链表
 
 /**

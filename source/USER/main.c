@@ -2,19 +2,19 @@
 
 int main(void)
 {
+    uint8_t CLEAR_CFG[] ={0xB5,0x62,0x06,0x09,0x0D,0x00,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x17,};//88 B7
+    uint8_t SAVE_CFG[]  ={0xB5,0x62,0x06,0x09,0x0D,0x00,0x00,0x00,0x00,0x00,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x17,};//31 BF
+    uint8_t LOAD_CFG[]  ={0xB5,0x62,0x06,0x09,0x0D,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x1F,0x1F,0x00,0x00,0x17,};
 
-    //链表测试：通过
-    // List_NodeTypeDef* List_HeadPointer=NULL;
-    // if(List_CreatHead(&List_HeadPointer))
-    // {
-    //     if(List_AddNode(List_HeadPointer,11))
-    //     {
-    //         List_AddNode(List_HeadPointer,33);
-    //         uint8_t tmp;
-    //         tmp=List_Length(List_HeadPointer);
-    //         tmp=List_DeleteList(&List_HeadPointer);
-    //     }
-    // }
+    uint8_t CK_A = 0;
+    uint8_t CK_B = 0;
+    for(uint8_t i=2;i<sizeof(SAVE_CFG);i++)
+    {
+        CK_A = CK_A + CLEAR_CFG[i];
+        CK_B = CK_B + CK_A;
+        //CK_A和CK_B等于串口数据的最后两项的情况下就正确
+    }
+
 
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//设置系统中断优先级分组2
 
@@ -31,14 +31,13 @@ int main(void)
     MPU6050_Init();
     SPL06_Init();
     AK8975_Init();
+    GPS_Init();
 
     Motor_Init();
     Steer_Init();
 
     PID_ParamInit();
     ALT_3OrderCompParamInit();
-
-    GPS_Init();
 
     //校准代码区
     CAL_Senser();
@@ -92,6 +91,11 @@ int main(void)
     float_t vol;
 
     extern Filter_CompInfoTypeDef ALT_AccZCompInfoStruct;
+
+    // uint8_t databuf[8]={0,1,2,3,4,5,6,7};
+    // uint8_t tmp=0;
+    // uint8_t a;
+    // a=databuf[++tmp];
 
     while (1)
     {

@@ -124,18 +124,18 @@ void PID_ParamInit(void)
     // PID_RollAngleParam.I=0;
     // PID_RollAngleParam.D=0;
 
-    PID_RollAngleParam.P=3.8f;//3.5f
+    PID_RollAngleParam.P=3.9f;//3.5f
     PID_RollAngleParam.I=0.001f;
     PID_RollAngleParam.D=0.f;
 
     //俯仰角度环
-    PID_PitchAngleParam.P=0;
-    PID_PitchAngleParam.I=0;
-    PID_PitchAngleParam.D=0;
+    // PID_PitchAngleParam.P=0;
+    // PID_PitchAngleParam.I=0;
+    // PID_PitchAngleParam.D=0;
 
-    // PID_PitchAngleParam.P=3.8f;//3.5f
-    // PID_PitchAngleParam.I=0.001f;
-    // PID_PitchAngleParam.D=0.f;
+    PID_PitchAngleParam.P=3.9f;//3.5f
+    PID_PitchAngleParam.I=0.001f;
+    PID_PitchAngleParam.D=0.f;
 
     /***************************************/
 
@@ -149,16 +149,16 @@ void PID_ParamInit(void)
     PID_RollRateParam.D=0.3f;
 
     //俯仰角速度环
-    PID_PitchRateParam.P=0;
-    PID_PitchRateParam.I=0;
-    PID_PitchRateParam.D=0;
+    // PID_PitchRateParam.P=0;
+    // PID_PitchRateParam.I=0;
+    // PID_PitchRateParam.D=0;
 
-    // PID_PitchRateParam.P=2.0f;
-    // PID_PitchRateParam.I=0.001f;
-    // PID_PitchRateParam.D=0.3f;
+    PID_PitchRateParam.P=2.0f;
+    PID_PitchRateParam.I=0.001f;
+    PID_PitchRateParam.D=0.3f;
 
     //偏航角速度环
-    PID_YawRateParam.P=0.f;
+    PID_YawRateParam.P=3.f;
     PID_YawRateParam.I=0;
     PID_YawRateParam.D=0;
 }

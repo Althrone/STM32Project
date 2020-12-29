@@ -40,6 +40,7 @@
 #include "kalman.h"
 
 #include "fly.h"
+#include "car.h"
 #include "calibrate.h"
 
 #include "list.h"
